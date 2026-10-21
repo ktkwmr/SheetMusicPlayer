@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<!-- Generated from ../index.html by scripts/build-ja.mjs. Do not edit. -->
+<html lang="ja" data-page-lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <base href="/sheetmusicplayer/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Sheet Music" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <title>Sheet Music Player – 楽譜の写真・PDFを読み取って再生する無料アプリ</title>
+  <meta name="description" content="楽譜を写真に撮るか画像・PDFを開くと、音符を読み取って再生する無料のWebアプリ。再生中は五線譜の上をカーソルが進み、テンポも途中で変えられます。読み取り（楽譜認識）はブラウザの中で行うので、楽譜はアップロードされません。登録不要。" />
+  <link rel="canonical" href="https://ktkwmr.com/sheetmusicplayer/ja/" />
+  <link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/" />
+  <link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/" />
+  <link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Sheet Music Player" />
+  <meta property="og:title" content="Sheet Music Player – 楽譜の写真・PDFを読み取って再生する無料アプリ" />
+  <meta property="og:description" content="楽譜の写真や画像・PDFを読み取って、五線譜の上をカーソルが進みながら再生。テンポも自由に変えられます。無料・登録不要、楽譜は端末の外に出ません。" />
+  <meta property="og:locale" content="ja_JP" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:url" content="https://ktkwmr.com/sheetmusicplayer/ja/" />
+  <meta property="og:image" content="https://ktkwmr.com/sheetmusicplayer/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Sheet Music Player：楽譜の写真を読み取り、五線譜の上のカーソルとともに再生" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Sheet Music Player",
+    "url": "https://ktkwmr.com/sheetmusicplayer/ja/",
+    "description": "楽譜の写真・画像・PDFを光学楽譜認識で読み取り、五線譜上のカーソルとともに再生するWebアプリ。",
+    "applicationCategory": "MultimediaApplication",
+    "inLanguage": "ja",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires a recent version of Chrome or Edge on a computer",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "ktkwmr" }
+  }
+  </script>
+  <style>
+    /* Layout: same as the other ktkwmr.com apps. White toolbar, grey canvas with white panels (left: open a score / right: the score and the player) */
+    :root {
+      color-scheme: light;
+      --ink: #000; --paper: #fff; --muted: #525252; --subtle: #737373; --line: #e5e5e5; --line-strong: #d4d4d4;
+      --hover-fill: #f5f5f5; --canvas: #f5f5f5; --press: #404040; --press-hover: #262626;
+      --error: #b91c1c;
+      /* The playback cursor on the staff: the only colour in the app, so it is easy to follow */
+      --cursor: #2563eb; --cursor-fill: rgba(37, 99, 235, .14);
+      --paper-shadow: 0 1px 3px rgba(0,0,0,.08), 0 6px 20px rgba(0,0,0,.08);
+      --shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+      --radius: 8px; --ctl-h: 34px;
+      --mono: "Cascadia Mono", "Consolas", "SF Mono", Menlo, "MS Gothic", monospace;
+      --sans: "Segoe UI Variable Text", "Segoe UI", "Yu Gothic UI", "Meiryo UI", "Meiryo", system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      --pad-x: 20px;
+      --gl: max(var(--pad-x), env(safe-area-inset-left, 0px)); --gr: max(var(--pad-x), env(safe-area-inset-right, 0px));
+    }
+    @media (max-width: 900px) { :root { --pad-x: 16px; } }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100dvh; color: var(--ink); background: var(--canvas); font-family: var(--sans); font-size: 13px; line-height: 1.6; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+    button, select, input { font-family: inherit; }
+    :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+    /* Toolbar */
+    .topbar { background: var(--paper); border-bottom: 1px solid var(--line); padding: calc(10px + env(safe-area-inset-top, 0px)) var(--gr) 10px var(--gl); }
+    .toolbar { display: flex; align-items: center; gap: 12px 20px; }
+    .brand { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
+    .brand svg { width: 28px; height: 28px; flex: 0 0 auto; }
+    .toolbar .end { margin-left: auto; display: flex; align-items: center; }
+    #settingsBtn { appearance: none; width: var(--ctl-h); height: var(--ctl-h); padding: 0; border: 1px solid transparent; border-radius: 50%; background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    #settingsBtn svg { flex: none; width: 28px; height: 28px; }
+    #settingsBtn:active { background: var(--line); }
+    @media (hover: hover) { #settingsBtn:hover { background: var(--hover-fill); } }
+
+    /* Settings menu */
+    .menu { position: fixed; z-index: 1000; min-width: 168px; padding: 4px; border: 1px solid var(--ink); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow); }
+    .menu button, .menu a { display: block; width: 100%; height: 40px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+    .menu a { line-height: 40px; text-decoration: none; white-space: nowrap; }
+    .menu button:active, .menu a:active { background: var(--line); }
+    .menu button:focus-visible, .menu a:focus-visible { outline-offset: -2px; }
+    @media (hover: hover) { .menu button:hover, .menu a:hover { background: var(--hover-fill); } }
+
+    /* Canvas and panels */
+    .canvas { padding: 16px var(--gr) calc(16px + env(safe-area-inset-bottom, 0px)) var(--gl); display: flex; flex-direction: column; gap: 12px; }
+    .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    .panel { min-width: 0; background: var(--paper); border: 1px solid var(--line-strong); border-radius: 12px; display: flex; flex-direction: column; }
+    .panel.out { border-color: transparent; box-shadow: var(--paper-shadow); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; min-height: 40px; padding: 0 6px 0 16px; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 700; flex-wrap: wrap; }
+    .panel-body { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 16px; }
+    .intro { margin: 0; color: var(--muted); font-size: 13px; max-width: 980px; }
+    .foot { color: var(--subtle); font-size: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .foot svg { flex: 0 0 auto; }
+    .hint { font-size: 12px; color: var(--subtle); margin: 0; }
+
+    /* Controls */
+    .chip { appearance: none; height: var(--ctl-h); padding: 0 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; touch-action: manipulation; text-decoration: none; }
+    .chip.mono { font-family: var(--mono); min-width: 42px; padding: 0 8px; }
+    .chip svg { width: 16px; height: 16px; flex: none; }
+    .chip:active:not(:disabled) { background: var(--line); }
+    .chip:disabled { opacity: .4; cursor: default; }
+    @media (hover: hover) { .chip:hover:not(:disabled) { border-color: var(--ink); background: var(--hover-fill); } }
+    .big { appearance: none; width: 100%; height: 48px; border: 0; border-radius: 10px; background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; touch-action: manipulation; }
+    .big svg { width: 20px; height: 20px; }
+    .big:active:not(:disabled) { background: var(--press); }
+    .big:disabled { opacity: .4; cursor: default; }
+    @media (hover: hover) { .big:hover:not(:disabled) { background: var(--press-hover); } }
+    .big.secondary { background: var(--paper); color: var(--ink); border: 1px solid var(--line-strong); }
+    .big.secondary:active:not(:disabled) { background: var(--line); }
+    @media (hover: hover) { .big.secondary:hover:not(:disabled) { background: var(--hover-fill); border-color: var(--ink); } }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    input[type=range] { width: 100%; accent-color: var(--ink); margin: 0; height: 24px; }
+
+    /* Open a score */
+    .drop { border: 1.5px dashed var(--line-strong); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; transition: border-color .12s, background-color .12s; }
+    .drop.over { border-color: var(--ink); background: var(--hover-fill); }
+    .drop p { margin: 0; text-align: center; color: var(--subtle); font-size: 12px; }
+    .linkish { appearance: none; border: 0; background: none; padding: 0; color: var(--ink); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .file-card { display: flex; gap: 10px; align-items: center; min-width: 0; }
+    .file-card img { width: 56px; height: 56px; object-fit: cover; border: 1px solid var(--line); border-radius: 6px; background: var(--hover-fill); flex: none; }
+    .file-card .meta { min-width: 0; }
+    .file-card .nm { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-card .sub { color: var(--subtle); font-size: 12px; }
+    .status { display: flex; flex-direction: column; gap: 6px; }
+    .status .line { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+    .status .line .num { font-family: var(--mono); color: var(--muted); font-weight: 700; }
+    .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .2s; }
+    .bar.indet i { width: 30%; animation: slide 1.2s ease-in-out infinite; }
+    @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(340%); } }
+    .error { margin: 0; color: var(--error); font-size: 13px; font-weight: 600; }
+    .note { margin: 0; padding: 10px 12px; border-radius: var(--radius); background: var(--hover-fill); color: var(--muted); font-size: 12px; }
+    .note b { color: var(--ink); }
+    .steps { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12px; }
+    .steps li + li { margin-top: 2px; }
+
+    /* The score and the player */
+    .player { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 10px 12px; background: var(--paper); border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
+    .play { appearance: none; height: 40px; min-width: 112px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--ink); color: var(--paper); font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; }
+    .play svg { width: 16px; height: 16px; }
+    .play:disabled { opacity: .4; cursor: default; }
+    .play:active:not(:disabled) { background: var(--press); }
+    @media (hover: hover) { .play:hover:not(:disabled) { background: var(--press-hover); } }
+    .tempo { display: flex; align-items: center; gap: 6px; flex: 1 1 320px; min-width: 0; }
+    .tempo .note-sym { font-size: 18px; line-height: 1; }
+    .bpm-input { appearance: textfield; -moz-appearance: textfield; width: 4.2ch; height: var(--ctl-h); border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 16px; font-weight: 700; text-align: center; padding: 0; }
+    .bpm-input::-webkit-outer-spin-button, .bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .bpm-input:focus { outline: none; border-color: var(--ink); }
+    .tempo input[type=range] { flex: 1; min-width: 80px; }
+    .player .end { display: flex; gap: 6px; margin-left: auto; }
+    .tempo-src { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--subtle); font-size: 12px; }
+    .tempo-src .linkish { font-weight: 600; }
+    .score-wrap { position: relative; min-height: 360px; padding: 8px 4px 24px; overflow-x: auto; }
+    #score { position: relative; cursor: pointer; }
+    #score.busy { cursor: default; }
+    #playhead { position: absolute; z-index: 2; width: 3px; margin-left: -1px; border-radius: 2px; background: var(--cursor); pointer-events: none; box-shadow: 0 0 0 4px var(--cursor-fill); will-change: transform; left: 0; top: 0; }
+    .empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; color: var(--subtle); text-align: center; }
+    .empty svg { width: 120px; height: auto; color: var(--line-strong); }
+    .empty p { margin: 0; max-width: 360px; }
+    .warn { margin: 12px 16px 0; padding: 10px 12px; border-radius: var(--radius); border: 1px solid var(--line-strong); color: var(--muted); font-size: 12px; }
+    .warn b { color: var(--ink); }
+    .keys { font-size: 12px; color: var(--subtle); padding: 0 16px 14px; margin: 0; }
+    kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; color: var(--muted); background: var(--paper); }
+    @media (pointer: coarse) { .keys { display: none; } }
+
+    /* Camera */
+    dialog.camera { width: min(720px, calc(100vw - 32px)); }
+    .cam-view { position: relative; background: #000; border-radius: var(--radius); overflow: hidden; aspect-ratio: 4 / 3; }
+    .cam-view video { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .cam-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+    /* Dialogs */
+    .primary { appearance: none; height: var(--ctl-h); padding: 0 16px; border: 1px solid transparent; border-radius: var(--radius); color: var(--paper); background: var(--ink); font-weight: 600; cursor: pointer; }
+    .primary:active { background: var(--press); }
+    @media (hover: hover) { .primary:hover { background: var(--press-hover); } }
+    .chip, .play, .big, .primary, #settingsBtn { transition: background-color .12s, border-color .12s, color .12s, transform .1s ease-out; }
+    .chip.is-pressed:not(:disabled), #settingsBtn.is-pressed, .big.secondary.is-pressed { background: var(--line); transform: scale(.94); }
+    .play.is-pressed, .primary.is-pressed, .big:not(.secondary).is-pressed { background: var(--press); transform: scale(.97); }
+    @media (prefers-reduced-motion: reduce) { .is-pressed { transform: none !important; } }
+    dialog.msg { width: min(420px, calc(100vw - 32px)); border: 1px solid var(--ink); border-radius: 12px; padding: 24px 24px 20px; box-shadow: var(--shadow); background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    dialog.msg:focus { outline: none; }
+    dialog.msg::backdrop { background: rgba(0, 0, 0, 0.55); }
+    dialog.msg h2 { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+    dialog.msg .dlg-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    dialog.help { width: min(480px, calc(100vw - 32px)); max-height: calc(100% - 32px); }
+    dialog.help[open] { display: flex; flex-direction: column; }
+    .help-body { flex: 0 1 auto; min-height: 0; overflow-y: auto; margin-bottom: 16px; -webkit-overflow-scrolling: touch; }
+    .help-list { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.7; color: var(--muted); }
+    .help-list li { margin-bottom: 10px; }
+    .help-list li:last-child { margin-bottom: 0; }
+    .help-list b { color: var(--ink); }
+    ul.help-list { list-style: disc; }
+    .help-list a { color: inherit; }
+    dialog.about { width: min(560px, calc(100vw - 32px)); height: min(640px, calc(100% - 32px)); }
+    dialog.about[open] { display: flex; flex-direction: column; }
+    dialog.msg p.about-license { margin: 0 0 12px; color: var(--subtle); font-size: 12px; }
+    .about-license a { color: inherit; }
+    .about-body { flex: 1 1 auto; min-height: 0; overflow: auto; margin-bottom: 16px; border: 1px solid var(--line); border-radius: var(--radius); -webkit-overflow-scrolling: touch; }
+    .about-body pre { margin: 0; padding: 12px; color: var(--muted); font-family: var(--mono); font-size: 11px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+    @media (prefers-reduced-motion: reduce) { *, ::before, ::after { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="toolbar">
+      <h1 class="brand">
+        <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="7" fill="#000"></rect><path d="M5 9.5h18M5 12.5h18M5 15.5h18M5 18.5h18" stroke="#fff" stroke-width="1" stroke-linecap="round"></path><rect x="9.4" y="6.5" width="2.8" height="15" rx="1.4" fill="#fff" fill-opacity=".45"></rect><path d="M18.6 6.8v10.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"></path><ellipse cx="16.7" cy="17.6" rx="2.3" ry="1.7" transform="rotate(-20 16.7 17.6)" fill="#fff"></ellipse></svg>
+        <span>Sheet Music Player</span>
+      </h1>
+      <div class="end">
+        <button id="settingsBtn" type="button" aria-label="設定" data-i18n-attr="aria-label:settings" aria-haspopup="menu" aria-expanded="false" aria-controls="settingsMenu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.89 5.11 L10.33 2.55 L13.67 2.55 L14.11 5.11 A7.2 7.2 0 0 1 15.38 5.64 L17.51 4.14 L19.86 6.49 L18.36 8.62 A7.2 7.2 0 0 1 18.89 9.89 L21.45 10.33 L21.45 13.67 L18.89 14.11 A7.2 7.2 0 0 1 18.36 15.38 L19.86 17.51 L17.51 19.86 L15.38 18.36 A7.2 7.2 0 0 1 14.11 18.89 L13.67 21.45 L10.33 21.45 L9.89 18.89 A7.2 7.2 0 0 1 8.62 18.36 L6.49 19.86 L4.14 17.51 L5.64 15.38 A7.2 7.2 0 0 1 5.11 14.11 L2.55 13.67 L2.55 10.33 L5.11 9.89 A7.2 7.2 0 0 1 5.64 8.62 L4.14 6.49 L6.49 4.14 L8.62 5.64 A7.2 7.2 0 0 1 9.89 5.11 Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="canvas">
+    <p class="intro" data-i18n="intro">楽譜を写真に撮るか、画像・PDFを開くと、音符を読み取って再生します。再生中は五線譜の上をカーソルが進み、テンポも途中で変えられます。読み取りはブラウザの中で行うので、楽譜がアップロードされることはありません。無料・登録不要です。</p>
+    <div class="layout">
+      <aside class="panel" aria-label="楽譜を開く" data-i18n-attr="aria-label:open">
+        <div class="panel-head"><span data-i18n="open">楽譜を開く</span></div>
+        <div class="panel-body">
+          <div class="drop" id="drop">
+            <div class="stack">
+              <button type="button" class="big" id="fileBtn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2.8h7.5L16 7.3v9.9H4z"></path><path d="M11.3 2.8v4.6H16"></path></svg><span data-i18n="pick">ファイルを選ぶ</span></button>
+              <button type="button" class="big secondary" id="camBtn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.5h3l1.6-2.2h5.8l1.6 2.2h3v9.7h-15z"></path><circle cx="10" cy="11" r="3.1"></circle></svg><span data-i18n="camera">写真を撮る</span></button>
+            </div>
+            <p data-i18n="drop">またはここにファイルをドロップ・画像（JPEG・PNGなど）とPDFに対応</p>
+            <input type="file" id="fileInput" hidden>
+            <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+          </div>
+          <p class="hint"><span data-i18n="sample.lead">手元に楽譜がないときは</span> <button type="button" class="linkish" id="sampleBtn" data-i18n="sample">サンプルで試す</button></p>
+
+          <div class="file-card" id="fileCard" hidden>
+            <img id="thumb" alt="">
+            <div class="meta"><div class="nm" id="fileName"></div><div class="sub" id="fileSub"></div></div>
+          </div>
+          <div class="status" id="status" hidden>
+            <div class="line"><span id="statusText"></span><span class="num" id="statusNum"></span></div>
+            <div class="bar" id="statusBar"><i></i></div>
+            <p class="hint" id="statusHint"></p>
+            <button type="button" class="chip" id="cancelBtn" data-i18n="cancel">キャンセル</button>
+          </div>
+          <p class="error" id="error" role="alert" hidden></p>
+
+          <p class="note" id="firstNote" data-i18n-html="first">初回だけ、読み取りエンジン（約130MB）をダウンロードします。次からはすぐに始まり、オフラインでも使えます。</p>
+          <ul class="steps" data-i18n-html="tips"><li>楽譜は正面から、明るい場所で、ページ全体が入るように撮ってください。</li>
+            <li>印刷された楽譜に対応しています。手書きの楽譜は読み取れません。</li>
+            <li>読み取り結果には間違いが含まれることがあります。聴きながら確かめてください。</li></ul>
+        </div>
+      </aside>
+
+      <section class="panel out" aria-label="楽譜" data-i18n-attr="aria-label:score">
+        <div class="player" id="player">
+          <button type="button" class="play" id="playBtn" disabled></button>
+          <button type="button" class="chip" id="rewindBtn" aria-label="最初に戻る" data-i18n-attr="aria-label:rewind" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5v11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M13.5 2.8v10.4L5 8z" fill="currentColor"></path></svg></button>
+          <div class="tempo">
+            <span class="note-sym" aria-hidden="true">♩=</span>
+            <button type="button" class="chip mono" data-bpm="-5" aria-label="テンポを5下げる" data-i18n-attr="aria-label:bpm.m5">−5</button>
+            <input id="bpmInput" class="bpm-input" type="number" inputmode="numeric" min="20" max="300" aria-label="テンポ（BPM）" data-i18n-attr="aria-label:bpm">
+            <button type="button" class="chip mono" data-bpm="5" aria-label="テンポを5上げる" data-i18n-attr="aria-label:bpm.p5">+5</button>
+            <input id="bpmSlider" type="range" min="20" max="300" step="1" aria-label="テンポのスライダー" data-i18n-attr="aria-label:bpm.slider">
+          </div>
+          <div class="end">
+            <button type="button" class="chip" id="saveBtn" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"></path></svg><span data-i18n="save">MusicXML</span></button>
+          </div>
+          <div class="tempo-src"><span id="tempoSrc"></span><button type="button" class="linkish" id="tempoReset" data-i18n="tempo.reset" hidden>楽譜のテンポに戻す</button></div>
+        </div>
+        <div class="warn" id="pageWarn" hidden></div>
+        <div class="score-wrap" id="scoreWrap">
+          <div id="score"></div>
+          <div id="playhead" hidden></div>
+          <div class="empty" id="empty">
+            <svg viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 14h112M4 24h112M4 34h112M4 44h112M4 54h112"></path><path d="M44 44V10M76 34V4" stroke-width="2.4"></path><ellipse cx="38" cy="45" rx="7" ry="5" transform="rotate(-20 38 45)" fill="currentColor"></ellipse><ellipse cx="70" cy="35" rx="7" ry="5" transform="rotate(-20 70 35)" fill="currentColor"></ellipse></svg>
+            <p data-i18n="empty">読み込んだ楽譜がここに表示されます。音符をクリックすると、そこから再生できます。</p>
+          </div>
+        </div>
+        <p class="keys" data-i18n-html="keys"><kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでそこから再生</p>
+      </section>
+    </div>
+    <footer class="foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span id="saveState" data-i18n="foot">楽譜はこの端末の中で読み取り、アップロードはしません。最後に開いた楽譜はこのブラウザに保存されます。</span></footer>
+  </main>
+
+  <dialog class="msg camera" id="camDlg" tabindex="-1" aria-labelledby="camTitle">
+    <h2 id="camTitle" data-i18n="camera">写真を撮る</h2>
+    <div class="cam-view"><video id="camVideo" playsinline muted></video></div>
+    <p class="hint" id="camHint" data-i18n="cam.hint">楽譜を平らにして、枠いっぱいに入れてください。</p>
+    <div class="cam-actions">
+      <button type="button" class="chip" id="camClose" data-i18n="cancel">キャンセル</button>
+      <button type="button" class="primary" id="camShoot" data-i18n="cam.shoot">撮影する</button>
+    </div>
+  </dialog>
+
+  <dialog class="msg help" id="helpDlg" tabindex="-1" aria-labelledby="helpTitle">
+    <h2 id="helpTitle" data-i18n="menu.help">使い方</h2>
+    <div class="help-body">
+      <ol class="help-list" data-i18n-html="help.body"><li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べますが、読み取れるのは画像とPDFだけです。</li>
+        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>
+        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックすると、そこから再生します。</li>
+        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>
+        <li><b>保存</b> – 「MusicXML」で読み取り結果を保存できます。MuseScore などの楽譜ソフトで開いて、間違いを直せます。</li></ol>
+    </div>
+    <div class="dlg-actions">
+      <button class="primary" id="helpClose" type="button" data-i18n="close">閉じる</button>
+    </div>
+  </dialog>
+
+  <dialog class="msg help" id="privacyDlg" tabindex="-1" aria-labelledby="privacyTitle">
+    <h2 id="privacyTitle" data-i18n="menu.privacy">プライバシー</h2>
+    <div class="help-body">
+      <ul class="help-list" data-i18n-html="privacy.body"><li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>
+        <li><b>ブラウザに保存するデータ</b> – 次に開いたときにも使えるよう、最後に開いた楽譜（読み取った音符のMusicXML）とファイル名、テンポをブラウザ内に保存します。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>
+        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>
+        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href="https://github.com/ktkwmr/SheetMusicPlayer/issues" target="_blank" rel="noopener">GitHub の Issues</a> へ。</li>
+        <li><b>詳しくは</b> – <a href="/sheetmusicplayer/ja/privacy/">プライバシーポリシー</a>と<a href="/sheetmusicplayer/ja/about/">運営者情報</a>をご覧ください。</li></ul>
+    </div>
+    <div class="dlg-actions">
+      <button class="primary" id="privacyClose" type="button" data-i18n="close">閉じる</button>
+    </div>
+  </dialog>
+
+  <div class="menu" id="settingsMenu" role="menu" aria-label="設定" data-i18n-attr="aria-label:settings" hidden>
+    <button type="button" role="menuitem" id="menuHelp" data-i18n="menu.help">使い方</button>
+    <button type="button" role="menuitem" id="menuPrivacy" data-i18n="menu.privacy">プライバシー</button>
+    <button type="button" role="menuitem" id="menuAbout" data-i18n="menu.about">このアプリについて</button>
+  </div>
+
+  <dialog class="msg about" id="aboutDlg" tabindex="-1" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle" data-i18n="menu.about">このアプリについて</h2>
+    <p class="about-license" data-i18n-html="about.license">© 2026 ktkwmr · <a href="https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE" target="_blank" rel="noopener">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href="/sheetmusicplayer/ja/about/">運営者情報</a></p>
+    <div class="about-body"><pre id="licenseText">Loading…</pre></div>
+    <div class="dlg-actions">
+      <button class="primary" id="aboutClose" type="button" data-i18n="close">閉じる</button>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      // ---------- English / Japanese ----------
+      const I18N = {
+        en: {
+          "settings": "Settings",
+          "intro": "Take a photo of sheet music, or open an image or PDF. The app reads the notes and plays them, with a cursor that moves along the staff. You can change the tempo while it plays. The notes are read inside your browser, so your music is never uploaded. Free, no sign-up.",
+          "open": "Open a score",
+          "score": "Score",
+          "pick": "Choose a file",
+          "camera": "Take a photo",
+          "drop": "or drop a file here · images (JPEG, PNG, …) and PDF",
+          "sample.lead": "No score at hand?",
+          "sample": "Try a sample",
+          "sample.name": "Twinkle, Twinkle, Little Star (photo)",
+          "cancel": "Cancel",
+          "first": "The first time, the app downloads its reading engine (about 130 MB). After that it starts right away, even offline.",
+          "tips": "<li>Photograph the page straight on, in good light, with the whole page in the frame.</li>\n            <li>Printed music works best. Handwriting is not supported.</li>\n            <li>The result may contain mistakes. Check it while you listen.</li>",
+          "play": "Play",
+          "stop": "Stop",
+          "rewind": "Back to the beginning",
+          "bpm": "Tempo (BPM)",
+          "bpm.m5": "Tempo −5",
+          "bpm.p5": "Tempo +5",
+          "bpm.slider": "Tempo slider",
+          "save": "MusicXML",
+          "save.aria": "Save as MusicXML",
+          "tempo.reset": "Back to the score's tempo",
+          "tempo.src.ocr": "The score says ♩ = {n}.",
+          "tempo.src.term": "The score says “{term}” (♩ = {n} is a typical tempo for it).",
+          "tempo.src.none": "No tempo marking was found, so it starts at ♩ = {n}.",
+          "tempo.src.saved": "Tempo you set: ♩ = {n}.",
+          "empty": "The score appears here. Click a note to start playing from there.",
+          "keys": "<kbd>Space</kbd> play / stop　<kbd>Home</kbd> back to the beginning　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to play from there",
+          "foot": "Your score is read on this device and is never uploaded. The last score is kept in this browser.",
+          "foot.fail": "This browser cannot keep your score (check private browsing or blocked site data).",
+          "file.pages": "PDF · {n} pages",
+          "file.page": "PDF · 1 page",
+          "file.image": "Image · {w} × {h}",
+          "file.photo": "Camera photo",
+          "file.saved": "Last score · {n} notes",
+          "st.decode": "Opening the file…",
+          "st.download": "Downloading the reading engine (first time only)",
+          "st.download.hint": "About 130 MB. Next time the app starts right away, even offline.",
+          "st.start": "Starting the reading engine…",
+          "st.tempo": "Looking for the tempo marking…",
+          "st.segment": "Finding the staves and notes…",
+          "st.staff": "Reading the staves",
+          "st.xml": "Writing the score…",
+          "st.render": "Drawing the score…",
+          "st.page": "Page {i} of {n}",
+          "st.done": "Read in {s} s",
+          "st.done.pages": "{n} pages read in {s} s",
+          "err.type": "This file cannot be read. Choose an image (JPEG, PNG, WebP, …) or a PDF.",
+          "err.image": "This image cannot be opened in this browser. Save it as JPEG or PNG and try again.",
+          "err.pdf": "This PDF cannot be opened. It may be damaged or protected with a password.",
+          "err.nostaff": "No staves or notes were found. Use a clear photo or scan of printed sheet music, with the whole page in the frame.",
+          "err.nostaff.page": "No staves were found on page {i}, so it was skipped.",
+          "err.unsupported": "This browser cannot run the reading engine. Use the latest Chrome or Edge on a computer.",
+          "err.download": "The reading engine could not be downloaded. Check your connection and try again.",
+          "err.memory": "The browser ran out of memory. Close other tabs, or try a smaller image or fewer pages.",
+          "err.recognize": "Reading failed. Try another photo or file. ({msg})",
+          "err.render": "The score could not be drawn. The reading may have gone wrong; try a clearer photo or scan.",
+          "err.camera": "The camera cannot be used. Allow camera access for this site, or choose a file instead.",
+          "err.license": "Could not load the license information. Check your connection and try again.",
+          "warn.pages": "Only the first {max} pages of this PDF are read.",
+          "cam.hint": "Hold the page flat and fill the frame with it.",
+          "cam.shoot": "Take photo",
+          "menu.help": "How to use",
+          "menu.privacy": "Privacy",
+          "menu.about": "About",
+          "help.body": "<li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen, but only images and PDFs can be read.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to start from there.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Save</b> – “MusicXML” saves the result. You can open it in MuseScore and most notation apps to fix mistakes.</li>",
+          "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – The last score (the notes the app read, as MusicXML), its file name, and the tempo are saved in your browser's storage so they are there next time. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\">about this site</a>.</li>",
+          "about.license": "© 2026 ktkwmr · Licensed under the <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a> (the same as homr, the music recognition it uses) · <a href=\"/sheetmusicplayer/about/\">About this site</a>",
+          "close": "Close",
+          "loading": "Loading…"
+        },
+        ja: {
+          "settings": "設定",
+          "intro": "楽譜を写真に撮るか、画像・PDFを開くと、音符を読み取って再生します。再生中は五線譜の上をカーソルが進み、テンポも途中で変えられます。読み取りはブラウザの中で行うので、楽譜がアップロードされることはありません。無料・登録不要です。",
+          "open": "楽譜を開く",
+          "score": "楽譜",
+          "pick": "ファイルを選ぶ",
+          "camera": "写真を撮る",
+          "drop": "またはここにファイルをドロップ・画像（JPEG・PNGなど）とPDFに対応",
+          "sample.lead": "手元に楽譜がないときは",
+          "sample": "サンプルで試す",
+          "sample.name": "きらきら星（写真）",
+          "cancel": "キャンセル",
+          "first": "初回だけ、読み取りエンジン（約130MB）をダウンロードします。次からはすぐに始まり、オフラインでも使えます。",
+          "tips": "<li>楽譜は正面から、明るい場所で、ページ全体が入るように撮ってください。</li>\n            <li>印刷された楽譜に対応しています。手書きの楽譜は読み取れません。</li>\n            <li>読み取り結果には間違いが含まれることがあります。聴きながら確かめてください。</li>",
+          "play": "再生",
+          "stop": "停止",
+          "rewind": "最初に戻る",
+          "bpm": "テンポ（BPM）",
+          "bpm.m5": "テンポを5下げる",
+          "bpm.p5": "テンポを5上げる",
+          "bpm.slider": "テンポのスライダー",
+          "save": "MusicXML",
+          "save.aria": "MusicXMLで保存",
+          "tempo.reset": "楽譜のテンポに戻す",
+          "tempo.src.ocr": "楽譜の指定は ♩ = {n} です。",
+          "tempo.src.term": "楽譜の指定は「{term}」です（目安の ♩ = {n} にしています）。",
+          "tempo.src.none": "楽譜にテンポの指定が見つからなかったので、♩ = {n} にしています。",
+          "tempo.src.saved": "設定したテンポ: ♩ = {n}",
+          "empty": "読み込んだ楽譜がここに表示されます。音符をクリックすると、そこから再生できます。",
+          "keys": "<kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでそこから再生",
+          "foot": "楽譜はこの端末の中で読み取り、アップロードはしません。最後に開いた楽譜はこのブラウザに保存されます。",
+          "foot.fail": "このブラウザでは楽譜を保存できません（プライベートモードやサイトデータのブロックを確認してください）。",
+          "file.pages": "PDF・{n}ページ",
+          "file.page": "PDF・1ページ",
+          "file.image": "画像・{w} × {h}",
+          "file.photo": "カメラで撮影",
+          "file.saved": "前回の楽譜・{n}音",
+          "st.decode": "ファイルを開いています…",
+          "st.download": "読み取りエンジンをダウンロード中（初回のみ）",
+          "st.download.hint": "約130MBです。次回からはすぐに始まり、オフラインでも使えます。",
+          "st.start": "読み取りエンジンを起動しています…",
+          "st.tempo": "テンポの指定を探しています…",
+          "st.segment": "五線と音符を探しています…",
+          "st.staff": "段ごとに読み取り中",
+          "st.xml": "楽譜を書き出しています…",
+          "st.render": "楽譜を表示しています…",
+          "st.page": "{n}ページ中{i}ページ目",
+          "st.done": "{s}秒で読み取りました",
+          "st.done.pages": "{n}ページを{s}秒で読み取りました",
+          "err.type": "このファイルは読み込めません。画像（JPEG・PNG・WebPなど）かPDFを選んでください。",
+          "err.image": "この画像はこのブラウザでは開けません。JPEGかPNGで保存し直してお試しください。",
+          "err.pdf": "このPDFを開けません。壊れているか、パスワードで保護されている可能性があります。",
+          "err.nostaff": "五線や音符が見つかりませんでした。印刷された楽譜を、ページ全体が入るように、はっきり撮った写真やスキャンでお試しください。",
+          "err.nostaff.page": "{i}ページ目には五線が見つからなかったので、飛ばしました。",
+          "err.unsupported": "このブラウザでは読み取りエンジンを動かせません。PCの最新のChromeかEdgeでお試しください。",
+          "err.download": "読み取りエンジンをダウンロードできませんでした。接続を確認して、もう一度お試しください。",
+          "err.memory": "ブラウザのメモリが足りなくなりました。ほかのタブを閉じるか、小さい画像やページ数の少ないファイルでお試しください。",
+          "err.recognize": "読み取りに失敗しました。別の写真やファイルでお試しください。（{msg}）",
+          "err.render": "楽譜を表示できませんでした。読み取りがうまくいかなかった可能性があります。もっとはっきりした写真やスキャンでお試しください。",
+          "err.camera": "カメラを使えません。このサイトにカメラの使用を許可するか、ファイルを選んでください。",
+          "err.license": "ライセンス情報を読み込めませんでした。接続を確認して、もう一度お試しください。",
+          "warn.pages": "このPDFは最初の{max}ページだけを読み取ります。",
+          "cam.hint": "楽譜を平らにして、枠いっぱいに入れてください。",
+          "cam.shoot": "撮影する",
+          "menu.help": "使い方",
+          "menu.privacy": "プライバシー",
+          "menu.about": "このアプリについて",
+          "help.body": "<li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べますが、読み取れるのは画像とPDFだけです。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックすると、そこから再生します。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>保存</b> – 「MusicXML」で読み取り結果を保存できます。MuseScore などの楽譜ソフトで開いて、間違いを直せます。</li>",
+          "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – 次に開いたときにも使えるよう、最後に開いた楽譜（読み取った音符のMusicXML）とファイル名、テンポをブラウザ内に保存します。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>をご覧ください。</li>",
+          "about.license": "© 2026 ktkwmr · <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>",
+          "close": "閉じる",
+          "loading": "読み込み中…"
+        }
+      };
+
+      function detectLang() {
+        const q = new URLSearchParams(location.search).get("lang");
+        if (q === "ja" || q === "en") return q;
+        const fixed = document.documentElement.dataset.pageLang;
+        if (fixed === "ja" || fixed === "en") return fixed;
+        const first = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+        return /^ja\b/i.test(first) ? "ja" : "en";
+      }
+      const lang = detectLang();
+      function t(key, vars) {
+        let str = I18N[lang][key];
+        if (str === undefined) str = I18N.en[key] !== undefined ? I18N.en[key] : key;
+        if (vars) str = str.replace(/\{(\w+)\}/g, function (m, k) { return k in vars ? String(vars[k]) : m; });
+        return str;
+      }
+      function applyI18n() {
+        document.documentElement.lang = lang;
+        document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = t(el.dataset.i18n); });
+        document.querySelectorAll("[data-i18n-html]").forEach(function (el) { el.innerHTML = t(el.dataset.i18nHtml); });
+        document.querySelectorAll("[data-i18n-attr]").forEach(function (el) {
+          el.dataset.i18nAttr.split(";").forEach(function (pair) {
+            const parts = pair.split(":");
+            el.setAttribute(parts[0], t(parts[1]));
+          });
+        });
+      }
+      function isIOS() {
+        return /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      }
+      if (isIOS()) {
+        const vp = document.querySelector('meta[name="viewport"]');
+        if (vp) vp.setAttribute("content", vp.getAttribute("content") + ", maximum-scale=1");
+      }
+
+      const $ = (id) => document.getElementById(id);
+      const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+      const DEFAULT_BPM = 120;
+      const MAX_PDF_PAGES = 12;
+      const MAX_SIDE = 3200; // the engine works at 1920 px wide; larger photos only cost memory
+
+      // ---------- Saved state ----------
+      // The last score is saved, so it is still there next time. A new file resets the tempo to the one on its page.
+      const STATE_KEY = "sheetmusicplayer-state";
+      let state = { xml: "", name: "", bpm: DEFAULT_BPM, scoreBpm: DEFAULT_BPM, tempoSource: "none", tempoTerm: "", notes: 0 };
+      try {
+        const s = JSON.parse(localStorage.getItem(STATE_KEY) || "null");
+        if (s && typeof s.xml === "string" && s.xml.length < 4e6 && /<score-partwise/.test(s.xml)) {
+          state = {
+            xml: s.xml, name: typeof s.name === "string" ? s.name.slice(0, 200) : "",
+            bpm: clamp(Math.round(+s.bpm || DEFAULT_BPM), 20, 300), scoreBpm: clamp(Math.round(+s.scoreBpm || DEFAULT_BPM), 20, 300),
+            tempoSource: ["ocr", "term", "none"].includes(s.tempoSource) ? s.tempoSource : "none",
+            tempoTerm: typeof s.tempoTerm === "string" ? s.tempoTerm.slice(0, 40) : "", notes: +s.notes || 0,
+          };
+        }
+      } catch (e) {}
+      function saveState() {
+        try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); $("saveState").textContent = t("foot"); }
+        catch (e) {
+          // Too large or blocked: keep at least the tempo
+          try { localStorage.setItem(STATE_KEY, JSON.stringify(Object.assign({}, state, { xml: "" }))); } catch (e2) {}
+          $("saveState").textContent = t("foot.fail");
+        }
+      }
+
+      // ---------- Status (left panel) ----------
+      function showStatus(text, opts) {
+        opts = opts || {};
+        $("status").hidden = false;
+        $("statusText").textContent = text;
+        $("statusNum").textContent = opts.num || "";
+        $("statusHint").textContent = opts.hint || "";
+        $("statusHint").hidden = !opts.hint;
+        const bar = $("statusBar");
+        bar.hidden = opts.bar === false;
+        bar.classList.toggle("indet", opts.ratio == null);
+        bar.firstElementChild.style.width = opts.ratio == null ? "" : Math.round(opts.ratio * 100) + "%";
+        $("cancelBtn").hidden = !opts.cancel;
+      }
+      function hideStatus() { $("status").hidden = true; }
+      function showError(msg) { const e = $("error"); e.textContent = msg; e.hidden = !msg; }
+      const mb = (b) => (b / 1e6).toFixed(b < 1e7 ? 1 : 0) + " MB";
+
+      // ---------- Opening files ----------
+      // Any file can be chosen; the type is checked from its first bytes (and the MIME type as a fallback)
+      async function sniff(file) {
+        const h = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+        const s = String.fromCharCode.apply(null, h);
+        if (s.startsWith("%PDF-")) return "pdf";
+        if (h[0] === 0xff && h[1] === 0xd8 && h[2] === 0xff) return "image";            // JPEG
+        if (s.startsWith("\x89PNG")) return "image";
+        if (s.startsWith("GIF8") || s.startsWith("BM")) return "image";
+        if (s.startsWith("RIFF") && s.slice(8, 12) === "WEBP") return "image";
+        if (s.slice(4, 8) === "ftyp") return "image";                                     // HEIC / AVIF
+        if (/^image\//.test(file.type)) return "image";
+        if (file.type === "application/pdf") return "pdf";
+        return null;
+      }
+      function toRgba(source, w, h) {
+        const scale = Math.min(1, MAX_SIDE / Math.max(w, h));
+        const cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+        const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+        const g = c.getContext("2d", { willReadFrequently: true });
+        g.fillStyle = "#fff"; g.fillRect(0, 0, cw, ch); // transparent PNGs: white paper
+        g.drawImage(source, 0, 0, cw, ch);
+        return { width: cw, height: ch, rgba: g.getImageData(0, 0, cw, ch).data.buffer, canvas: c };
+      }
+      async function decodeImage(file) {
+        let bmp;
+        try { bmp = await createImageBitmap(file, { imageOrientation: "from-image" }); }
+        catch (e) {
+          // Some browsers decode formats (e.g. HEIC on Safari) only through <img>
+          const url = URL.createObjectURL(file);
+          try { const img = new Image(); img.src = url; await img.decode(); bmp = img; }
+          catch (e2) { throw Object.assign(new Error("image"), { code: "image" }); }
+          finally { setTimeout(() => URL.revokeObjectURL(url), 1000); }
+        }
+        const w = bmp.width || bmp.naturalWidth, h = bmp.height || bmp.naturalHeight;
+        const page = toRgba(bmp, w, h);
+        if (bmp.close) bmp.close();
+        return { pages: [page], sub: t("file.image", { w: w, h: h }) };
+      }
+      let pdfjs = null;
+      async function decodePdf(file) {
+        if (!pdfjs) {
+          pdfjs = await import("./vendor/pdf.min.mjs");
+          pdfjs.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", location.href.replace(/[?#].*$/, "")).href;
+        }
+        let doc;
+        try { doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false }).promise; }
+        catch (e) { throw Object.assign(new Error("pdf"), { code: "pdf" }); }
+        const n = Math.min(doc.numPages, MAX_PDF_PAGES), pages = [];
+        for (let i = 1; i <= n; i++) {
+          showStatus(t("st.decode"), { num: i + " / " + n, ratio: (i - 1) / n });
+          const page = await doc.getPage(i);
+          const base = page.getViewport({ scale: 1 });
+          const vp = page.getViewport({ scale: 2400 / base.width });
+          const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+          const g = c.getContext("2d", { willReadFrequently: true });
+          g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+          await page.render({ canvasContext: g, canvas: c, viewport: vp }).promise;
+          pages.push(toRgba(c, c.width, c.height));
+          page.cleanup();
+        }
+        const total = doc.numPages;
+        doc.destroy();
+        return { pages: pages, sub: total === 1 ? t("file.page") : t("file.pages", { n: total }), truncated: total > MAX_PDF_PAGES };
+      }
+
+      // ---------- Reading engine (omr-worker.mjs) ----------
+      let worker = null, engineReady = false, jobSeq = 0;
+      const pending = new Map();
+      let onProgress = null;
+      function getWorker() {
+        if (worker) return worker;
+        worker = new Worker("omr-worker.mjs", { type: "module" });
+        worker.onmessage = function (ev) {
+          const m = ev.data;
+          if (m.type === "progress") { if (onProgress) onProgress(m); }
+          else if (m.type === "ready") { engineReady = true; $("firstNote").hidden = true; }
+          else if (m.type === "result") { const p = pending.get(m.id); if (p) { pending.delete(m.id); p.resolve(m); } }
+          else if (m.type === "error") {
+            if (m.id != null && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); p.reject(m); }
+            else pending.forEach(function (p, id) { pending.delete(id); p.reject(m); });
+            if (m.id == null) { worker.terminate(); worker = null; engineReady = false; }
+          }
+        };
+        worker.onerror = function () {
+          pending.forEach(function (p, id) { pending.delete(id); p.reject({ code: "recognize", message: "worker" }); });
+          worker = null; engineReady = false;
+        };
+        worker.postMessage({ type: "init" });
+        return worker;
+      }
+      function recognizePage(page, tempo) {
+        const id = ++jobSeq;
+        return new Promise(function (resolve, reject) {
+          pending.set(id, { resolve: resolve, reject: reject });
+          getWorker().postMessage({ type: "page", id: id, rgba: page.rgba, width: page.width, height: page.height, tempo: tempo }, [page.rgba]);
+        });
+      }
+      const supported = typeof WebAssembly === "object" && typeof WebAssembly.Suspending === "function";
+
+      // ---------- Tempo marking (Tesseract.js OCR on the top of the first page) ----------
+      // Typical tempo for each marking (the middle of the usual range)
+      const TEMPO_TERMS = {
+        grave: 40, largo: 50, lento: 55, larghetto: 63, adagio: 70, adagietto: 75, andante: 80, andantino: 88,
+        moderato: 108, allegretto: 112, allegro: 132, vivace: 160, vivacissimo: 172, presto: 180, prestissimo: 200,
+      };
+      const METRONOME = /[=＝]\s*(?:c\.|ca\.|ca|c)?\s*(\d{2,3})\b/;
+      async function findTempo(page) {
+        const c = page.canvas;
+        // The marking is above the first staff: read the top part only
+        const h = Math.round(c.height * Math.min(0.45, Math.max(0.25, 1400 / c.height)));
+        const crops = ["none", "grayscale(1) contrast(1.4)"].map(function (filter) {
+          const crop = document.createElement("canvas"); crop.width = c.width; crop.height = h;
+          const g = crop.getContext("2d"); g.filter = filter; g.drawImage(c, 0, 0, c.width, h, 0, 0, c.width, h);
+          return crop;
+        });
+        let text = "", ocr = null, found = null;
+        // The tempo is a nice-to-have: give up after 40 s instead of holding up the reading
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("ocr timeout")), 40000));
+        try {
+          await Promise.race([timeout, (async function () {
+            const T = await import("./engine/v1/tesseract/tesseract.esm.min.js");
+            const here = location.href.replace(/[?#].*$/, "");
+            ocr = await (T.default || T).createWorker("eng", 1, {
+              workerPath: new URL("engine/v1/tesseract/worker.min.js", here).href,
+              corePath: new URL("engine/v1/tesseract/tesseract-core-simd-lstm.js", here).href,
+              langPath: new URL("engine/v1/tesseract/lang/", here).href,
+              workerBlobURL: false, logger: function () {},
+              // The engine cache (sw.js / omr-worker.mjs) already keeps the data; no second copy in IndexedDB
+              cacheMethod: "none",
+            });
+            // Tesseract's result depends a lot on the page layout mode and the contrast: try a few, stop at the first "= 76"
+            for (const [psm, crop] of [["6", crops[0]], ["11", crops[1]], ["6", crops[1]], ["11", crops[0]]]) {
+              await ocr.setParameters({ tessedit_pageseg_mode: psm });
+              const part = (await ocr.recognize(crop)).data.text;
+              text += "\n" + part;
+              const m = part.match(METRONOME);
+              if (m && +m[1] >= 30 && +m[1] <= 300) { found = { bpm: +m[1], source: "ocr" }; break; }
+            }
+          })()]);
+        } catch (e) { /* no tempo: the default is used */ }
+        try { if (ocr) await ocr.terminate(); } catch (e) {}
+        if (found) return found;
+        const words = text.toLowerCase().match(/[a-z]{4,}/g) || [];
+        for (const w of words) if (TEMPO_TERMS[w]) return { bpm: TEMPO_TERMS[w], source: "term", term: w.charAt(0).toUpperCase() + w.slice(1) };
+        return null;
+      }
+
+      // ---------- Merging pages ----------
+      // Each page is read on its own; the measures of later pages are appended to the parts of the first page
+      function mergePages(xmls) {
+        const parser = new DOMParser();
+        const docs = xmls.map((x) => parser.parseFromString(x, "application/xml"));
+        const first = docs[0];
+        const parts = Array.from(first.querySelectorAll("score-partwise > part"));
+        let number = Math.max.apply(null, [0].concat(Array.from(parts[0].querySelectorAll(":scope > measure")).map((m) => +m.getAttribute("number") || 0)));
+        for (const d of docs.slice(1)) {
+          const pp = Array.from(d.querySelectorAll("score-partwise > part"));
+          const count = pp.length ? pp[0].querySelectorAll(":scope > measure").length : 0;
+          parts.forEach(function (part, i) {
+            const src = pp[i] || null;
+            const measures = src ? Array.from(src.querySelectorAll(":scope > measure")) : [];
+            for (let k = 0; k < count; k++) {
+              let m = measures[k];
+              if (!m) { // this page has fewer parts: fill with a rest of the same length as the first part's measure
+                m = first.createElement("measure");
+                const ref = pp[0].querySelectorAll(":scope > measure")[k];
+                let dur = 0; ref.querySelectorAll(":scope > note").forEach((n) => { if (!n.querySelector("chord") && (n.querySelector("voice") || {}).textContent !== "2") dur += +((n.querySelector("duration") || {}).textContent || 0); });
+                m.innerHTML = '<note><rest measure="yes"/><duration>' + Math.max(1, dur) + "</duration><voice>1</voice></note>";
+              } else m = first.importNode(m, true);
+              m.setAttribute("number", String(number + k + 1));
+              // A new page starts a new system
+              if (k === 0) { const pr = m.querySelector(":scope > print") || first.createElement("print"); pr.setAttribute("new-system", "yes"); if (!pr.parentNode) m.insertBefore(pr, m.firstChild); }
+              part.appendChild(m);
+            }
+          });
+          number += count;
+        }
+        return new XMLSerializer().serializeToString(first);
+      }
+
+      // ---------- The whole flow: file -> pages -> engine -> score ----------
+      let busy = false, cancelled = false;
+      async function openFile(file, label) {
+        if (busy) return;
+        showError(""); $("pageWarn").hidden = true;
+        const kind = await sniff(file);
+        if (!kind) { showError(t("err.type")); return; }
+        if (kind !== "pdf" && kind !== "image") return;
+        if (!supported) { showError(t("err.unsupported")); return; }
+        busy = true; cancelled = false; stop();
+        $("fileCard").hidden = false;
+        $("fileName").textContent = label || file.name || "";
+        $("fileSub").textContent = "";
+        $("thumb").removeAttribute("src");
+        $("score").classList.add("busy");
+        const t0 = performance.now();
+        try {
+          getWorker();
+          showStatus(t("st.decode"), {});
+          const input = kind === "pdf" ? await decodePdf(file) : await decodeImage(file);
+          $("fileSub").textContent = label === t("file.photo") ? t("file.photo") : input.sub;
+          $("thumb").src = input.pages[0].canvas.toDataURL("image/jpeg", 0.6);
+          if (input.truncated) { $("pageWarn").textContent = t("warn.pages", { max: MAX_PDF_PAGES }); $("pageWarn").hidden = false; }
+          // The tempo marking is read while the engine starts (or downloads)
+          showStatus(t("st.tempo"), {});
+          let pageIndex = 0;
+          const n = input.pages.length;
+          onProgress = function (m) {
+            if (cancelled) return;
+            const pageText = n > 1 ? t("st.page", { i: pageIndex + 1, n: n }) + " · " : "";
+            if (m.stage === "download") showStatus(t("st.download"), { num: mb(m.done) + " / " + mb(m.total), ratio: m.total ? m.done / m.total : 0, hint: t("st.download.hint"), cancel: true });
+            else if (m.stage === "start") showStatus(t("st.start"), { cancel: true });
+            else if (m.stage === "segment") showStatus(pageText + t("st.segment"), { ratio: n > 1 ? pageIndex / n : null, cancel: true });
+            else if (m.stage === "staff") showStatus(pageText + t("st.staff"), { num: m.done + " / " + m.total, ratio: (pageIndex + (m.total ? m.done / m.total : 0)) / n, cancel: true });
+            else if (m.stage === "xml") showStatus(pageText + t("st.xml"), { ratio: (pageIndex + 1) / n, cancel: true });
+          };
+          const tempo = await findTempo(input.pages[0]);
+          if (cancelled) throw { code: "cancel" };
+          const xmls = [], skipped = [];
+          for (pageIndex = 0; pageIndex < n; pageIndex++) {
+            try {
+              const r = await recognizePage(input.pages[pageIndex], tempo ? tempo.bpm : null);
+              xmls.push(r.xml);
+            } catch (e) {
+              if (e && e.code === "no-staff" && n > 1) { skipped.push(pageIndex + 1); continue; }
+              throw e;
+            }
+            if (cancelled) throw { code: "cancel" };
+          }
+          if (!xmls.length) throw { code: "no-staff" };
+          const xml = xmls.length > 1 ? mergePages(xmls) : xmls[0];
+          showStatus(t("st.render"), {});
+          state.xml = xml; state.name = $("fileName").textContent;
+          state.scoreBpm = tempo ? tempo.bpm : DEFAULT_BPM; state.bpm = state.scoreBpm;
+          state.tempoSource = tempo ? tempo.source : "none"; state.tempoTerm = tempo && tempo.term ? tempo.term : "";
+          await showScore(xml);
+          state.notes = timeline.notes;
+          saveState();
+          const secs = Math.round((performance.now() - t0) / 1000);
+          showStatus(n > 1 ? t("st.done.pages", { n: xmls.length, s: secs }) : t("st.done", { s: secs }), { bar: false });
+          if (skipped.length) { $("pageWarn").textContent = skipped.map((i) => t("err.nostaff.page", { i: i })).join(" "); $("pageWarn").hidden = false; }
+        } catch (e) {
+          hideStatus();
+          const code = e && e.code;
+          if (code === "cancel") { /* nothing */ }
+          else if (code === "image") showError(t("err.image"));
+          else if (code === "pdf") showError(t("err.pdf"));
+          else if (code === "no-staff") showError(t("err.nostaff"));
+          else if (code === "unsupported") showError(t("err.unsupported"));
+          else if (code === "download") showError(t("err.download"));
+          else if (code === "memory") showError(t("err.memory"));
+          else if (code === "render") showError(t("err.render"));
+          else { showError(t("err.recognize", { msg: String((e && e.message) || e).split("\n").filter(Boolean).pop().slice(0, 160) })); console.error(e); }
+          if (!timeline.steps.length) $("fileCard").hidden = true;
+        } finally {
+          busy = false; onProgress = null;
+          $("score").classList.remove("busy");
+          renderPlayer();
+        }
+      }
+      $("cancelBtn").onclick = function () {
+        cancelled = true;
+        // Stop the engine right away; it starts again (from the cache) for the next file
+        if (worker) { worker.terminate(); worker = null; engineReady = false; }
+        pending.forEach(function (p, id) { pending.delete(id); p.reject({ code: "cancel" }); });
+      };
+
+      $("fileBtn").onclick = () => $("fileInput").click();
+      $("fileInput").onchange = function (e) { const f = e.target.files[0]; e.target.value = ""; if (f) openFile(f); };
+      $("camInput").onchange = function (e) { const f = e.target.files[0]; e.target.value = ""; if (f) openFile(f, t("file.photo")); };
+      $("sampleBtn").onclick = async function () {
+        try { const r = await fetch("samples/twinkle.jpg"); openFile(new File([await r.blob()], "twinkle.jpg", { type: "image/jpeg" }), t("sample.name")); }
+        catch (e) { showError(t("err.download")); }
+      };
+      const drop = $("drop");
+      ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }));
+      ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, function () { drop.classList.remove("over"); }));
+      drop.addEventListener("drop", function (e) { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) openFile(f); });
+      // A file dropped anywhere else should not open in the tab
+      window.addEventListener("dragover", (e) => e.preventDefault());
+      window.addEventListener("drop", (e) => e.preventDefault());
+
+      // ---------- Camera ----------
+      // Phones and tablets use their camera app (better photos); computers use the webcam in a dialog
+      const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+      let camStream = null;
+      $("camBtn").onclick = async function () {
+        if (coarse || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $("camInput").click(); return; }
+        showError("");
+        try {
+          camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 3840 }, height: { ideal: 2160 } }, audio: false });
+        } catch (e) { showError(t("err.camera")); return; }
+        const v = $("camVideo"); v.srcObject = camStream; v.play().catch(() => {});
+        openDlg($("camDlg"));
+      };
+      function stopCamera() { if (camStream) camStream.getTracks().forEach((tr) => tr.stop()); camStream = null; $("camVideo").srcObject = null; }
+      $("camDlg").addEventListener("close", stopCamera);
+      $("camClose").onclick = () => $("camDlg").close();
+      $("camShoot").onclick = function () {
+        const v = $("camVideo");
+        if (!v.videoWidth) return;
+        const c = document.createElement("canvas"); c.width = v.videoWidth; c.height = v.videoHeight;
+        c.getContext("2d").drawImage(v, 0, 0);
+        $("camDlg").close();
+        c.toBlob((b) => { if (b) openFile(new File([b], "photo.jpg", { type: "image/jpeg" }), t("file.photo")); }, "image/jpeg", 0.92);
+      };
+
+      // ---------- Score display (OpenSheetMusicDisplay) and the timeline ----------
+      let osmd = null, osmdLoading = null;
+      function loadOsmd() {
+        if (window.opensheetmusicdisplay) return Promise.resolve();
+        osmdLoading = osmdLoading || new Promise(function (resolve, reject) {
+          const s = document.createElement("script"); s.src = "vendor/opensheetmusicdisplay.min.js";
+          s.onload = resolve; s.onerror = () => { osmdLoading = null; reject({ code: "render" }); };
+          document.head.appendChild(s);
+        });
+        return osmdLoading;
+      }
+      // steps: one entry per cursor position: { q (quarter notes from the start), x, y, h (position on the page) }
+      // events: notes to play: [q, length in quarters, MIDI number]
+      let timeline = { steps: [], events: [], endQ: 0, notes: 0, tempoRatio: [] };
+      async function showScore(xml) {
+        await loadOsmd();
+        const box = $("score");
+        if (!osmd) {
+          osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(box, {
+            autoResize: false, backend: "svg", drawTitle: false, drawSubtitle: false, drawComposer: false, drawLyricist: false,
+            drawPartNames: false, drawMeasureNumbers: true, drawingParameters: "compacttight",
+            cursorsOptions: [{ type: 0, color: "#2563eb", alpha: 0, follow: false }],
+          });
+        }
+        try {
+          await osmd.load(xml);
+          // A little larger than OSMD's default on wide screens, smaller on phones
+          osmd.zoom = clamp(box.clientWidth / 820, 0.6, 1.25);
+          osmd.render();
+          lastWidth = box.clientWidth;
+        } catch (e) { throw { code: "render", message: String(e) }; }
+        $("empty").hidden = true;
+        buildTimeline();
+        if (!timeline.events.length) throw { code: "no-staff" };
+        setPosition(0);
+        renderPlayer();
+      }
+      function buildTimeline() {
+        const steps = [], events = [], cur = osmd.cursor;
+        cur.show(); cur.reset();
+        const it = cur.Iterator;
+        const host = $("score").getBoundingClientRect();
+        let guard = 0, notes = 0;
+        while (!it.EndReached && guard++ < 50000) {
+          const q = it.CurrentEnrolledTimestamp.RealValue * 4;
+          const el = cur.cursorElement, r = el.getBoundingClientRect();
+          steps.push({ q: q, x: r.left - host.left + r.width / 2, y: r.top - host.top, h: r.height, bpm: it.CurrentBpm || 0 });
+          for (const ve of it.CurrentVoiceEntries) {
+            if (ve.IsGrace) continue;
+            for (const n of ve.Notes) {
+              if (n.isRest() || !n.Pitch || n.IsGraceNote) continue;
+              const tie = n.NoteTie;
+              if (tie && tie.StartNote !== n) continue; // the tied note is held, not played again
+              const len = tie ? tie.Notes.reduce((s, x) => s + x.Length.RealValue, 0) : n.Length.RealValue;
+              events.push([q, len * 4, n.halfTone + 12]);
+              notes++;
+            }
+          }
+          cur.next();
+        }
+        cur.reset(); cur.hide();
+        events.sort((a, b) => a[0] - b[0]);
+        const endQ = events.reduce((m, e) => Math.max(m, e[0] + e[1]), 0);
+        timeline = { steps: steps, events: events, endQ: endQ, notes: notes };
+      }
+      // Re-measure the cursor positions after the score is laid out again (window size changed)
+      let resizeTimer = null, lastWidth = 0;
+      window.addEventListener("resize", function () {
+        if (!osmd || !timeline.steps.length) return;
+        const w = $("score").clientWidth;
+        if (Math.abs(w - lastWidth) < 8) return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          lastWidth = $("score").clientWidth;
+          const q = playing ? currentQ() : posQ, was = playing;
+          if (was) stop();
+          osmd.zoom = clamp(lastWidth / 820, 0.6, 1.25);
+          osmd.render(); buildTimeline(); setPosition(q);
+          if (was) start();
+        }, 250);
+      });
+
+      // ---------- Playhead (the cursor on the staff) ----------
+      const head = $("playhead");
+      let headStep = -1;
+      function stepAt(q) {
+        const s = timeline.steps;
+        let lo = 0, hi = s.length - 1, ans = 0;
+        while (lo <= hi) { const mid = (lo + hi) >> 1; if (s[mid].q <= q + 1e-6) { ans = mid; lo = mid + 1; } else hi = mid - 1; }
+        return ans;
+      }
+      // Glides from one note to the next on the same line, and jumps to the next line
+      function drawHead(q) {
+        const s = timeline.steps;
+        if (!s.length) { head.hidden = true; return; }
+        const i = stepAt(q), a = s[i], b = s[i + 1];
+        let x = a.x;
+        if (b && Math.abs(b.y - a.y) < 2 && b.x > a.x && b.q > a.q) x = a.x + (b.x - a.x) * clamp((q - a.q) / (b.q - a.q), 0, 1);
+        head.hidden = false;
+        head.style.height = a.h + "px";
+        head.style.transform = "translate(" + x.toFixed(1) + "px," + a.y.toFixed(1) + "px)";
+        if (i !== headStep) { headStep = i; if (playing) keepInView(a); }
+      }
+      function keepInView(a) {
+        const r = $("score").getBoundingClientRect();
+        const top = r.top + a.y, bottom = top + a.h, pad = $("player").offsetHeight + 24, vh = window.innerHeight;
+        if (top < pad || bottom > vh - 24) window.scrollBy({ top: top - pad - 40, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+        const wrap = $("scoreWrap");
+        if (a.x < wrap.scrollLeft + 20 || a.x > wrap.scrollLeft + wrap.clientWidth - 40) wrap.scrollLeft = a.x - 60;
+      }
+      // Click a note (or anywhere on a line) to play from there
+      $("score").addEventListener("click", function (e) {
+        if (busy || !timeline.steps.length) return;
+        const r = this.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+        let best = -1, bestD = Infinity;
+        timeline.steps.forEach(function (s, i) {
+          const dy = y < s.y ? s.y - y : (y > s.y + s.h ? y - s.y - s.h : 0);
+          const d = dy * 4 + Math.abs(x - s.x);
+          if (d < bestD) { bestD = d; best = i; }
+        });
+        if (best < 0 || bestD > 400) return;
+        const q = timeline.steps[best].q;
+        if (playing) { stop(); setPosition(q); start(); } else { setPosition(q); start(); }
+      });
+
+      // ---------- Sound (Web Audio API, a simple piano-like synthesizer) ----------
+      // bus: one gain node per playback, so Stop can silence the notes already scheduled
+      let ctx = null, master = null, bus = null;
+      function ensureCtx() {
+        if (!ctx) {
+          ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 6;
+          master = ctx.createGain(); master.gain.value = 0.7;
+          master.connect(comp); comp.connect(ctx.destination);
+        }
+        if (ctx.state === "suspended") ctx.resume();
+      }
+      function playNote(midi, t0, dur) {
+        const f = 440 * Math.pow(2, (midi - 69) / 12);
+        const g = ctx.createGain(), lp = ctx.createBiquadFilter();
+        lp.type = "lowpass"; lp.frequency.setValueAtTime(Math.min(9000, f * 8), t0); lp.frequency.exponentialRampToValueAtTime(Math.max(400, f * 2), t0 + 0.6);
+        const peak = 0.22 * Math.pow(440 / Math.max(f, 110), 0.25); // keep low notes from sounding weak
+        const end = t0 + Math.max(0.12, dur);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(peak, t0 + 0.008);
+        g.gain.exponentialRampToValueAtTime(peak * 0.35, t0 + 0.35);
+        g.gain.setTargetAtTime(peak * 0.2, t0 + 0.35, 0.8);
+        g.gain.setTargetAtTime(0.0001, end, 0.08);
+        lp.connect(g); g.connect(bus || master);
+        [["triangle", 1, 1], ["sine", 2, 0.35], ["sine", 3, 0.12]].forEach(function (o) {
+          const osc = ctx.createOscillator(), og = ctx.createGain();
+          osc.type = o[0]; osc.frequency.value = f * o[1]; og.gain.value = o[2];
+          osc.connect(og); og.connect(lp); osc.start(t0); osc.stop(end + 0.6);
+        });
+      }
+
+      // ---------- Player ----------
+      // Notes are scheduled on the audio clock a little ahead, in quarter notes, so the tempo can change at any time
+      let playing = false, posQ = 0, timer = null, raf = 0, wake = null;
+      let schedQ = 0, schedT = 0, evIdx = 0;
+      const bpm = () => state.bpm;
+      function currentQ() {
+        if (!playing) return posQ;
+        return schedQ - Math.max(0, schedT - ctx.currentTime) * bpm() / 60;
+      }
+      function tick() {
+        if (!playing) return;
+        const ev = timeline.events, horizon = ctx.currentTime + 0.15;
+        while (schedT < horizon && schedQ < timeline.endQ + 0.01) {
+          const b = bpm(), nextQ = schedQ + Math.max(0.01, Math.min(0.25, (horizon - schedT) * b / 60));
+          while (evIdx < ev.length && ev[evIdx][0] < nextQ) {
+            const e = ev[evIdx];
+            if (e[0] >= posQ - 1e-6) playNote(e[2], schedT + (e[0] - schedQ) * 60 / b, e[1] * 60 / b * 0.96);
+            evIdx++;
+          }
+          schedT += (nextQ - schedQ) * 60 / b; schedQ = nextQ;
+        }
+        if (schedQ >= timeline.endQ + 0.01 && ctx.currentTime > schedT) { stop(); setPosition(0); }
+      }
+      function frame() {
+        if (!playing) return;
+        drawHead(currentQ());
+        raf = requestAnimationFrame(frame);
+      }
+      function start() {
+        if (!timeline.events.length || busy) return;
+        ensureCtx();
+        if (posQ >= timeline.endQ - 1e-6) posQ = 0;
+        playing = true;
+        bus = ctx.createGain(); bus.connect(master);
+        schedQ = posQ; schedT = ctx.currentTime + 0.06;
+        evIdx = timeline.events.findIndex((e) => e[0] >= posQ - 1e-6); if (evIdx < 0) evIdx = timeline.events.length;
+        tick(); timer = setInterval(tick, 25);
+        raf = requestAnimationFrame(frame);
+        try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then((w) => { wake = w; }).catch(() => {}); } catch (e) {}
+        renderPlayer();
+      }
+      function stop() {
+        if (!playing) return;
+        posQ = currentQ();
+        playing = false; clearInterval(timer); cancelAnimationFrame(raf);
+        // Silence the notes that are already scheduled
+        const old = bus; bus = null;
+        if (old) { old.gain.setTargetAtTime(0, ctx.currentTime, 0.02); setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 400); }
+        try { if (wake) wake.release(); } catch (e) {} wake = null;
+        // Snap the cursor to the note it stopped on
+        const s = timeline.steps[stepAt(posQ)]; if (s) { posQ = s.q; drawHead(posQ); }
+        renderPlayer();
+      }
+      function setPosition(q) { posQ = clamp(q, 0, timeline.endQ); headStep = -1; drawHead(posQ); }
+
+      // ---------- Player UI ----------
+      function renderPlayer() {
+        const ready = timeline.events.length > 0;
+        $("playBtn").disabled = !ready || busy; $("rewindBtn").disabled = !ready || busy; $("saveBtn").disabled = !state.xml;
+        $("saveBtn").setAttribute("aria-label", t("save.aria"));
+        $("playBtn").innerHTML = (playing
+          ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="1.5" fill="currentColor"></rect></svg>'
+          : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6l9.8-5.8z" fill="currentColor"></path></svg>') + "<span>" + t(playing ? "stop" : "play") + "</span>";
+        $("playBtn").setAttribute("aria-pressed", playing);
+        renderTempo();
+      }
+      function renderTempo() {
+        if (document.activeElement !== $("bpmInput")) $("bpmInput").value = state.bpm;
+        $("bpmSlider").value = state.bpm;
+        const src = state.tempoSource === "ocr" ? t("tempo.src.ocr", { n: state.scoreBpm })
+          : state.tempoSource === "term" ? t("tempo.src.term", { term: state.tempoTerm, n: state.scoreBpm })
+          : t("tempo.src.none", { n: state.scoreBpm });
+        $("tempoSrc").textContent = state.xml ? src : "";
+        $("tempoReset").hidden = !state.xml || state.bpm === state.scoreBpm;
+      }
+      function setBpm(v) {
+        state.bpm = clamp(Math.round(v), 20, 300);
+        // While playing, keep the cursor where it is: re-anchor the clock at the current position
+        if (playing) { const q = currentQ(); schedQ = q; schedT = ctx.currentTime; evIdx = timeline.events.findIndex((e) => e[0] >= q - 1e-6); if (evIdx < 0) evIdx = timeline.events.length; posQ = Math.min(posQ, q); }
+        renderTempo(); saveState();
+      }
+      $("playBtn").onclick = () => (playing ? stop() : start());
+      $("rewindBtn").onclick = () => { const was = playing; if (was) stop(); setPosition(0); if (was) start(); };
+      document.querySelectorAll("[data-bpm]").forEach((b) => { b.onclick = () => setBpm(state.bpm + +b.dataset.bpm); });
+      $("bpmSlider").oninput = (e) => setBpm(+e.target.value);
+      $("bpmInput").onchange = (e) => { const v = +e.target.value; if (v) setBpm(v); else renderTempo(); };
+      $("bpmInput").onblur = () => renderTempo();
+      $("bpmInput").onkeydown = (e) => { if (e.key === "Enter") e.target.blur(); };
+      $("tempoReset").onclick = () => setBpm(state.scoreBpm);
+      $("saveBtn").onclick = function () {
+        if (!state.xml) return;
+        const base = (state.name || "score").replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80) || "score";
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([state.xml], { type: "application/vnd.recordare.musicxml+xml" }));
+        a.download = base + ".musicxml"; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      };
+
+      // Tap feedback: buttons that don't stay on get .is-pressed for at least 150 ms
+      const PRESSABLE = ".chip:not([aria-pressed]), .play, .big, .primary, #settingsBtn";
+      document.addEventListener("pointerdown", function (e) {
+        const el = e.target.closest && e.target.closest(PRESSABLE);
+        if (!el || el.disabled || e.button > 0) return;
+        const t0 = performance.now();
+        el.classList.add("is-pressed");
+        const release = function () {
+          document.removeEventListener("pointerup", release); document.removeEventListener("pointercancel", release);
+          setTimeout(() => el.classList.remove("is-pressed"), Math.max(0, 150 - (performance.now() - t0)));
+        };
+        document.addEventListener("pointerup", release); document.addEventListener("pointercancel", release);
+      });
+
+      // Keyboard shortcuts (not while typing, or while a menu or dialog is open)
+      document.addEventListener("keydown", function (e) {
+        const el = e.target, tag = el && el.tagName;
+        if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+        if (!$("settingsMenu").hidden || document.querySelector("dialog[open]")) return;
+        if ((tag === "INPUT" && el.type !== "range") || tag === "SELECT" || tag === "TEXTAREA") return;
+        if (e.key === " ") { if (tag === "BUTTON") return; e.preventDefault(); if (playing) stop(); else start(); }
+        else if (tag === "INPUT") return;
+        else if (e.key === "Home") { e.preventDefault(); $("rewindBtn").click(); }
+        else if (e.key === "ArrowUp") { e.preventDefault(); setBpm(state.bpm + (e.shiftKey ? 5 : 1)); }
+        else if (e.key === "ArrowDown") { e.preventDefault(); setBpm(state.bpm - (e.shiftKey ? 5 : 1)); }
+      });
+
+      // ---------- Settings (gear) menu: How to use / Privacy / About ----------
+      const settingsBtn = $("settingsBtn"), settingsMenu = $("settingsMenu");
+      const helpDlg = $("helpDlg"), privacyDlg = $("privacyDlg"), aboutDlg = $("aboutDlg");
+      function closeMenu(returnFocus) {
+        if (settingsMenu.hidden) return;
+        settingsMenu.hidden = true; settingsBtn.setAttribute("aria-expanded", "false");
+        if (returnFocus) settingsBtn.focus();
+      }
+      function openMenu() {
+        const r = settingsBtn.getBoundingClientRect();
+        settingsMenu.style.top = r.bottom + 6 + "px";
+        settingsMenu.style.right = Math.max(8, document.documentElement.clientWidth - r.right) + "px";
+        settingsMenu.hidden = false; settingsBtn.setAttribute("aria-expanded", "true");
+        $("menuHelp").focus();
+      }
+      settingsBtn.addEventListener("click", function () { if (settingsMenu.hidden) openMenu(); else closeMenu(true); });
+      document.addEventListener("click", function (e) {
+        if (!settingsMenu.hidden && !settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) closeMenu(false);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (settingsMenu.hidden) return;
+        if (e.key === "Escape") { closeMenu(true); return; }
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          const items = Array.prototype.slice.call(settingsMenu.querySelectorAll('[role="menuitem"]'));
+          const i = items.indexOf(document.activeElement);
+          items[e.key === "ArrowDown" ? (i + 1) % items.length : (i - 1 + items.length) % items.length].focus();
+        }
+      }, true);
+      window.addEventListener("resize", function () { closeMenu(false); });
+
+      let licenseLoaded = false;
+      async function loadLicenses() {
+        if (licenseLoaded) return;
+        const el = $("licenseText");
+        el.textContent = t("loading");
+        try {
+          const res = await fetch("THIRD_PARTY_LICENSES.md");
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          el.textContent = (await res.text()).replace(/<!--[\s\S]*?-->\n?/g, "");
+          licenseLoaded = true;
+        } catch (e) { el.textContent = t("err.license"); }
+      }
+      // Focus the dialog itself, not its first link, so no link looks selected on open
+      let opener = null;
+      function openDlg(dlg) {
+        if (typeof dlg.showModal !== "function") return;
+        opener = document.activeElement;
+        dlg.showModal(); dlg.focus();
+      }
+      $("menuHelp").addEventListener("click", function () { closeMenu(false); openDlg(helpDlg); opener = settingsBtn; });
+      $("menuPrivacy").addEventListener("click", function () { closeMenu(false); openDlg(privacyDlg); opener = settingsBtn; });
+      $("menuAbout").addEventListener("click", function () { closeMenu(false); loadLicenses(); openDlg(aboutDlg); opener = settingsBtn; });
+      [[helpDlg, "helpClose"], [privacyDlg, "privacyClose"], [aboutDlg, "aboutClose"], [$("camDlg"), null]].forEach(function (pair) {
+        const dlg = pair[0];
+        if (pair[1]) $(pair[1]).addEventListener("click", function () { dlg.close(); });
+        dlg.addEventListener("close", function () { if (opener && opener.focus) opener.focus(); opener = null; });
+        dlg.addEventListener("click", function (e) {
+          const r = dlg.getBoundingClientRect();
+          if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+        });
+      });
+
+      // ---------- Start ----------
+      applyI18n();
+      renderPlayer();
+      if (!supported) { $("firstNote").hidden = true; showError(t("err.unsupported")); }
+      // The engine is already downloaded: the first-time note is not needed
+      if (self.caches) caches.has("sheetmusicplayer-engine-v1").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
+      if (state.xml) {
+        $("fileCard").hidden = false; $("fileName").textContent = state.name; $("fileSub").textContent = t("file.saved", { n: state.notes });
+        $("thumb").hidden = true;
+        showScore(state.xml).catch(function () { state.xml = ""; saveState(); $("fileCard").hidden = true; $("empty").hidden = false; renderPlayer(); });
+      }
+      $("thumb").addEventListener("load", function () { this.hidden = false; });
+    })();
+  </script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+</script>
+<!-- Cloudflare Web Analytics (page views; no cookies) -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "5c53079cb9a64d819d1ca53e8533ca63"}'></script>
+</body>
+</html>

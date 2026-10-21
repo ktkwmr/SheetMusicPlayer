@@ -1,0 +1,105 @@
+{
+ "version": "v1",
+ "files": {
+  "homr.zip": {
+   "size": 91932,
+   "sha256": "f05ce670930ff8f0"
+  },
+  "models/decoder.onnx.part0": {
+   "size": 25165824,
+   "sha256": "465439167e5b45e3"
+  },
+  "models/decoder.onnx.part1": {
+   "size": 22133727,
+   "sha256": "a3c2cb8d7ed977b7"
+  },
+  "models/encoder.int8.onnx": {
+   "size": 15428333,
+   "sha256": "f7ddbd47a727759a"
+  },
+  "models/segnet.int8.onnx": {
+   "size": 14389494,
+   "sha256": "e56904423e192e3f"
+  },
+  "ort/ort-wasm-simd-threaded.mjs": {
+   "size": 24381,
+   "sha256": "e13f7f94fc51b4ca"
+  },
+  "ort/ort-wasm-simd-threaded.wasm": {
+   "size": 14239897,
+   "sha256": "3398c10d07d229bd"
+  },
+  "ort/ort.wasm.min.mjs": {
+   "size": 50126,
+   "sha256": "219e6a1fc8a99382"
+  },
+  "pyodide/musicxml-1.6.3-py3-none-any.whl": {
+   "size": 978406,
+   "sha256": "c6a66e591b4219c5"
+  },
+  "pyodide/numpy-2.4.6-cp314-cp314-pyemscripten_2026_0_wasm32.whl": {
+   "size": 2960568,
+   "sha256": "a292c1f5d7d8a220"
+  },
+  "pyodide/opencv_python-4.11.0.86-cp314-cp314-pyemscripten_2026_0_wasm32.whl": {
+   "size": 10675764,
+   "sha256": "469a8ba6758ec4e0"
+  },
+  "pyodide/package.json": {
+   "size": 2999,
+   "sha256": "40ca48e43ce4ddc6"
+  },
+  "pyodide/pillow-12.2.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl": {
+   "size": 1037806,
+   "sha256": "e29838b7a756e4ee"
+  },
+  "pyodide/pyodide-lock.json": {
+   "size": 119077,
+   "sha256": "5dc2fc119108bc14"
+  },
+  "pyodide/pyodide.asm.mjs": {
+   "size": 1250344,
+   "sha256": "f7cdc8ece80678ce"
+  },
+  "pyodide/pyodide.asm.wasm": {
+   "size": 9598218,
+   "sha256": "cc36e3cab04fdfc9"
+  },
+  "pyodide/pyodide.mjs": {
+   "size": 17931,
+   "sha256": "6f1d60f7bf529beb"
+  },
+  "pyodide/python_stdlib.zip": {
+   "size": 2545637,
+   "sha256": "fa1957e5777068fc"
+  },
+  "pyodide/typing_extensions-4.15.0-py3-none-any.whl": {
+   "size": 44613,
+   "sha256": "4fec68770a05408e"
+  },
+  "pyodide/verysimpletree-2.1.5-py3-none-any.whl": {
+   "size": 19523,
+   "sha256": "02f36d76c6e93520"
+  },
+  "tesseract/lang/eng.traineddata.gz": {
+   "size": 2952873,
+   "sha256": "45b4cb346724ac17"
+  },
+  "tesseract/tesseract-core-simd-lstm.js": {
+   "size": 89271,
+   "sha256": "e48e2f02ddae3716"
+  },
+  "tesseract/tesseract-core-simd-lstm.wasm": {
+   "size": 2857601,
+   "sha256": "34e8d50cac216427"
+  },
+  "tesseract/tesseract.esm.min.js": {
+   "size": 63220,
+   "sha256": "64871d76c75609fd"
+  },
+  "tesseract/worker.min.js": {
+   "size": 111307,
+   "sha256": "576b7df7e3393e13"
+  }
+ }
+}

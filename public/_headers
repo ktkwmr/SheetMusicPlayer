@@ -1,0 +1,31 @@
+# Security headers for every response (Cloudflare Workers static assets).
+# CSP notes:
+# - 'unsafe-inline': the app's script and styles are written inline in index.html,
+#   and OpenSheetMusicDisplay sets inline styles on the score.
+# - 'wasm-unsafe-eval': the reading engine runs as WebAssembly (Pyodide, onnxruntime-web,
+#   Tesseract.js). Every engine file is served from this site (engine/<version>/).
+# - worker-src 'self' blob:: the reading engine, onnxruntime-web's threads, PDF.js, and
+#   Tesseract.js run in workers. onnxruntime-web may start its threads from blob URLs.
+# - img-src blob: data:: the thumbnail of the opened file and the camera picture.
+# - media-src blob: and camera=(self): the webcam preview when taking a photo on a computer.
+# - static.cloudflareinsights.com / cloudflareinsights.com: Cloudflare Web Analytics
+#   (the beacon script and where it sends page views).
+# Cross-origin isolation (COOP + COEP) lets onnxruntime-web use several threads
+# (SharedArrayBuffer), which makes reading about 1.5–3 times faster. Everything is
+# same-origin except the analytics beacon (loaded with CORS). "credentialless" is used
+# instead of "require-corp" so the beacon keeps working even without CORP headers.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; worker-src 'self' blob:; frame-src 'none'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Resource-Policy: same-origin
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=()
+
+# The Tesseract.js worker (tempo marking OCR) creates functions at run time (new Function),
+# so only this one file gets 'unsafe-eval'. Its CSP applies only inside that worker.
+/sheetmusicplayer/engine/*/tesseract/worker.min.js
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'

@@ -1,0 +1,50 @@
+name: Build generated pages
+
+# Regenerates public/sheetmusicplayer/ja/index.html from
+# public/sheetmusicplayer/index.html, and the info pages and
+# public/sheetmusicplayer/sitemap.xml from scripts/pages/, then commits the changes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/sheetmusicplayer/index.html"
+      - "public/sheetmusicplayer/ja/index.html"
+      - "scripts/build-ja.mjs"
+      - "scripts/build-pages.mjs"
+      - "scripts/pages/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-ja
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate ja/index.html
+        run: node scripts/build-ja.mjs
+
+      - name: Generate pages and sitemap.xml
+        run: node scripts/build-pages.mjs
+
+      - name: Commit changes
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/sheetmusicplayer
+          git commit -m "生成ページ（ja/index.html・情報ページ・sitemap.xml）を再生成"
+          git push

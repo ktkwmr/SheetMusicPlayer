@@ -1,0 +1,20 @@
+{
+  "name": "sheetmusicplayer",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  // Regenerates ja/index.html, the info pages, and sitemap.xml before deploy / dev
+  "build": { "command": "node scripts/build-ja.mjs && node scripts/build-pages.mjs" },
+  // Required by `wrangler preview`, which Workers Builds runs for non-production branches
+  "previews": {},
+  // Fourth app on ktkwmr.com: this Worker only serves /sheetmusicplayer/*.
+  // The domain root (/, robots.txt, the root sitemap.xml, 404 for other paths) stays in the ChordTransposer Worker.
+  "routes": [{ "pattern": "ktkwmr.com/sheetmusicplayer*", "zone_name": "ktkwmr.com" }],
+  "workers_dev": false,
+  // workers_dev: false also turns off preview URLs; keep them on so each PR gets a URL to review
+  "preview_urls": true,
+  "assets": {
+    "directory": "./public",
+    // Unknown URLs under /sheetmusicplayer/ get public/404.html with status 404
+    "not_found_handling": "404-page"
+  }
+}
