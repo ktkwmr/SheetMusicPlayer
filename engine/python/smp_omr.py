@@ -73,6 +73,26 @@ def _parse_staff_with_progress(*args, **kwargs):
 
 staff_parsing.parse_staff_tromr = _parse_staff_with_progress
 
+# One staff homr cannot handle (for example a fragment with no width) should not lose the
+# whole page: skip it. parse_staffs already skips staves that come back empty.
+_parse_staff_image = staff_parsing.parse_staff_image
+skipped_staffs = 0
+
+
+def _parse_staff_image_safely(*args, **kwargs):
+    global _staff_done, skipped_staffs
+    try:
+        return _parse_staff_image(*args, **kwargs)
+    except Exception as e:  # noqa: BLE001
+        print("Skipping a staff that could not be read:", e, file=sys.stderr)
+        skipped_staffs += 1
+        _staff_done += 1
+        _report("staff", _staff_done, _staff_total)
+        return []
+
+
+staff_parsing.parse_staff_image = _parse_staff_image_safely
+
 # The segmentation model runs over the page in 320 px tiles, a batch at a time: count them for progress
 from homr.segmentation import inference_segnet  # noqa: E402
 
@@ -118,7 +138,8 @@ def recognize(rgba, width: int, height: int, tempo=None) -> str:
     tempo: quarter notes per minute to write into the MusicXML, or None.
     Raises ValueError("no-staff") when no staff or no notes are found.
     """
-    global _staff_done, _staff_total
+    global _staff_done, _staff_total, skipped_staffs
+    skipped_staffs = 0
     if hasattr(rgba, "to_bytes"):  # a JS Uint8Array
         rgba = rgba.to_bytes()
     t0 = time.time()

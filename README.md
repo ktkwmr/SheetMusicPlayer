@@ -84,7 +84,7 @@ public/
   sheetmusicplayer/
     index.html                  # the app (HTML / CSS / JS, English and Japanese text)
     omr-worker.mjs              # Web Worker: downloads and caches the engine, runs homr in Pyodide
-    engine/v2/                  # the reading engine, built by scripts/build-engine.py (do not edit)
+    engine/v3/                  # the reading engine, built by scripts/build-engine.py (do not edit)
       pyodide/ ort/ models/ tesseract/ homr.zip manifest.json
     vendor/                     # OpenSheetMusicDisplay and PDF.js (copied by scripts/build-engine.py)
     samples/twinkle.jpg         # the built-in sample (a traditional melody engraved for this app)

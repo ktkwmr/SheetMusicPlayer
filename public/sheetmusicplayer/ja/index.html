@@ -384,6 +384,7 @@
           "file.page": "PDF · 1 page",
           "file.image": "Image · {w} × {h}",
           "file.photo": "Camera photo",
+          "file.spread": "two pages side by side, read one at a time",
           "file.saved": "Last score · {n} notes",
           "st.decode": "Opening the file…",
           "st.download": "Downloading the reading engine (first time only)",
@@ -458,6 +459,7 @@
           "file.page": "PDF・1ページ",
           "file.image": "画像・{w} × {h}",
           "file.photo": "カメラで撮影",
+          "file.spread": "見開き2ページとして読み取り",
           "file.saved": "前回の楽譜・{n}音",
           "st.decode": "ファイルを開いています…",
           "st.download": "読み取りエンジンをダウンロード中（初回のみ）",
@@ -617,7 +619,38 @@
         const w = bmp.width || bmp.naturalWidth, h = bmp.height || bmp.naturalHeight;
         const page = toRgba(bmp, w, h);
         if (bmp.close) bmp.close();
-        return { pages: [page], sub: t("file.image", { w: w, h: h }) };
+        const pages = splitSpread(page);
+        return { pages: pages, sub: t("file.image", { w: w, h: h }) + (pages.length > 1 ? " · " + t("file.spread") : "") };
+      }
+      // A photo of an open book or a sheet with two pages side by side: split it at the gap between
+      // the pages, so each page is read on its own and in the right order (left page first)
+      function splitSpread(page) {
+        const c = page.canvas, w = c.width, h = c.height;
+        if (w < h * 1.15) return [page];
+        const sw = 800, sh = Math.max(1, Math.round(h * sw / w));
+        const small = document.createElement("canvas"); small.width = sw; small.height = sh;
+        const g = small.getContext("2d", { willReadFrequently: true }); g.drawImage(c, 0, 0, sw, sh);
+        const px = g.getImageData(0, 0, sw, sh).data;
+        const lum = new Float32Array(sw * sh);
+        for (let i = 0; i < lum.length; i++) lum[i] = px[i * 4] * 0.3 + px[i * 4 + 1] * 0.59 + px[i * 4 + 2] * 0.11;
+        const sorted = Array.from(lum).sort((a, b) => a - b), median = sorted[sorted.length >> 1];
+        // Share of dark (ink) pixels in each column, smoothed over about 2 % of the width
+        const col = new Float32Array(sw);
+        for (let x = 0; x < sw; x++) { let d = 0; for (let y = 0; y < sh; y++) if (lum[y * sw + x] < median * 0.65) d++; col[x] = d / sh; }
+        const r = Math.round(sw * 0.01), sm = new Float32Array(sw);
+        for (let x = 0; x < sw; x++) { let s = 0, k = 0; for (let j = Math.max(0, x - r); j <= Math.min(sw - 1, x + r); j++) { s += col[j]; k++; } sm[x] = s / k; }
+        const avg = (a, b) => { let s = 0; for (let x = Math.round(a * sw); x < Math.round(b * sw); x++) s += sm[x]; return s / (Math.round(b * sw) - Math.round(a * sw)); };
+        let best = -1, bestV = Infinity;
+        for (let x = Math.round(sw * 0.35); x <= Math.round(sw * 0.65); x++) if (sm[x] < bestV) { bestV = sm[x]; best = x; }
+        // Only when there is clearly music on both sides and almost nothing in the gap
+        const left = avg(0.1, 0.4), right = avg(0.6, 0.9);
+        if (best < 0 || Math.min(left, right) < 0.02 || bestV > 0.3 * Math.min(left, right)) return [page];
+        const cut = Math.round(best * w / sw);
+        return [[0, cut], [cut, w]].map(function (span) {
+          const part = document.createElement("canvas"); part.width = span[1] - span[0]; part.height = h;
+          part.getContext("2d").drawImage(c, span[0], 0, part.width, h, 0, 0, part.width, h);
+          return toRgba(part, part.width, part.height);
+        });
       }
       let pdfjs = null;
       async function decodePdf(file) {
@@ -701,12 +734,12 @@
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("ocr timeout")), 40000));
         try {
           await Promise.race([timeout, (async function () {
-            const T = await import("./engine/v2/tesseract/tesseract.esm.min.js");
+            const T = await import("./engine/v3/tesseract/tesseract.esm.min.js");
             const here = location.href.replace(/[?#].*$/, "");
             ocr = await (T.default || T).createWorker("eng", 1, {
-              workerPath: new URL("engine/v2/tesseract/worker.min.js", here).href,
-              corePath: new URL("engine/v2/tesseract/tesseract-core-simd-lstm.js", here).href,
-              langPath: new URL("engine/v2/tesseract/lang/", here).href,
+              workerPath: new URL("engine/v3/tesseract/worker.min.js", here).href,
+              corePath: new URL("engine/v3/tesseract/tesseract-core-simd-lstm.js", here).href,
+              langPath: new URL("engine/v3/tesseract/lang/", here).href,
               workerBlobURL: false, logger: function () {},
               // The engine cache (sw.js / omr-worker.mjs) already keeps the data; no second copy in IndexedDB
               cacheMethod: "none",
@@ -781,7 +814,7 @@
           getWorker();
           showStatus(t("st.decode"), {});
           const input = kind === "pdf" ? await decodePdf(file) : await decodeImage(file);
-          $("fileSub").textContent = label === t("file.photo") ? t("file.photo") : input.sub;
+          $("fileSub").textContent = (label === t("file.photo") ? t("file.photo") : input.sub.split(" · ")[0]) + (input.pages.length > 1 && kind === "image" ? " · " + t("file.spread") : "");
           $("thumb").src = input.pages[0].canvas.toDataURL("image/jpeg", 0.6);
           if (input.truncated) { $("pageWarn").textContent = t("warn.pages", { max: MAX_PDF_PAGES }); $("pageWarn").hidden = false; }
           // The tempo marking is read while the engine starts (or downloads)
@@ -1242,7 +1275,7 @@
       renderPlayer();
       if (!supported) { $("firstNote").hidden = true; showError(t("err.unsupported")); }
       // The engine is already downloaded: the first-time note is not needed
-      if (self.caches) caches.has("sheetmusicplayer-engine-v2").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
+      if (self.caches) caches.has("sheetmusicplayer-engine-v3").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
       if (state.xml) {
         $("fileCard").hidden = false; $("fileName").textContent = state.name; $("fileSub").textContent = t("file.saved", { n: state.notes });
         $("thumb").hidden = true;
