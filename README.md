@@ -58,9 +58,9 @@ file / photo ──► page canvas (PDF.js for PDF) ──► RGBA pixels
 ```
 
 - homr's segmentation model and encoder are **quantized to int8** (57→14 MB and 52→15 MB). On the six test scores the results were exactly the same as with the original models, and reading was faster. The decoder is already int8 and is split into two files (Cloudflare Workers serves files up to 25 MiB).
-- `public/_headers` sets **cross-origin isolation** (COOP `same-origin` + COEP `credentialless`), so onnxruntime-web can use several threads (about 1.5× faster on 2 cores, more on bigger computers).
+- `public/_headers` sets **cross-origin isolation** (COOP `same-origin` + COEP `credentialless`) so onnxruntime-web can use several threads. **For now the engine runs on one thread**: with more, the first model run never finishes when it is called from Python through JSPI (under investigation).
 - homr の分割モデルとエンコーダーは **int8 に量子化**（57→14MB、52→15MB）。6 つのテスト楽譜で元のモデルと結果が完全に一致し、速くなった。デコーダーは元から int8 で、Cloudflare Workers の 1 ファイル 25MiB の制限に合わせて 2 つに分割。
-- `public/_headers` で **cross-origin isolation**（COOP `same-origin` + COEP `credentialless`）を有効にし、onnxruntime-web を複数スレッドで動かしている（2 コアで約 1.5 倍、コアが多いほど速い）。
+- `public/_headers` で **cross-origin isolation**（COOP `same-origin` + COEP `credentialless`）を有効にしている（onnxruntime-web を複数スレッドで動かすため）。ただし**今は 1 スレッドで動かしている**。複数スレッドにすると、Python から JSPI 経由で呼んだときに最初のモデルの実行が終わらなくなる（調査中）。
 
 ## Privacy / プライバシー
 

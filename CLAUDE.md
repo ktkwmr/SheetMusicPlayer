@@ -31,7 +31,7 @@
 - homr の Python ファイルは変更しない。ブラウザ用の差し替えは `engine/python/smp_omr.py`（入口・進捗・タイトル OCR の無効化）と `engine/python/onnxruntime/`（onnxruntime-web への橋渡し）で行う。homr を更新したら、テスト用の楽譜（スキャン・写真、単旋律・大譜表）で結果を確かめる。int8 量子化は homr 0.7.0 でだけ確認済み。
 - Cloudflare Workers の静的アセットは 1 ファイル 25MiB まで。大きいモデルは `build-engine.py` で分割する（`--check` が超過を検出する）。
 - PDF.js は 5.4 系に固定（5.5 以降は現行ブラウザにない `Map.prototype.getOrInsertComputed` を使う）。
-- `public/_headers` の COOP/COEP（cross-origin isolation）はスレッドで読み取りを速くするために必要。外部のスクリプトを足すときは CSP に加えて CORS／CORP も確かめる。Tesseract.js のワーカーだけ `unsafe-eval` を許可している（同じファイル内のコメント参照）。
+- `public/_headers` の COOP/COEP（cross-origin isolation）は onnxruntime-web を複数スレッドで動かすためのもの。ただし今は `omr-worker.mjs` で 1 スレッドに固定している（複数スレッドだと Pyodide の JSPI 経由の呼び出しで最初のモデル実行が終わらない。検証環境は 2 コアで `hardwareConcurrency - 1` = 1 になり再現しなかったので、スレッド数を変えるときは明示的に 4〜8 を指定して試す）。外部のスクリプトを足すときは CSP に加えて CORS／CORP も確かめる。Tesseract.js のワーカーだけ `unsafe-eval` を許可している（同じファイル内のコメント参照）。
 - 最後の楽譜は `localStorage` の `sheetmusicplayer-state` に保存する。読み込んだ値は検証してから使う。新しいファイルを開いたらテンポは楽譜の値に戻す。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。
 - トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（ChordTransposer の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ChordTransposer` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。

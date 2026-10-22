@@ -11,7 +11,7 @@
 # - static.cloudflareinsights.com / cloudflareinsights.com: Cloudflare Web Analytics
 #   (the beacon script and where it sends page views).
 # Cross-origin isolation (COOP + COEP) lets onnxruntime-web use several threads
-# (SharedArrayBuffer), which makes reading about 1.5–3 times faster. Everything is
+# (SharedArrayBuffer). omr-worker.mjs uses one thread for now (see the comment there). Everything is
 # same-origin except the analytics beacon (loaded with CORS). "credentialless" is used
 # instead of "require-corp" so the beacon keeps working even without CORP headers.
 /*

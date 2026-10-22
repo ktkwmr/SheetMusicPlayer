@@ -146,8 +146,9 @@ async function start() {
   post("progress", { stage: "start" });
   ort = await import(ENGINE + "ort/ort.wasm.min.mjs");
   ort.env.wasm.wasmPaths = ENGINE + "ort/";
-  // Threads need cross-origin isolation (COOP/COEP headers in public/_headers)
-  ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.max(1, Math.min(8, (navigator.hardwareConcurrency || 2) - 1)) : 1;
+  // One thread for now: with more than one, the first model run never finishes when onnxruntime-web
+  // is called from Python through JSPI (onnxruntime-web on its own works with threads). Investigating.
+  ort.env.wasm.numThreads = 1;
   const { loadPyodide } = await import(ENGINE + "pyodide/pyodide.mjs");
   py = await loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} });
   await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions",
