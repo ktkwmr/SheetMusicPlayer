@@ -12,7 +12,7 @@
 // The engine files (engine/<version>/, ~130 MB) never change for a version, so they are
 // kept in their own Cache Storage entry (cache first). sw.js leaves them to this worker.
 
-const ENGINE_VERSION = "v1";
+const ENGINE_VERSION = "v2";
 const BASE = new URL("./", import.meta.url).href;
 const ENGINE = BASE + "engine/" + ENGINE_VERSION + "/";
 const CACHE = "sheetmusicplayer-engine-" + ENGINE_VERSION;

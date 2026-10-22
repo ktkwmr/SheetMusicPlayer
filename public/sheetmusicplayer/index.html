@@ -395,6 +395,7 @@
           "st.start": "Starting the reading engine…",
           "st.tempo": "Looking for the tempo marking…",
           "st.segment": "Finding the staves and notes…",
+          "st.analyze": "Sorting out the staves and notes…",
           "st.staff": "Reading the staves",
           "st.xml": "Writing the score…",
           "st.render": "Drawing the score…",
@@ -468,6 +469,7 @@
           "st.start": "読み取りエンジンを起動しています…",
           "st.tempo": "テンポの指定を探しています…",
           "st.segment": "五線と音符を探しています…",
+          "st.analyze": "五線と音符を整理しています…",
           "st.staff": "段ごとに読み取り中",
           "st.xml": "楽譜を書き出しています…",
           "st.render": "楽譜を表示しています…",
@@ -703,12 +705,12 @@
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("ocr timeout")), 40000));
         try {
           await Promise.race([timeout, (async function () {
-            const T = await import("./engine/v1/tesseract/tesseract.esm.min.js");
+            const T = await import("./engine/v2/tesseract/tesseract.esm.min.js");
             const here = location.href.replace(/[?#].*$/, "");
             ocr = await (T.default || T).createWorker("eng", 1, {
-              workerPath: new URL("engine/v1/tesseract/worker.min.js", here).href,
-              corePath: new URL("engine/v1/tesseract/tesseract-core-simd-lstm.js", here).href,
-              langPath: new URL("engine/v1/tesseract/lang/", here).href,
+              workerPath: new URL("engine/v2/tesseract/worker.min.js", here).href,
+              corePath: new URL("engine/v2/tesseract/tesseract-core-simd-lstm.js", here).href,
+              langPath: new URL("engine/v2/tesseract/lang/", here).href,
               workerBlobURL: false, logger: function () {},
               // The engine cache (sw.js / omr-worker.mjs) already keeps the data; no second copy in IndexedDB
               cacheMethod: "none",
@@ -795,9 +797,14 @@
             const pageText = n > 1 ? t("st.page", { i: pageIndex + 1, n: n }) + " · " : "";
             if (m.stage === "download") showStatus(t("st.download"), { num: mb(m.done) + " / " + mb(m.total), ratio: m.total ? m.done / m.total : 0, hint: t("st.download.hint"), cancel: true });
             else if (m.stage === "start") showStatus(t("st.start"), { cancel: true });
-            else if (m.stage === "segment") showStatus(pageText + t("st.segment"), { ratio: n > 1 ? pageIndex / n : null, cancel: true });
-            else if (m.stage === "staff") showStatus(pageText + t("st.staff"), { num: m.done + " / " + m.total, ratio: (pageIndex + (m.total ? m.done / m.total : 0)) / n, cancel: true });
-            else if (m.stage === "xml") showStatus(pageText + t("st.xml"), { ratio: (pageIndex + 1) / n, cancel: true });
+            // One bar per file: on each page, finding the staves and notes is the first 45 %
+            // (counted in image tiles), tidying them up 45–50 %, and reading staff by staff the rest
+            const bar = (frac) => { const r = (pageIndex + frac) / n; return { ratio: r, num: Math.floor(r * 100) + "%", cancel: true }; };
+            if (m.stage === "prepare") showStatus(pageText + t("st.segment"), bar(0));
+            else if (m.stage === "segment") showStatus(pageText + t("st.segment"), bar(0.45 * (m.total ? m.done / m.total : 0)));
+            else if (m.stage === "analyze") showStatus(pageText + t("st.analyze"), bar(0.45));
+            else if (m.stage === "staff") showStatus(pageText + t("st.staff") + (m.total ? " (" + m.done + " / " + m.total + ")" : ""), bar(0.5 + 0.5 * (m.total ? m.done / m.total : 0)));
+            else if (m.stage === "xml") showStatus(pageText + t("st.xml"), bar(1));
           };
           const tempo = await findTempo(input.pages[0]);
           if (cancelled) throw { code: "cancel" };
@@ -1239,7 +1246,7 @@
       renderPlayer();
       if (!supported) { $("firstNote").hidden = true; showError(t("err.unsupported")); }
       // The engine is already downloaded: the first-time note is not needed
-      if (self.caches) caches.has("sheetmusicplayer-engine-v1").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
+      if (self.caches) caches.has("sheetmusicplayer-engine-v2").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
       if (state.xml) {
         $("fileCard").hidden = false; $("fileName").textContent = state.name; $("fileSub").textContent = t("file.saved", { n: state.notes });
         $("thumb").hidden = true;

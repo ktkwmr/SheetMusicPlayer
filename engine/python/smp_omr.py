@@ -73,6 +73,44 @@ def _parse_staff_with_progress(*args, **kwargs):
 
 staff_parsing.parse_staff_tromr = _parse_staff_with_progress
 
+# The segmentation model runs over the page in 320 px tiles, a batch at a time: count them for progress
+from homr.segmentation import inference_segnet  # noqa: E402
+
+_tiles_done = 0
+_tiles_total = 0
+_segnet_run = inference_segnet.Segnet.run
+
+
+def _segnet_run_with_progress(self, input_data):
+    global _tiles_done
+    out = _segnet_run(self, input_data)
+    _tiles_done += len(input_data)
+    _report("segment", _tiles_done, _tiles_total)
+    if _tiles_done >= _tiles_total:
+        _report("analyze")  # finding staves, notes, and bar lines in the model's output
+    return out
+
+
+inference_segnet.Segnet.run = _segnet_run_with_progress
+_extract = inference_segnet.extract
+
+
+def _extract_with_progress(original_image, *args, **kwargs):
+    global _tiles_done, _tiles_total
+    win = kwargs.get("win_size", 320)
+    step = kwargs.get("step_size", -1)
+    if step < 0:
+        step = win // 2
+    h, w = original_image.shape[:2]
+    _tiles_done = 0
+    _tiles_total = len(range(0, max(h, win), step)) * len(range(0, max(w, win), step))
+    _report("segment", 0, _tiles_total)
+    return _extract(original_image, *args, **kwargs)
+
+
+inference_segnet.extract = _extract_with_progress
+homr_main.extract = _extract_with_progress
+
 
 def recognize(rgba, width: int, height: int, tempo=None) -> str:
     """Pixels (RGBA, row by row) of one page -> MusicXML text.
@@ -88,7 +126,7 @@ def recognize(rgba, width: int, height: int, tempo=None) -> str:
     path = "/tmp/page.png"
     cv2.imwrite(path, cv2.cvtColor(image, cv2.COLOR_RGBA2BGR))
 
-    _report("segment")
+    _report("prepare")
     config = homr_main.ProcessingConfig(
         enable_debug=False,
         enable_cache=False,

@@ -1,9 +1,9 @@
 {
- "version": "v1",
+ "version": "v2",
  "files": {
   "homr.zip": {
-   "size": 91932,
-   "sha256": "f05ce670930ff8f0"
+   "size": 92311,
+   "sha256": "4ac58128e16756ad"
   },
   "models/decoder.onnx.part0": {
    "size": 25165824,

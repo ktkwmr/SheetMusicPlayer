@@ -41,7 +41,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-VERSION = "v1"
+VERSION = "v2"
 PYODIDE = "314.0.7"
 HOMR = "0.7.0"
 ORT_WEB = "1.30.0"

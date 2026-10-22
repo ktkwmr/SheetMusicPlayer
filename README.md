@@ -84,7 +84,7 @@ public/
   sheetmusicplayer/
     index.html                  # the app (HTML / CSS / JS, English and Japanese text)
     omr-worker.mjs              # Web Worker: downloads and caches the engine, runs homr in Pyodide
-    engine/v1/                  # the reading engine, built by scripts/build-engine.py (do not edit)
+    engine/v2/                  # the reading engine, built by scripts/build-engine.py (do not edit)
       pyodide/ ort/ models/ tesseract/ homr.zip manifest.json
     vendor/                     # OpenSheetMusicDisplay and PDF.js (copied by scripts/build-engine.py)
     samples/twinkle.jpg         # the built-in sample (a traditional melody engraved for this app)
@@ -94,7 +94,7 @@ public/
     sw.js                       # Service Worker (network first; engine files cache first)
     manifest.json  icons/  og-image.png
     THIRD_PARTY_LICENSES.md     # third-party notices (shown in About), written by scripts/build-engine.py
-engine/python/                  # the browser glue for homr (packed into engine/v1/homr.zip)
+engine/python/                  # the browser glue for homr (packed into engine/<version>/homr.zip)
   smp_omr.py                    #   entry point: pixels → MusicXML, progress, no file I/O or title OCR
   onnxruntime/__init__.py       #   the part of the onnxruntime API homr uses, on top of onnxruntime-web
 scripts/
@@ -126,11 +126,11 @@ Use `wrangler dev` rather than a plain static server: the app needs the headers 
 
 The engine files are committed, so normal changes do not need this. To update homr, Pyodide, onnxruntime-web, Tesseract.js, OpenSheetMusicDisplay, or PDF.js:
 
-1. Change the versions at the top of `scripts/build-engine.py`. If anything in `engine/` changes, also bump `VERSION` there and `ENGINE_VERSION` in `omr-worker.mjs` (and the `engine/v1/` paths in `index.html`), so browsers download the new engine instead of using the cached one.
+1. Change the versions at the top of `scripts/build-engine.py`. If anything in `engine/` changes, also bump `VERSION` there and `ENGINE_VERSION` in `omr-worker.mjs` (and the `engine/<version>/` paths and the cache name in `index.html`), so browsers download the new engine instead of using the cached one.
 2. `pip install onnx onnxruntime` and run `python3 scripts/build-engine.py` (downloads ~400 MB into `.engine-cache/`, which is ignored by Git). Delete the old `engine/<version>/` folder.
 3. Check the results on several scores (scan and photo) before publishing; the int8 quantization was only verified for homr 0.7.0.
 
-エンジンのファイルはコミットしてあるので、ふだんは不要です。ライブラリを更新するときは、`scripts/build-engine.py` の先頭のバージョンを変え、エンジンの中身が変わるなら `VERSION`・`omr-worker.mjs` の `ENGINE_VERSION`・`index.html` の `engine/v1/` も上げてから、`python3 scripts/build-engine.py` を実行します（`pip install onnx onnxruntime` が必要）。公開前に複数の楽譜（スキャン・写真）で結果を確かめてください。int8 量子化は homr 0.7.0 でだけ確認しています。
+エンジンのファイルはコミットしてあるので、ふだんは不要です。ライブラリを更新するときは、`scripts/build-engine.py` の先頭のバージョンを変え、エンジンの中身が変わるなら `VERSION`・`omr-worker.mjs` の `ENGINE_VERSION`・`index.html` の `engine/<version>/` とキャッシュ名も上げてから、`python3 scripts/build-engine.py` を実行します（`pip install onnx onnxruntime` が必要）。公開前に複数の楽譜（スキャン・写真）で結果を確かめてください。int8 量子化は homr 0.7.0 でだけ確認しています。
 
 ## Deploy / デプロイ
 

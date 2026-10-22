@@ -27,7 +27,7 @@
   - `public/sheetmusicplayer/ja/index.html`、情報ページ（`about/`・`privacy/` とその `ja/`）、`sitemap.xml` → `node scripts/build-ja.mjs`・`node scripts/build-pages.mjs`（`--check` で確認）
   - `public/sheetmusicplayer/engine/<version>/`、`vendor/`、`THIRD_PARTY_LICENSES.md` → `python3 scripts/build-engine.py`（`--check` で確認）
 - 画面の文言は `index.html` の `I18N`（en / ja）に書き、要素には `data-i18n` / `data-i18n-html` / `data-i18n-attr` を付ける。JS で作る文言は `t()` を使う。子要素を持つ要素に `data-i18n` は付けない（`build-ja.mjs` が止まる）。
-- **読み取りエンジン（engine/<version>/）の中身を変えたら、必ずバージョンを上げる**（`build-engine.py` の `VERSION`、`omr-worker.mjs` の `ENGINE_VERSION`、`index.html` の `engine/v1/` と `caches.has("sheetmusicplayer-engine-v1")`）。エンジンはキャッシュ優先なので、同じバージョンのまま中身を変えると利用者のブラウザは古いファイルを使い続ける。古いバージョンのフォルダは消す。
+- **読み取りエンジン（engine/<version>/）の中身を変えたら、必ずバージョンを上げる**（`build-engine.py` の `VERSION`、`omr-worker.mjs` の `ENGINE_VERSION`、`index.html` の `engine/<version>/` と `caches.has("sheetmusicplayer-engine-<version>")`）。エンジンはキャッシュ優先なので、同じバージョンのまま中身を変えると利用者のブラウザは古いファイルを使い続ける。古いバージョンのフォルダは消す。
 - homr の Python ファイルは変更しない。ブラウザ用の差し替えは `engine/python/smp_omr.py`（入口・進捗・タイトル OCR の無効化）と `engine/python/onnxruntime/`（onnxruntime-web への橋渡し）で行う。homr を更新したら、テスト用の楽譜（スキャン・写真、単旋律・大譜表）で結果を確かめる。int8 量子化は homr 0.7.0 でだけ確認済み。
 - Cloudflare Workers の静的アセットは 1 ファイル 25MiB まで。大きいモデルは `build-engine.py` で分割する（`--check` が超過を検出する）。
 - PDF.js は 5.4 系に固定（5.5 以降は現行ブラウザにない `Map.prototype.getOrInsertComputed` を使う）。
