@@ -19,8 +19,10 @@ Take a photo of sheet music, or open an image or PDF, and hear it. The app reads
   1ページ目の上部から、メトロノーム記号（♩ = 100）や速度用語（Allegro など）を Tesseract.js で読み取る。見つからなければ ♩ = 120
 - **Score and playback**: OpenSheetMusicDisplay draws the score; a blue cursor glides along the staff with the sound (Web Audio API). Click a note to play from there. Change the tempo with −5 / +5, the number, or the slider, even while playing
   OpenSheetMusicDisplay で楽譜を表示し、音（Web Audio API）に合わせて青いカーソルが五線の上を進む。音符をクリックでそこから再生。テンポは −5／+5・数字・スライダーで、再生中でも変更可
-- **Save as MusicXML** to fix mistakes in MuseScore or other notation apps
-  MusicXML で保存して、MuseScore などで間違いを直せる
+- **Fix mistakes in a piano-roll editor** (“Edit”): each note is a box — drag to change its pitch and timing, drag its right edge for the length, click to add, right-click or Delete to remove, select several by dragging, add or delete measures, undo / redo. Measures whose beats did not add up when read are marked. Going back to “Score” rebuilds the MusicXML and redraws the staff (lyrics, slurs, and articulations are not kept after an edit)
+  ピアノロールの編集画面（「編集」）で間違いを直せる。音符を四角で表し、ドラッグで音の高さとタイミング、右端で長さ、クリックで追加、右クリックか Delete で削除、ドラッグでまとめて選択、小節の追加・削除、元に戻す／やり直し。読み取り時に拍が合わなかった小節には印を付ける。「楽譜」に戻ると MusicXML を作り直して五線譜を描き直す（編集すると歌詞・スラー・アーティキュレーションは消える）
+- **Save as MusicXML** to open the result in MuseScore or other notation apps
+  MusicXML で保存して、MuseScore などでも開ける
 - **The last score is kept** in the browser. Installable PWA. English / Japanese UI (`/sheetmusicplayer/ja/` is always Japanese; `?lang=en` / `?lang=ja` override)
   最後の楽譜をブラウザに保存。ホーム画面に追加可能。英語・日本語の表示（`/sheetmusicplayer/ja/` は常に日本語、`?lang=en` / `?lang=ja` で切り替え）
 
@@ -84,6 +86,8 @@ public/
   sheetmusicplayer/
     index.html                  # the app (HTML / CSS / JS, English and Japanese text)
     omr-worker.mjs              # Web Worker: downloads and caches the engine, runs homr in Pyodide
+    score-model.mjs             # MusicXML <-> editable notes (ticks, measures, staves), and back to MusicXML
+    editor.mjs                  # the piano-roll editor (canvas)
     engine/v3/                  # the reading engine, built by scripts/build-engine.py (do not edit)
       pyodide/ ort/ models/ tesseract/ homr.zip manifest.json
     vendor/                     # OpenSheetMusicDisplay and PDF.js (copied by scripts/build-engine.py)
@@ -138,7 +142,7 @@ The app is served with Cloudflare Workers static assets. With Workers Builds con
 
 ## Generated files / 生成ファイル
 
-Edit only `public/sheetmusicplayer/index.html`, `omr-worker.mjs`, `sw.js`, `engine/python/`, and `scripts/`. These files are generated and must not be edited by hand:
+Edit only `public/sheetmusicplayer/index.html`, `omr-worker.mjs`, `score-model.mjs`, `editor.mjs`, `sw.js`, `engine/python/`, and `scripts/`. These files are generated and must not be edited by hand:
 
 - `public/sheetmusicplayer/ja/index.html` – from `index.html` (Japanese `<head>` in `scripts/build-ja.mjs`, UI text from `I18N.ja`)
 - `about/`, `privacy/`, their `ja/` versions, and `sitemap.xml` – from `scripts/pages/`
@@ -152,7 +156,7 @@ python3 scripts/build-engine.py --check  # check that every engine file is prese
 ```
 
 The first two run automatically on `wrangler deploy` / `wrangler dev` and on push to `main` (GitHub Actions).
-編集するのは `index.html`・`omr-worker.mjs`・`sw.js`・`engine/python/`・`scripts/` だけです。日本語ページ・情報ページ・`sitemap.xml` は生成ファイル、`engine/`・`vendor/`・`THIRD_PARTY_LICENSES.md` は `scripts/build-engine.py` が作ります。
+編集するのは `index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`sw.js`・`engine/python/`・`scripts/` だけです。日本語ページ・情報ページ・`sitemap.xml` は生成ファイル、`engine/`・`vendor/`・`THIRD_PARTY_LICENSES.md` は `scripts/build-engine.py` が作ります。
 
 ## Images / 画像
 

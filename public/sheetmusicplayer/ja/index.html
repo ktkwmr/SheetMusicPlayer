@@ -172,6 +172,27 @@
     kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; color: var(--muted); background: var(--paper); }
     @media (pointer: coarse) { .keys { display: none; } }
 
+    /* Score / Edit switch and the piano-roll editor (editor.mjs) */
+    .mode { display: inline-flex; gap: 0; }
+    .mode .chip { border-radius: 0; }
+    .mode .chip:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .mode .chip:last-child { border-radius: 0 var(--radius) var(--radius) 0; margin-left: -1px; }
+    .mode .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .edit-wrap { padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .ed-bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+    .ed-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .ed-label { font-size: 12px; color: var(--subtle); margin-right: 2px; }
+    .ed-bar .chip { height: 30px; padding: 0 10px; }
+    .ed-bar .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .ed-count { width: 3.6em; height: 30px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-family: var(--mono); text-align: center; }
+    .ed-count:disabled { opacity: .4; }
+    .ed-scroll { position: relative; overflow: auto; height: min(68vh, 620px); border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--paper); overscroll-behavior: contain; }
+    .ed-scroll:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+    .ed-canvas { position: sticky; top: 0; left: 0; display: block; touch-action: none; }
+    .ed-space { pointer-events: none; }
+    .ed-hint { margin: 0; font-size: 12px; color: var(--subtle); }
+    .ed-hint b { color: var(--muted); font-weight: 600; }
+
     /* Camera */
     dialog.camera { width: min(720px, calc(100vw - 32px)); }
     .cam-view { position: relative; background: #000; border-radius: var(--radius); overflow: hidden; aspect-ratio: 4 / 3; }
@@ -262,6 +283,10 @@
 
       <section class="panel out" aria-label="楽譜" data-i18n-attr="aria-label:score">
         <div class="player" id="player">
+          <div class="mode" role="group" aria-label="表示" data-i18n-attr="aria-label:mode">
+            <button type="button" class="chip" id="modeScore" aria-pressed="true" data-i18n="mode.score">楽譜</button>
+            <button type="button" class="chip" id="modeEdit" aria-pressed="false" disabled data-i18n="mode.edit">編集</button>
+          </div>
           <button type="button" class="play" id="playBtn" disabled></button>
           <button type="button" class="chip" id="rewindBtn" aria-label="最初に戻る" data-i18n-attr="aria-label:rewind" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5v11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M13.5 2.8v10.4L5 8z" fill="currentColor"></path></svg></button>
           <div class="tempo">
@@ -285,7 +310,8 @@
             <p data-i18n="empty">読み込んだ楽譜がここに表示されます。音符をクリックすると、そこから再生できます。</p>
           </div>
         </div>
-        <p class="keys" data-i18n-html="keys"><kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでそこから再生</p>
+        <div class="edit-wrap" id="editWrap" hidden></div>
+        <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでそこから再生</p>
       </section>
     </div>
     <footer class="foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span id="saveState" data-i18n="foot">楽譜はこの端末の中で読み取り、アップロードはしません。最後に開いた楽譜はこのブラウザに保存されます。</span></footer>
@@ -308,7 +334,8 @@
         <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>
         <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックすると、そこから再生します。</li>
         <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>
-        <li><b>保存</b> – 「MusicXML」で読み取り結果を保存できます。MuseScore などの楽譜ソフトで開いて、間違いを直せます。</li></ol>
+        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>
+        <li><b>保存</b> – 「MusicXML」で結果を保存できます。MuseScore などの楽譜ソフトでも開けます。</li></ol>
     </div>
     <div class="dlg-actions">
       <button class="primary" id="helpClose" type="button" data-i18n="close">閉じる</button>
@@ -372,6 +399,30 @@
           "save": "MusicXML",
           "save.aria": "Save as MusicXML",
           "tempo.reset": "Back to the score's tempo",
+          "mode": "View",
+          "mode.score": "Score",
+          "mode.edit": "Edit",
+          "ed.area": "Note editor. Drag a note to move it, drag its right edge to change its length.",
+          "ed.hint": "<b>Drag</b> a note to move it (up/down: pitch, left/right: timing) · drag its <b>right edge</b> to change the length · <b>click</b> an empty spot to add a note · <b>right-click</b> or <b>Delete</b> to remove · <b>drag</b> on empty space to select several · <b>↑↓</b> pitch (Shift: octave) · <b>←→</b> move · <b>Ctrl+Z</b> undo. Click a measure number to add or delete measures. Measures marked <b>!</b> did not add up when read; check them first.",
+          "ed.track": "Staff",
+          "ed.grid": "Grid",
+          "ed.grid.24": "Quarter notes",
+          "ed.grid.12": "Eighth notes",
+          "ed.grid.6": "Sixteenth notes",
+          "ed.grid.8": "Eighth-note triplets",
+          "ed.zoomIn": "Zoom in",
+          "ed.zoomOut": "Zoom out",
+          "ed.undo": "Undo",
+          "ed.redo": "Redo",
+          "ed.measPick": "Measures: click a number above",
+          "ed.measSel": "Measure {n}",
+          "ed.measCount": "Number of measures to add",
+          "ed.measAdd": "Add after",
+          "ed.measDel": "Delete",
+          "track.part": "Part {n}",
+          "track.upper": "upper",
+          "track.lower": "lower",
+          "track.only": "Notes",
           "tempo.src.ocr": "The score says ♩ = {n}.",
           "tempo.src.term": "The score says “{term}” (♩ = {n} is a typical tempo for it).",
           "tempo.src.none": "No tempo marking was found, so it starts at ♩ = {n}.",
@@ -417,7 +468,7 @@
           "menu.help": "How to use",
           "menu.privacy": "Privacy",
           "menu.about": "About",
-          "help.body": "<li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen, but only images and PDFs can be read.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to start from there.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Save</b> – “MusicXML” saves the result. You can open it in MuseScore and most notation apps to fix mistakes.</li>",
+          "help.body": "<li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen, but only images and PDFs can be read.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to start from there.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Save</b> – “MusicXML” saves the result. You can also open it in MuseScore and most notation apps.</li>",
           "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – The last score (the notes the app read, as MusicXML), its file name, and the tempo are saved in your browser's storage so they are there next time. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\">about this site</a>.</li>",
           "about.license": "© 2026 ktkwmr · Licensed under the <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a> (the same as homr, the music recognition it uses) · <a href=\"/sheetmusicplayer/about/\">About this site</a>",
           "close": "Close",
@@ -447,6 +498,30 @@
           "save": "MusicXML",
           "save.aria": "MusicXMLで保存",
           "tempo.reset": "楽譜のテンポに戻す",
+          "mode": "表示",
+          "mode.score": "楽譜",
+          "mode.edit": "編集",
+          "ed.area": "音符の編集。音符をドラッグで移動、右端をドラッグで長さを変更。",
+          "ed.hint": "音符を<b>ドラッグ</b>で移動（上下で音の高さ、左右でタイミング）・<b>右端をドラッグ</b>で長さ・空いている所を<b>クリック</b>で追加・<b>右クリック</b>か <b>Delete</b> で削除・空いている所を<b>ドラッグ</b>でまとめて選択・<b>↑↓</b> 音の高さ（Shift でオクターブ）・<b>←→</b> 移動・<b>Ctrl+Z</b> 元に戻す。上の小節番号をクリックすると、小節の追加・削除ができます。<b>!</b> の付いた小節は、読み取ったときに拍の合計が合わなかった小節です。先に確かめてください。",
+          "ed.track": "段",
+          "ed.grid": "マス目",
+          "ed.grid.24": "4分音符",
+          "ed.grid.12": "8分音符",
+          "ed.grid.6": "16分音符",
+          "ed.grid.8": "3連8分音符",
+          "ed.zoomIn": "拡大",
+          "ed.zoomOut": "縮小",
+          "ed.undo": "元に戻す",
+          "ed.redo": "やり直す",
+          "ed.measPick": "小節：上の番号をクリック",
+          "ed.measSel": "{n}小節目",
+          "ed.measCount": "追加する小節の数",
+          "ed.measAdd": "後ろに追加",
+          "ed.measDel": "削除",
+          "track.part": "パート{n}",
+          "track.upper": "上段",
+          "track.lower": "下段",
+          "track.only": "音符",
           "tempo.src.ocr": "楽譜の指定は ♩ = {n} です。",
           "tempo.src.term": "楽譜の指定は「{term}」です（目安の ♩ = {n} にしています）。",
           "tempo.src.none": "楽譜にテンポの指定が見つからなかったので、♩ = {n} にしています。",
@@ -492,7 +567,7 @@
           "menu.help": "使い方",
           "menu.privacy": "プライバシー",
           "menu.about": "このアプリについて",
-          "help.body": "<li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べますが、読み取れるのは画像とPDFだけです。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックすると、そこから再生します。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>保存</b> – 「MusicXML」で読み取り結果を保存できます。MuseScore などの楽譜ソフトで開いて、間違いを直せます。</li>",
+          "help.body": "<li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べますが、読み取れるのは画像とPDFだけです。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックすると、そこから再生します。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>保存</b> – 「MusicXML」で結果を保存できます。MuseScore などの楽譜ソフトでも開けます。</li>",
           "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – 次に開いたときにも使えるよう、最後に開いた楽譜（読み取った音符のMusicXML）とファイル名、テンポをブラウザ内に保存します。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>をご覧ください。</li>",
           "about.license": "© 2026 ktkwmr · <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>",
           "close": "閉じる",
@@ -803,7 +878,7 @@
         if (!kind) { showError(t("err.type")); return; }
         if (kind !== "pdf" && kind !== "image") return;
         if (!supported) { showError(t("err.unsupported")); return; }
-        busy = true; cancelled = false; stop();
+        busy = true; cancelled = false; stop(); resetEditor();
         $("fileCard").hidden = false;
         $("fileName").textContent = label || file.name || "";
         $("fileSub").textContent = "";
@@ -849,7 +924,8 @@
             if (cancelled) throw { code: "cancel" };
           }
           if (!xmls.length) throw { code: "no-staff" };
-          const xml = xmls.length > 1 ? mergePages(xmls) : xmls[0];
+          SM = SM || await import("./score-model.mjs");
+          const xml = SM.expandMultiRests(xmls.length > 1 ? mergePages(xmls) : xmls[0]);
           showStatus(t("st.render"), {});
           state.xml = xml; state.name = $("fileName").textContent;
           state.scoreBpm = tempo ? tempo.bpm : DEFAULT_BPM; state.bpm = state.scoreBpm;
@@ -1082,10 +1158,80 @@
         });
       }
 
+      // ---------- Edit mode (score-model.mjs + editor.mjs) ----------
+      // The notes are edited as boxes on a piano roll. Going back to Score (or saving) turns them
+      // back into MusicXML and draws the score again.
+      let mode = "score", SM = null, model = null, modelXml = null, editor = null, dirty = false;
+      function trackName(i) {
+        const tr = model.tracks[i], part = model.parts[tr.part];
+        if (model.tracks.length === 1) return t("track.only");
+        const name = model.parts.length > 1 ? t("track.part", { n: tr.part + 1 }) : "";
+        const staff = part.staves > 1 ? (tr.staff === 1 ? t("track.upper") : tr.staff === 2 ? t("track.lower") : String(tr.staff)) : "";
+        return [name, staff].filter(Boolean).join(" ") || t("track.part", { n: tr.part + 1 });
+      }
+      function preview(midi) { try { ensureCtx(); playNote(midi, ctx.currentTime + 0.01, 0.3); } catch (e) {} }
+      function onModelChange() {
+        dirty = true;
+        state.notes = model.notes.length;
+        // Playing while editing: play the edited notes from the current position on
+        if (playing && mode === "edit") {
+          const q = currentQ(); playSrc = source();
+          evIdx = playSrc.events.findIndex((e) => e[0] >= q - 1e-6); if (evIdx < 0) evIdx = playSrc.events.length;
+        }
+        renderPlayer();
+      }
+      async function commitEdits() {
+        if (!dirty || !model) return;
+        const xml = SM.buildXml(model, modelXml, state.tempoSource !== "none" ? state.scoreBpm : null);
+        dirty = false;
+        state.xml = xml; modelXml = xml;
+        model.measures.forEach((m, i) => { m.src = i; });
+        state.notes = model.notes.length; saveState();
+        await showScore(xml);
+      }
+      function resetEditor() {
+        if (editor) editor.destroy();
+        editor = null; model = null; modelXml = null; dirty = false;
+        if (mode === "edit") showMode("score");
+      }
+      function showMode(m) {
+        mode = m;
+        $("scoreWrap").hidden = m === "edit"; $("editWrap").hidden = m !== "edit"; $("keys").hidden = m === "edit";
+        $("pageWarn").hidden = m === "edit" || !$("pageWarn").textContent;
+        playSrc = source(); posQ = 0;
+        renderPlayer();
+      }
+      async function setMode(m) {
+        if (m === mode || busy || !state.xml) return;
+        stop();
+        if (m === "edit") {
+          SM = SM || await import("./score-model.mjs");
+          if (!model || modelXml !== state.xml) {
+            if (editor) { editor.destroy(); editor = null; }
+            modelXml = state.xml; model = SM.parseScore(state.xml); dirty = false;
+          }
+          showMode("edit");
+          if (!editor) {
+            const E = await import("./editor.mjs");
+            editor = E.createEditor($("editWrap"), { model: model, t: t, trackName: trackName, preview: preview, onChange: onModelChange });
+          }
+          editor.focus();
+        } else {
+          showMode("score");
+          try { await commitEdits(); } catch (e) { showError(t("err.render")); console.error(e); }
+          setPosition(0);
+        }
+      }
+      $("modeScore").onclick = () => setMode("score");
+      $("modeEdit").onclick = () => setMode("edit");
+
       // ---------- Player ----------
       // Notes are scheduled on the audio clock a little ahead, in quarter notes, so the tempo can change at any time
       let playing = false, posQ = 0, timer = null, raf = 0, wake = null;
       let schedQ = 0, schedT = 0, evIdx = 0;
+      // What is played: the score's timeline, or (in Edit) the notes being edited
+      let playSrc = timeline;
+      const source = () => (mode === "edit" && model ? { events: SM.modelEvents(model), endQ: SM.modelEnd(model) / SM.PPQ } : timeline);
       const bpm = () => state.bpm;
       function currentQ() {
         if (!playing) return posQ;
@@ -1093,8 +1239,8 @@
       }
       function tick() {
         if (!playing) return;
-        const ev = timeline.events, horizon = ctx.currentTime + 0.15;
-        while (schedT < horizon && schedQ < timeline.endQ + 0.01) {
+        const ev = playSrc.events, horizon = ctx.currentTime + 0.15;
+        while (schedT < horizon && schedQ < playSrc.endQ + 0.01) {
           const b = bpm(), nextQ = schedQ + Math.max(0.01, Math.min(0.25, (horizon - schedT) * b / 60));
           while (evIdx < ev.length && ev[evIdx][0] < nextQ) {
             const e = ev[evIdx];
@@ -1103,21 +1249,23 @@
           }
           schedT += (nextQ - schedQ) * 60 / b; schedQ = nextQ;
         }
-        if (schedQ >= timeline.endQ + 0.01 && ctx.currentTime > schedT) { stop(); setPosition(0); }
+        if (schedQ >= playSrc.endQ + 0.01 && ctx.currentTime > schedT) { stop(); setPosition(0); }
       }
       function frame() {
         if (!playing) return;
-        drawHead(currentQ());
+        if (mode === "edit" && editor) editor.setPlayhead(currentQ(), true); else drawHead(currentQ());
         raf = requestAnimationFrame(frame);
       }
       function start() {
-        if (!timeline.events.length || busy) return;
+        playSrc = source();
+        if (!playSrc.events.length || busy) return;
         ensureCtx();
-        if (posQ >= timeline.endQ - 1e-6) posQ = 0;
+        if (mode === "edit" && editor && editor.positionQ() != null) posQ = editor.positionQ();
+        if (posQ >= playSrc.endQ - 1e-6) posQ = 0;
         playing = true;
         bus = ctx.createGain(); bus.connect(master);
         schedQ = posQ; schedT = ctx.currentTime + 0.06;
-        evIdx = timeline.events.findIndex((e) => e[0] >= posQ - 1e-6); if (evIdx < 0) evIdx = timeline.events.length;
+        evIdx = playSrc.events.findIndex((e) => e[0] >= posQ - 1e-6); if (evIdx < 0) evIdx = playSrc.events.length;
         tick(); timer = setInterval(tick, 25);
         raf = requestAnimationFrame(frame);
         try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then((w) => { wake = w; }).catch(() => {}); } catch (e) {}
@@ -1132,15 +1280,21 @@
         if (old) { old.gain.setTargetAtTime(0, ctx.currentTime, 0.02); setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 400); }
         try { if (wake) wake.release(); } catch (e) {} wake = null;
         // Snap the cursor to the note it stopped on
-        const s = timeline.steps[stepAt(posQ)]; if (s) { posQ = s.q; drawHead(posQ); }
+        if (mode === "edit") { if (editor) editor.setPlayhead(posQ); }
+        else { const s = timeline.steps[stepAt(posQ)]; if (s) { posQ = s.q; drawHead(posQ); } }
         renderPlayer();
       }
-      function setPosition(q) { posQ = clamp(q, 0, timeline.endQ); headStep = -1; drawHead(posQ); }
+      function setPosition(q) {
+        posQ = clamp(q, 0, source().endQ); headStep = -1;
+        if (mode === "edit") { if (editor) editor.setPlayhead(posQ ? posQ : null); } else drawHead(posQ);
+      }
 
       // ---------- Player UI ----------
       function renderPlayer() {
-        const ready = timeline.events.length > 0;
+        const ready = mode === "edit" ? !!(model && model.notes.length) : timeline.events.length > 0;
         $("playBtn").disabled = !ready || busy; $("rewindBtn").disabled = !ready || busy; $("saveBtn").disabled = !state.xml;
+        $("modeEdit").disabled = !state.xml || busy || !timeline.events.length;
+        $("modeScore").setAttribute("aria-pressed", mode === "score"); $("modeEdit").setAttribute("aria-pressed", mode === "edit");
         $("saveBtn").setAttribute("aria-label", t("save.aria"));
         $("playBtn").innerHTML = (playing
           ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="1.5" fill="currentColor"></rect></svg>'
@@ -1160,7 +1314,7 @@
       function setBpm(v) {
         state.bpm = clamp(Math.round(v), 20, 300);
         // While playing, keep the cursor where it is: re-anchor the clock at the current position
-        if (playing) { const q = currentQ(); schedQ = q; schedT = ctx.currentTime; evIdx = timeline.events.findIndex((e) => e[0] >= q - 1e-6); if (evIdx < 0) evIdx = timeline.events.length; posQ = Math.min(posQ, q); }
+        if (playing) { const q = currentQ(); schedQ = q; schedT = ctx.currentTime; evIdx = playSrc.events.findIndex((e) => e[0] >= q - 1e-6); if (evIdx < 0) evIdx = playSrc.events.length; posQ = Math.min(posQ, q); }
         renderTempo(); saveState();
       }
       $("playBtn").onclick = () => (playing ? stop() : start());
@@ -1171,8 +1325,9 @@
       $("bpmInput").onblur = () => renderTempo();
       $("bpmInput").onkeydown = (e) => { if (e.key === "Enter") e.target.blur(); };
       $("tempoReset").onclick = () => setBpm(state.scoreBpm);
-      $("saveBtn").onclick = function () {
+      $("saveBtn").onclick = async function () {
         if (!state.xml) return;
+        await commitEdits();
         const base = (state.name || "score").replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80) || "score";
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob([state.xml], { type: "application/vnd.recordare.musicxml+xml" }));
