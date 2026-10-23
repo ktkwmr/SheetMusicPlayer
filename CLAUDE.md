@@ -40,4 +40,4 @@
 - 記事（ガイド）はまだない。作るときは PR のプレビューで人間が内容を確認してからマージする（ベースライン §10-7、`docs/article-review.md`）。
 - 作業はブランチ → PR → Cloudflare のプレビュービルド確認 → squash マージ。
 - 本番サイト・Cloudflare 管理画面・外部 CDN にはこの環境から届かないことが多い。確かめられなかったことは「未確認」と書き、ユーザーに確認手順を伝える。
-- 動作確認は `npx wrangler dev`（`_headers` が効く）＋ Playwright の Chromium で、サンプルの読み取り → 表示 → 再生 → カーソルの移動まで通す。テスト用のブラウザプロファイルは使い回さない（Tesseract.js や Cache Storage に古いデータが残ると結果が変わる）。
+- 動作確認は `npx wrangler dev`（`_headers` が効く）＋ Playwright の Chromium で、テスト用の楽譜画像の読み取り → 表示 → 再生 → カーソルの移動と、MusicXML（.musicxml・.mxl）の読み込みまで通す。テスト用のブラウザプロファイルは使い回さない（Tesseract.js や Cache Storage に古いデータが残ると結果が変わる）。

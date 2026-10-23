@@ -155,8 +155,6 @@
     .bpm-input:focus { outline: none; border-color: var(--ink); }
     .tempo input[type=range] { flex: 1; min-width: 80px; }
     .player .end { display: flex; gap: 6px; margin-left: auto; }
-    .tempo-src { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--subtle); font-size: 12px; }
-    .tempo-src .linkish { font-weight: 600; }
     .score-wrap { position: relative; min-height: 360px; padding: 8px 4px 24px; overflow-x: auto; }
     #score { position: relative; cursor: pointer; }
     #score.busy { cursor: default; }
@@ -254,11 +252,10 @@
               <button type="button" class="big" id="fileBtn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2.8h7.5L16 7.3v9.9H4z"></path><path d="M11.3 2.8v4.6H16"></path></svg><span data-i18n="pick">Choose a file</span></button>
               <button type="button" class="big secondary" id="camBtn"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.5h3l1.6-2.2h5.8l1.6 2.2h3v9.7h-15z"></path><circle cx="10" cy="11" r="3.1"></circle></svg><span data-i18n="camera">Take a photo</span></button>
             </div>
-            <p data-i18n="drop">or drop a file here · images (JPEG, PNG, …) and PDF</p>
+            <p data-i18n="drop">or drop a file here · images (JPEG, PNG, …), PDF, and MusicXML</p>
             <input type="file" id="fileInput" hidden>
             <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
           </div>
-          <p class="hint"><span data-i18n="sample.lead">No score at hand?</span> <button type="button" class="linkish" id="sampleBtn" data-i18n="sample">Try a sample</button></p>
 
           <div class="file-card" id="fileCard" hidden>
             <img id="thumb" alt="">
@@ -297,9 +294,9 @@
             <input id="bpmSlider" type="range" min="20" max="300" step="1" aria-label="Tempo slider" data-i18n-attr="aria-label:bpm.slider">
           </div>
           <div class="end">
+            <button type="button" class="chip" id="clearBtn" disabled data-i18n="clear">Clear</button>
             <button type="button" class="chip" id="saveBtn" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"></path></svg><span data-i18n="save">MusicXML</span></button>
           </div>
-          <div class="tempo-src"><span id="tempoSrc"></span><button type="button" class="linkish" id="tempoReset" data-i18n="tempo.reset" hidden>Back to the score's tempo</button></div>
         </div>
         <div class="warn" id="pageWarn" hidden></div>
         <div class="score-wrap" id="scoreWrap">
@@ -307,11 +304,11 @@
           <div id="playhead" hidden></div>
           <div class="empty" id="empty">
             <svg viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 14h112M4 24h112M4 34h112M4 44h112M4 54h112"></path><path d="M44 44V10M76 34V4" stroke-width="2.4"></path><ellipse cx="38" cy="45" rx="7" ry="5" transform="rotate(-20 38 45)" fill="currentColor"></ellipse><ellipse cx="70" cy="35" rx="7" ry="5" transform="rotate(-20 70 35)" fill="currentColor"></ellipse></svg>
-            <p data-i18n="empty">The score appears here. Click a note to start playing from there.</p>
+            <p data-i18n="empty">The score appears here. Click a note to move the cursor there.</p>
           </div>
         </div>
         <div class="edit-wrap" id="editWrap" hidden></div>
-        <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> play / stop　<kbd>Home</kbd> back to the beginning　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to play from there</p>
+        <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> play / stop　<kbd>Home</kbd> back to the beginning　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to move the cursor there</p>
       </section>
     </div>
     <footer class="foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span id="saveState" data-i18n="foot">Your score is read on this device and is never uploaded. The last score is kept in this browser.</span></footer>
@@ -331,9 +328,9 @@
     <h2 id="helpTitle" data-i18n="menu.help">How to use</h2>
     <div class="help-body">
       <ol class="help-list" data-i18n-html="help.body">
-        <li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen, but only images and PDFs can be read.</li>
+        <li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen; images and PDFs are read, and a MusicXML file (for example one saved from this app) opens as it is.</li>
         <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>
-        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to start from there.</li>
+        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to move the cursor there; Play starts from it.</li>
         <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>
         <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>
         <li><b>Save</b> – “MusicXML” saves the result. You can also open it in MuseScore and most notation apps.</li>
@@ -386,10 +383,7 @@
           "score": "Score",
           "pick": "Choose a file",
           "camera": "Take a photo",
-          "drop": "or drop a file here · images (JPEG, PNG, …) and PDF",
-          "sample.lead": "No score at hand?",
-          "sample": "Try a sample",
-          "sample.name": "Twinkle, Twinkle, Little Star (photo)",
+          "drop": "or drop a file here · images (JPEG, PNG, …), PDF, and MusicXML",
           "cancel": "Cancel",
           "first": "The first time, the app downloads its reading engine (about 130 MB). After that it starts right away, even offline.",
           "tips": "<li>Photograph the page straight on, in good light, with the whole page in the frame.</li>\n            <li>Printed music works best. Handwriting is not supported.</li>\n            <li>The result may contain mistakes. Check it while you listen.</li>",
@@ -401,8 +395,13 @@
           "bpm.p5": "Tempo +5",
           "bpm.slider": "Tempo slider",
           "save": "MusicXML",
+          "clear": "Clear",
+          "clear.confirm": "Clear this score? It is also removed from this browser. Save it as MusicXML first if you want to keep it.",
+          "file.xml": "MusicXML",
+          "st.xml.open": "Opening the MusicXML file…",
+          "st.xml.done": "Opened the MusicXML file.",
+          "err.xml": "This MusicXML file cannot be opened. It may be damaged, or in a form this app does not support (only partwise MusicXML is supported).",
           "save.aria": "Save as MusicXML",
-          "tempo.reset": "Back to the score's tempo",
           "mode": "View",
           "mode.score": "Score",
           "mode.edit": "Edit",
@@ -427,12 +426,8 @@
           "track.upper": "upper",
           "track.lower": "lower",
           "track.only": "Notes",
-          "tempo.src.ocr": "The score says ♩ = {n}.",
-          "tempo.src.term": "The score says “{term}” (♩ = {n} is a typical tempo for it).",
-          "tempo.src.none": "No tempo marking was found, so it starts at ♩ = {n}.",
-          "tempo.src.saved": "Tempo you set: ♩ = {n}.",
-          "empty": "The score appears here. Click a note to start playing from there.",
-          "keys": "<kbd>Space</kbd> play / stop　<kbd>Home</kbd> back to the beginning　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to play from there",
+          "empty": "The score appears here. Click a note to move the cursor there.",
+          "keys": "<kbd>Space</kbd> play / stop　<kbd>Home</kbd> back to the beginning　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to move the cursor there",
           "foot": "Your score is read on this device and is never uploaded. The last score is kept in this browser.",
           "foot.fail": "This browser cannot keep your score (check private browsing or blocked site data).",
           "file.pages": "PDF · {n} pages",
@@ -454,7 +449,7 @@
           "st.page": "Page {i} of {n}",
           "st.done": "Read in {s} s",
           "st.done.pages": "{n} pages read in {s} s",
-          "err.type": "This file cannot be read. Choose an image (JPEG, PNG, WebP, …) or a PDF.",
+          "err.type": "This file cannot be read. Choose an image (JPEG, PNG, WebP, …), a PDF, or a MusicXML file.",
           "err.image": "This image cannot be opened in this browser. Save it as JPEG or PNG and try again.",
           "err.pdf": "This PDF cannot be opened. It may be damaged or protected with a password.",
           "err.nostaff": "No staves or notes were found. Use a clear photo or scan of printed sheet music, with the whole page in the frame.",
@@ -472,7 +467,7 @@
           "menu.help": "How to use",
           "menu.privacy": "Privacy",
           "menu.about": "About",
-          "help.body": "<li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen, but only images and PDFs can be read.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to start from there.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Save</b> – “MusicXML” saves the result. You can also open it in MuseScore and most notation apps.</li>",
+          "help.body": "<li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen; images and PDFs are read, and a MusicXML file (for example one saved from this app) opens as it is.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to move the cursor there; Play starts from it.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Save</b> – “MusicXML” saves the result. You can also open it in MuseScore and most notation apps.</li>",
           "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – The last score (the notes the app read, as MusicXML), its file name, and the tempo are saved in your browser's storage so they are there next time. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\">about this site</a>.</li>",
           "about.license": "© 2026 ktkwmr · Licensed under the <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a> (the same as homr, the music recognition it uses) · <a href=\"/sheetmusicplayer/about/\">About this site</a>",
           "close": "Close",
@@ -485,10 +480,7 @@
           "score": "楽譜",
           "pick": "ファイルを選ぶ",
           "camera": "写真を撮る",
-          "drop": "またはここにファイルをドロップ・画像（JPEG・PNGなど）とPDFに対応",
-          "sample.lead": "手元に楽譜がないときは",
-          "sample": "サンプルで試す",
-          "sample.name": "きらきら星（写真）",
+          "drop": "またはここにファイルをドロップ・画像（JPEG・PNGなど）・PDF・MusicXMLに対応",
           "cancel": "キャンセル",
           "first": "初回だけ、読み取りエンジン（約130MB）をダウンロードします。次からはすぐに始まり、オフラインでも使えます。",
           "tips": "<li>楽譜は正面から、明るい場所で、ページ全体が入るように撮ってください。</li>\n            <li>印刷された楽譜に対応しています。手書きの楽譜は読み取れません。</li>\n            <li>読み取り結果には間違いが含まれることがあります。聴きながら確かめてください。</li>",
@@ -500,8 +492,13 @@
           "bpm.p5": "テンポを5上げる",
           "bpm.slider": "テンポのスライダー",
           "save": "MusicXML",
+          "clear": "クリア",
+          "clear.confirm": "この楽譜をクリアしますか？ このブラウザに保存した楽譜も消えます。残したいときは先に MusicXML で保存してください。",
+          "file.xml": "MusicXML",
+          "st.xml.open": "MusicXML を開いています…",
+          "st.xml.done": "MusicXML を開きました。",
+          "err.xml": "この MusicXML は開けません。ファイルが壊れているか、このアプリが対応していない形式です（partwise 形式の MusicXML に対応しています）。",
           "save.aria": "MusicXMLで保存",
-          "tempo.reset": "楽譜のテンポに戻す",
           "mode": "表示",
           "mode.score": "楽譜",
           "mode.edit": "編集",
@@ -526,12 +523,8 @@
           "track.upper": "上段",
           "track.lower": "下段",
           "track.only": "音符",
-          "tempo.src.ocr": "楽譜の指定は ♩ = {n} です。",
-          "tempo.src.term": "楽譜の指定は「{term}」です（目安の ♩ = {n} にしています）。",
-          "tempo.src.none": "楽譜にテンポの指定が見つからなかったので、♩ = {n} にしています。",
-          "tempo.src.saved": "設定したテンポ: ♩ = {n}",
-          "empty": "読み込んだ楽譜がここに表示されます。音符をクリックすると、そこから再生できます。",
-          "keys": "<kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでそこから再生",
+          "empty": "読み込んだ楽譜がここに表示されます。音符をクリックすると、そこにカーソルを移動します。",
+          "keys": "<kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでカーソルを移動",
           "foot": "楽譜はこの端末の中で読み取り、アップロードはしません。最後に開いた楽譜はこのブラウザに保存されます。",
           "foot.fail": "このブラウザでは楽譜を保存できません（プライベートモードやサイトデータのブロックを確認してください）。",
           "file.pages": "PDF・{n}ページ",
@@ -553,7 +546,7 @@
           "st.page": "{n}ページ中{i}ページ目",
           "st.done": "{s}秒で読み取りました",
           "st.done.pages": "{n}ページを{s}秒で読み取りました",
-          "err.type": "このファイルは読み込めません。画像（JPEG・PNG・WebPなど）かPDFを選んでください。",
+          "err.type": "このファイルは読み込めません。画像（JPEG・PNG・WebPなど）・PDF・MusicXMLのファイルを選んでください。",
           "err.image": "この画像はこのブラウザでは開けません。JPEGかPNGで保存し直してお試しください。",
           "err.pdf": "このPDFを開けません。壊れているか、パスワードで保護されている可能性があります。",
           "err.nostaff": "五線や音符が見つかりませんでした。印刷された楽譜を、ページ全体が入るように、はっきり撮った写真やスキャンでお試しください。",
@@ -571,7 +564,7 @@
           "menu.help": "使い方",
           "menu.privacy": "プライバシー",
           "menu.about": "このアプリについて",
-          "help.body": "<li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べますが、読み取れるのは画像とPDFだけです。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックすると、そこから再生します。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>保存</b> – 「MusicXML」で結果を保存できます。MuseScore などの楽譜ソフトでも開けます。</li>",
+          "help.body": "<li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べます。画像とPDFは読み取り、MusicXML（このアプリで保存したものなど）はそのまま開きます。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックするとカーソルがそこに移り、「再生」でそこから始まります。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>保存</b> – 「MusicXML」で結果を保存できます。MuseScore などの楽譜ソフトでも開けます。</li>",
           "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – 次に開いたときにも使えるよう、最後に開いた楽譜（読み取った音符のMusicXML）とファイル名、テンポをブラウザ内に保存します。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>をご覧ください。</li>",
           "about.license": "© 2026 ktkwmr · <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>",
           "close": "閉じる",
@@ -667,6 +660,7 @@
         const h = new Uint8Array(await file.slice(0, 16).arrayBuffer());
         const s = String.fromCharCode.apply(null, h);
         if (s.startsWith("%PDF-")) return "pdf";
+        if (s.startsWith("PK\x03\x04")) return /\.(mxl|zip)$/i.test(file.name || "") || /musicxml/.test(file.type) ? "mxl" : null;
         if (h[0] === 0xff && h[1] === 0xd8 && h[2] === 0xff) return "image";            // JPEG
         if (s.startsWith("\x89PNG")) return "image";
         if (s.startsWith("GIF8") || s.startsWith("BM")) return "image";
@@ -674,6 +668,9 @@
         if (s.slice(4, 8) === "ftyp") return "image";                                     // HEIC / AVIF
         if (/^image\//.test(file.type)) return "image";
         if (file.type === "application/pdf") return "pdf";
+        // Text: MusicXML (with or without the XML declaration, BOM, or a DOCTYPE)
+        const head = await file.slice(0, 4096).text();
+        if (/<score-(partwise|timewise)[\s>]/.test(head) || (/^\s*(\uFEFF)?\s*<\?xml/.test(head) && /\.(musicxml|xml)$/i.test(file.name || ""))) return "xml";
         return null;
       }
       function toRgba(source, w, h) {
@@ -873,6 +870,110 @@
         return new XMLSerializer().serializeToString(first);
       }
 
+      // ---------- MusicXML files (restored as they are, no reading engine needed) ----------
+      // .mxl is a zip: META-INF/container.xml names the score file inside
+      async function unzip(buf) {
+        const d = new DataView(buf), u8 = new Uint8Array(buf), dec = new TextDecoder();
+        let eocd = -1;
+        for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 66000); i--) if (d.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+        if (eocd < 0) throw { code: "xml" };
+        const count = d.getUint16(eocd + 10, true);
+        let p = d.getUint32(eocd + 16, true);
+        const files = new Map();
+        for (let k = 0; k < count && d.getUint32(p, true) === 0x02014b50; k++) {
+          const method = d.getUint16(p + 10, true), csize = d.getUint32(p + 20, true);
+          const nlen = d.getUint16(p + 28, true), xlen = d.getUint16(p + 30, true), clen = d.getUint16(p + 32, true);
+          const local = d.getUint32(p + 42, true);
+          const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
+          files.set(name, { method: method, csize: csize, local: local });
+          p += 46 + nlen + xlen + clen;
+        }
+        async function read(name) {
+          const f = files.get(name);
+          if (!f) return null;
+          const start = f.local + 30 + d.getUint16(f.local + 26, true) + d.getUint16(f.local + 28, true);
+          const data = u8.subarray(start, start + f.csize);
+          if (f.method === 0) return dec.decode(data);
+          if (f.method !== 8) throw { code: "xml" };
+          const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+          return await new Response(stream).text();
+        }
+        return { names: [...files.keys()], read: read };
+      }
+      async function readMusicXml(file, kind) {
+        let xml;
+        if (kind === "mxl") {
+          const z = await unzip(await file.arrayBuffer());
+          const container = await z.read("META-INF/container.xml");
+          const m = container && container.match(/full-path\s*=\s*"([^"]+)"/);
+          const name = m ? m[1] : z.names.find((n) => !n.startsWith("META-INF/") && /\.(xml|musicxml)$/i.test(n));
+          xml = name && await z.read(name);
+        } else xml = await file.text();
+        xml = (xml || "").replace(/^\uFEFF/, "");
+        if (!/<score-partwise[\s>]/.test(xml) || xml.length > 4e6) throw { code: "xml" };
+        const doc = new DOMParser().parseFromString(xml, "application/xml");
+        if (doc.getElementsByTagName("parsererror").length || !doc.querySelector("part measure")) throw { code: "xml" };
+        // Tempo: the first <sound tempo="…">, or a metronome mark (quarter = …)
+        let bpm = null;
+        const snd = doc.querySelector("sound[tempo]");
+        if (snd) bpm = parseFloat(snd.getAttribute("tempo"));
+        if (!(bpm > 0)) {
+          const pm = doc.querySelector("metronome per-minute"), unit = doc.querySelector("metronome beat-unit");
+          const f = { whole: 4, half: 2, quarter: 1, eighth: 0.5, "16th": 0.25 }[unit ? unit.textContent.trim() : "quarter"] || 1;
+          const dot = doc.querySelector("metronome beat-unit-dot") ? 1.5 : 1;
+          if (pm && parseFloat(pm.textContent) > 0) bpm = parseFloat(pm.textContent) * f * dot;
+        }
+        return { xml: xml, bpm: bpm > 0 ? clamp(Math.round(bpm), 20, 300) : null };
+      }
+      async function openMusicXml(file, kind) {
+        busy = true; stop(); resetEditor();
+        $("score").classList.add("busy");
+        showStatus(t("st.xml.open"), {});
+        try {
+          const r = await readMusicXml(file, kind);
+          SM = SM || await import("./score-model.mjs");
+          const xml = SM.expandMultiRests(r.xml);
+          await showScore(xml);
+          $("fileCard").hidden = false; $("thumb").removeAttribute("src"); $("thumb").hidden = true;
+          $("fileName").textContent = file.name || ""; $("fileSub").textContent = t("file.xml");
+          state.xml = xml; state.name = file.name || "";
+          state.scoreBpm = r.bpm || DEFAULT_BPM; state.bpm = state.scoreBpm;
+          state.tempoSource = r.bpm ? "ocr" : "none"; state.tempoTerm = "";
+          state.notes = timeline.notes;
+          saveState();
+          showStatus(t("st.xml.done"), { bar: false });
+        } catch (e) {
+          hideStatus();
+          console.error(e);
+          showError(t(e && e.code === "render" ? "err.render" : "err.xml"));
+          // The previous score (if any) stays
+          if (state.xml) await showScore(state.xml).catch(() => {});
+          else if (osmd) { try { osmd.clear(); } catch (e2) {} $("score").innerHTML = ""; osmd = null; timeline = { steps: [], events: [], endQ: 0, notes: 0, tempoRatio: [] }; playSrc = timeline; $("playhead").hidden = true; $("empty").hidden = false; }
+        } finally {
+          busy = false;
+          $("score").classList.remove("busy");
+          renderPlayer();
+        }
+      }
+
+      // ---------- Clearing the score ----------
+      function clearScore() {
+        if (busy || !state.xml) return;
+        if (!confirm(t("clear.confirm"))) return;
+        stop(); resetEditor();
+        if (osmd) { try { osmd.clear(); } catch (e) {} }
+        $("score").innerHTML = ""; osmd = null;
+        timeline = { steps: [], events: [], endQ: 0, notes: 0, tempoRatio: [] }; playSrc = timeline; posQ = 0;
+        $("playhead").hidden = true; $("empty").hidden = false;
+        $("fileCard").hidden = true; $("thumb").removeAttribute("src");
+        $("pageWarn").textContent = ""; $("pageWarn").hidden = true;
+        hideStatus(); showError("");
+        state = { xml: "", name: "", bpm: DEFAULT_BPM, scoreBpm: DEFAULT_BPM, tempoSource: "none", tempoTerm: "", notes: 0 };
+        saveState();
+        renderPlayer();
+      }
+      $("clearBtn").onclick = clearScore;
+
       // ---------- The whole flow: file -> pages -> engine -> score ----------
       let busy = false, cancelled = false;
       async function openFile(file, label) {
@@ -880,7 +981,7 @@
         showError(""); $("pageWarn").hidden = true;
         const kind = await sniff(file);
         if (!kind) { showError(t("err.type")); return; }
-        if (kind !== "pdf" && kind !== "image") return;
+        if (kind === "xml" || kind === "mxl") { await openMusicXml(file, kind); return; }
         if (!supported) { showError(t("err.unsupported")); return; }
         busy = true; cancelled = false; stop(); resetEditor();
         $("fileCard").hidden = false;
@@ -969,10 +1070,6 @@
       $("fileBtn").onclick = () => $("fileInput").click();
       $("fileInput").onchange = function (e) { const f = e.target.files[0]; e.target.value = ""; if (f) openFile(f); };
       $("camInput").onchange = function (e) { const f = e.target.files[0]; e.target.value = ""; if (f) openFile(f, t("file.photo")); };
-      $("sampleBtn").onclick = async function () {
-        try { const r = await fetch("samples/twinkle.jpg"); openFile(new File([await r.blob()], "twinkle.jpg", { type: "image/jpeg" }), t("sample.name")); }
-        catch (e) { showError(t("err.download")); }
-      };
       const drop = $("drop");
       ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }));
       ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, function () { drop.classList.remove("over"); }));
@@ -1116,7 +1213,7 @@
         const wrap = $("scoreWrap");
         if (a.x < wrap.scrollLeft + 20 || a.x > wrap.scrollLeft + wrap.clientWidth - 40) wrap.scrollLeft = a.x - 60;
       }
-      // Click a note (or anywhere on a line) to play from there
+      // Click a note (or anywhere on a line) to move the cursor there (playing carries on from there)
       $("score").addEventListener("click", function (e) {
         if (busy || !timeline.steps.length) return;
         const r = this.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
@@ -1128,7 +1225,8 @@
         });
         if (best < 0 || bestD > 400) return;
         const q = timeline.steps[best].q;
-        if (playing) { stop(); setPosition(q); start(); } else { setPosition(q); start(); }
+        // Only move the cursor; while playing, carry on from there
+        if (playing) { stop(); setPosition(q); start(); } else setPosition(q);
       });
 
       // ---------- Sound (Web Audio API, a simple piano-like synthesizer) ----------
@@ -1296,7 +1394,7 @@
       // ---------- Player UI ----------
       function renderPlayer() {
         const ready = mode === "edit" ? !!(model && model.notes.length) : timeline.events.length > 0;
-        $("playBtn").disabled = !ready || busy; $("rewindBtn").disabled = !ready || busy; $("saveBtn").disabled = !state.xml;
+        $("playBtn").disabled = !ready || busy; $("rewindBtn").disabled = !ready || busy; $("saveBtn").disabled = !state.xml; $("clearBtn").disabled = !state.xml || busy;
         $("modeEdit").disabled = !state.xml || busy || !timeline.events.length;
         $("modeScore").setAttribute("aria-pressed", mode === "score"); $("modeEdit").setAttribute("aria-pressed", mode === "edit");
         $("saveBtn").setAttribute("aria-label", t("save.aria"));
@@ -1309,11 +1407,6 @@
       function renderTempo() {
         if (document.activeElement !== $("bpmInput")) $("bpmInput").value = state.bpm;
         $("bpmSlider").value = state.bpm;
-        const src = state.tempoSource === "ocr" ? t("tempo.src.ocr", { n: state.scoreBpm })
-          : state.tempoSource === "term" ? t("tempo.src.term", { term: state.tempoTerm, n: state.scoreBpm })
-          : t("tempo.src.none", { n: state.scoreBpm });
-        $("tempoSrc").textContent = state.xml ? src : "";
-        $("tempoReset").hidden = !state.xml || state.bpm === state.scoreBpm;
       }
       function setBpm(v) {
         state.bpm = clamp(Math.round(v), 20, 300);
@@ -1328,7 +1421,6 @@
       $("bpmInput").onchange = (e) => { const v = +e.target.value; if (v) setBpm(v); else renderTempo(); };
       $("bpmInput").onblur = () => renderTempo();
       $("bpmInput").onkeydown = (e) => { if (e.key === "Enter") e.target.blur(); };
-      $("tempoReset").onclick = () => setBpm(state.scoreBpm);
       $("saveBtn").onclick = async function () {
         if (!state.xml) return;
         await commitEdits();

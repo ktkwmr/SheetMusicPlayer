@@ -42,7 +42,7 @@ export default {
 <ul>
   <li>The app reads sheet music with <a href="${HOMR}" rel="noopener">homr</a>, an open-source optical music recognition program licensed under the GNU Affero General Public License v3 (AGPL-3.0). The app's source code is published under the same <a href="${REPO}/blob/main/LICENSE" rel="noopener">AGPL-3.0</a> on <a href="${REPO}" rel="noopener">GitHub</a>.</li>
   <li>Other libraries used by the app are listed under Settings → About in the app.</li>
-  <li>The text and images on this site are © 2026 ktkwmr. The sample score is a traditional melody engraved for this site.</li>
+  <li>The text and images on this site are © 2026 ktkwmr.</li>
 </ul>
 
 <h2 id="privacy">Privacy</h2>
@@ -84,7 +84,7 @@ export default {
 <ul>
   <li>楽譜の読み取りには、オープンソースの光学楽譜認識プログラム <a href="${HOMR}" rel="noopener">homr</a>（GNU Affero General Public License v3、AGPL-3.0）を使用しています。アプリのソースコードも同じ <a href="${REPO}/blob/main/LICENSE" rel="noopener">AGPL-3.0</a> で <a href="${REPO}" rel="noopener">GitHub</a> に公開しています。</li>
   <li>そのほかにアプリが使用しているライブラリは、アプリの「設定 → このアプリについて」に掲載しています。</li>
-  <li>本サイトの文章と画像の著作権は ktkwmr に帰属します（© 2026 ktkwmr）。サンプルの楽譜は、伝承曲を本サイト用に浄書したものです。</li>
+  <li>本サイトの文章と画像の著作権は ktkwmr に帰属します（© 2026 ktkwmr）。</li>
 </ul>
 
 <h2 id="privacy">プライバシー</h2>
