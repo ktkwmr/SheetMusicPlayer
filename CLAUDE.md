@@ -32,7 +32,7 @@
 - Cloudflare Workers の静的アセットは 1 ファイル 25MiB まで。大きいモデルは `build-engine.py` で分割する（`--check` が超過を検出する）。
 - PDF.js は 5.4 系に固定（5.5 以降は現行ブラウザにない `Map.prototype.getOrInsertComputed` を使う）。
 - `public/_headers` の COOP/COEP（cross-origin isolation）は onnxruntime-web を複数スレッドで動かすためのもの。ただし今は `omr-worker.mjs` で 1 スレッドに固定している（複数スレッドだと Pyodide の JSPI 経由の呼び出しで最初のモデル実行が終わらない。検証環境は 2 コアで `hardwareConcurrency - 1` = 1 になり再現しなかったので、スレッド数を変えるときは明示的に 4〜8 を指定して試す）。外部のスクリプトを足すときは CSP に加えて CORS／CORP も確かめる。Tesseract.js のワーカーだけ `unsafe-eval` を許可している（同じファイル内のコメント参照）。
-- 編集機能: `score-model.mjs` が MusicXML ⇄ 音符のリスト（24 tick/4分音符、小節は拍子から決める）を変換し、`editor.mjs` がピアノロールを描く。「楽譜」に戻るか保存するときに `buildXml` で MusicXML を作り直す（ヘッダー・パート・各小節の繰り返し記号と改行は元の XML から引き継ぎ、歌詞・スラー等は消える）。`score-model.mjs` を変えたら、テスト用の MusicXML（単旋律・大譜表・3 パート）で「読み込み → 書き出し → 読み込み」で音符が一致することと、OSMD で描けることを確かめる。
+- 編集機能: `score-model.mjs` が MusicXML ⇄ 音符のリスト（24 tick/4分音符、小節は拍子から決める）を変換し、`editor.mjs` がピアノロールを描く。「楽譜」に戻るか保存するときに `buildXml` で MusicXML を作り直す（ヘッダー・パート・各小節の繰り返し記号と改行は元の XML から引き継ぎ、歌詞・スラー等は消える）。`score-model.mjs` を変えたら `npm test`（`tests/score-model.test.mjs`。「読み込み → 書き出し → 読み込み」で音符が一致するか等）を通し、OSMD で描けることも確かめる。直した不具合や新しい機能にはテストを足す。
 - homr は複数小節休符をふつうの 1 小節として読むことがある。`expandMultiRests` は `<multiple-rest>` が付いたときだけ小節を増やす。それ以外は編集画面の「小節を追加」で直してもらう。
 - 最後の楽譜は `localStorage` の `sheetmusicplayer-state` に保存する。読み込んだ値は検証してから使う。新しいファイルを開いたらテンポは楽譜の値に戻す。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。

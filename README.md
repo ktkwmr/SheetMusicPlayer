@@ -125,6 +125,16 @@ npx wrangler dev        # http://localhost:8787/sheetmusicplayer/ (also runs the
 Use `wrangler dev` rather than a plain static server: the app needs the headers in `public/_headers` (cross-origin isolation for threads) to run at full speed. `file://` does not work. After editing a file, restart `wrangler dev` (it keeps serving the old ETag). On Windows PowerShell, use `npx.cmd` if `npx` is blocked.
 ふつうの静的サーバーではなく `wrangler dev` を使ってください（`_headers` の cross-origin isolation がないとスレッドが使えず遅くなります）。`file://` では動きません。ファイルを編集したら `wrangler dev` を起動し直してください。
 
+### Tests / テスト
+
+```sh
+npm install   # once: jsdom (test only; the app has no npm dependencies)
+npm test      # unit tests of score-model.mjs (tests/, with the scores in tests/fixtures/)
+```
+
+The **Test** workflow runs them on every pull request and push to `main`, and checks that the generated pages are up to date. The reading engine, display, and playback are checked by hand in Chromium (see CLAUDE.md).
+GitHub Actions の **Test** が、PR と `main` への push のたびに単体テストと生成ファイルの確認を行います。読み取り・表示・再生は Chromium で手動確認します（CLAUDE.md 参照）。
+
 ### Rebuilding the engine / エンジンの作り直し
 
 The engine files are committed, so normal changes do not need this. To update homr, Pyodide, onnxruntime-web, Tesseract.js, OpenSheetMusicDisplay, or PDF.js:
