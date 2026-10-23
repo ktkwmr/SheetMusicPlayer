@@ -29,7 +29,7 @@
 | # | 項目 | 状態 | メモ |
 |---|---|---|---|
 | 2-1 | wrangler.jsonc | ✅ | `routes`・`workers_dev: false`・`preview_urls: true`・`previews: {}` |
-| 2-2 | `/` → `/<slug>/` の転送 | — | ドメイン直下は ChordTransposer 側 |
+| 2-2 | `/` → `/<slug>/` の転送 | — | ドメイン直下は `ktkwmr/ktkwmr.com` |
 | 2-3 | 404.html | ✅ | `wrangler dev` で `/sheetmusicplayer/` 以下の不明な URL が 404 になることを確認 |
 | 2-4 | .gitignore | ✅ | `.engine-cache/`（エンジン作成用のダウンロード）も除外 |
 | 2-5 | .gitattributes（LF） | ✅ | |
@@ -40,9 +40,9 @@
 | 2-10 | バージョン番号なし・キャッシュ名固定 | ✅ | 画面にバージョンは出さない。エンジンだけはフォルダ名でバージョン管理（`engine/v3/`、中身を変えたら上げる） |
 | 2-11 | Cloudflare に接続・ルート設定 | 👤 待ち | |
 | 2-13 | 自動デプロイの確認 | 👤 待ち | |
-| 2-14 | 2 つ目以降のアプリの設定 | ✅ | sitemap は `public/sheetmusicplayer/sitemap.xml`。ChordTransposer の `robots.txt` に `Sitemap:` 行を足す PR が必要（未作成） |
-| 2-15 | トップページ | — | ChordTransposer 側 |
-| 2-16 | トップページへのアプリの追加 | ❌ | ChordTransposer の `home.mjs` に `ICON`・`APPS` を足す PR（リポジトリ公開後に作成） |
+| 2-14 | 2 つ目以降のアプリの設定 | ✅ | sitemap は `public/sheetmusicplayer/sitemap.xml`。`Sitemap:` 行は `ktkwmr/ktkwmr.com` の `robots.txt` に記載済み |
+| 2-15 | トップページ | — | `ktkwmr/ktkwmr.com`（ChordTransposer から分離） |
+| 2-16 | トップページへのアプリの追加 | ✅ | `ktkwmr/ktkwmr.com` の `home.mjs` に `ICON`・`APPS` を記載（そのリポジトリの公開・デプロイは 👤 待ち） |
 
 ## 3. PWA
 
@@ -74,7 +74,7 @@
 | 5-1〜5-3 | title・description・canonical・hreflang・OGP | ✅ | |
 | 5-4 | og-image.png | ✅ | `scripts/og-image.html` から生成 |
 | 5-5 | JSON-LD | ✅ | `browserRequirements` に「PC の Chrome・Edge」 |
-| 5-6 | robots.txt・sitemap | ⚠️ | sitemap は生成済み。robots.txt は ChordTransposer 側に追記が必要 |
+| 5-6 | robots.txt・sitemap | ✅ | sitemap は生成済み。robots.txt は `ktkwmr/ktkwmr.com` に記載 |
 | 5-7 | h1 | ✅ | |
 | 5-8 | 見えるテキスト | ✅ | 冒頭の説明と、撮影のコツ |
 | 5-10 | アプリごとの sitemap | ✅ | |
