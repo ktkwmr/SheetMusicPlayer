@@ -110,7 +110,7 @@ CLAUDE.md                       # instructions for Claude Code
 docs/baseline-status.md         # status of the shared web app baseline items
 ```
 
-This is the fourth app on `ktkwmr.com`. Its Worker only serves `/sheetmusicplayer/*`; the domain root (`/`, `robots.txt`, the root `sitemap.xml`, and 404 for other paths) belongs to the [Chord Transposer](https://github.com/ktkwmr/ChordTransposer) Worker.
+This is the fourth app on `ktkwmr.com`. Its Worker only serves `/sheetmusicplayer/*`; the domain root (`/`, `robots.txt`, the root `sitemap.xml`, and 404 for other paths) belongs to the `ktkwmr-home` Worker ([ktkwmr/ktkwmr.com](https://github.com/ktkwmr/ktkwmr.com)), so this app does not depend on any other app.
 `ktkwmr.com` の 4 つ目のアプリです。この Worker は `/sheetmusicplayer/*` だけを配信し、ドメイン直下は Chord Transposer の Worker が持っています。
 
 When you load a script or data from a new external host, add it to the `Content-Security-Policy` in `public/_headers`, or the browser will block it. With COEP, a cross-origin script also needs CORS. Also update the privacy text.

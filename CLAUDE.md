@@ -17,7 +17,7 @@
 - 運営者: ktkwmr / 問い合わせ: GitHub Issues
 - Cloudflare Web Analytics token: `5c53079cb9a64d819d1ca53e8533ca63`（ほかのアプリと同じサイト）
 - ホスティング: Cloudflare Workers 静的アセット。ドメインの 4 つ目のアプリなので、別 Worker に Route `ktkwmr.com/sheetmusicplayer*` だけを割り当てる（ベースライン §0 の A）。
-  ドメイン直下（`/` のトップページ、`robots.txt`、ルートの `sitemap.xml`、ルートの 404）は ChordTransposer の Worker にある。このアプリの sitemap は `/sheetmusicplayer/sitemap.xml`。
+  ドメイン直下（`/` のトップページ、`robots.txt`、ルートの `sitemap.xml`、ルートの 404）は別リポジトリ `ktkwmr/ktkwmr.com`（Worker `ktkwmr-home`、ルート `ktkwmr.com/*`）にある。ほかのアプリには依存しない。このアプリの sitemap は `/sheetmusicplayer/sitemap.xml`。
 - ライセンス: **AGPL-3.0**（ベースラインの MIT ではない）。アプリの中で homr（AGPL-3.0）の Python コードを配信・実行するため、同じライセンスにしている。
 - 対応環境: PC の Chrome・Edge（JSPI が必要）。スマホ・Safari・Firefox は未対応（画面に案内を出す）。
 
@@ -36,7 +36,7 @@
 - homr は複数小節休符をふつうの 1 小節として読むことがある。`expandMultiRests` は `<multiple-rest>` が付いたときだけ小節を増やす。それ以外は編集画面の「小節を追加」で直してもらう。
 - 最後の楽譜は `localStorage` の `sheetmusicplayer-state` に保存する。読み込んだ値は検証してから使う。新しいファイルを開いたらテンポは楽譜の値に戻す。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。
-- トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（ChordTransposer の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ChordTransposer` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。
+- トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（`ktkwmr/ktkwmr.com` の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`。`public/robots.txt` の `Sitemap:` 行も）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ktkwmr.com` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。
 - 記事（ガイド）はまだない。作るときは PR のプレビューで人間が内容を確認してからマージする（ベースライン §10-7、`docs/article-review.md`）。
 - 作業はブランチ → PR → Cloudflare のプレビュービルド確認 → squash マージ。
 - 本番サイト・Cloudflare 管理画面・外部 CDN にはこの環境から届かないことが多い。確かめられなかったことは「未確認」と書き、ユーザーに確認手順を伝える。

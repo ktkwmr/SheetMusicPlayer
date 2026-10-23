@@ -5,7 +5,7 @@
 //   public/sheetmusicplayer/sitemap.xml
 //
 // The sitemap is under /sheetmusicplayer/ because the domain root belongs to the
-// ChordTransposer Worker; list it in that Worker's robots.txt.
+// ktkwmr-home Worker (ktkwmr/ktkwmr.com); it is listed in that robots.txt.
 //
 // Each page is written in scripts/pages/<slug>.mjs, with separate English and
 // Japanese text (the articles are written for each language, not translated
