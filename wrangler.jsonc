@@ -7,7 +7,7 @@
   // Required by `wrangler preview`, which Workers Builds runs for non-production branches
   "previews": {},
   // Fourth app on ktkwmr.com: this Worker only serves /sheetmusicplayer/*.
-  // The domain root (/, robots.txt, the root sitemap.xml, 404 for other paths) stays in the ChordTransposer Worker.
+  // The domain root (/, robots.txt, the root sitemap.xml, 404 for other paths) is the ktkwmr-home Worker (ktkwmr/ktkwmr.com).
   "routes": [{ "pattern": "ktkwmr.com/sheetmusicplayer*", "zone_name": "ktkwmr.com" }],
   "workers_dev": false,
   // workers_dev: false also turns off preview URLs; keep them on so each PR gets a URL to review
