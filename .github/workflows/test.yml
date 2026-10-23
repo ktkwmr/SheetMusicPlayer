@@ -1,0 +1,29 @@
+name: Test
+
+# Unit tests of the score model (MusicXML <-> notes, used by the editor), and a check that the
+# generated pages are up to date. Runs on pull requests and on push to main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install test tools
+        run: npm install --no-audit --no-fund
+      - name: Unit tests
+        run: npm test
+      - name: Generated pages are up to date
+        run: |
+          node scripts/build-ja.mjs --check
+          node scripts/build-pages.mjs --check
