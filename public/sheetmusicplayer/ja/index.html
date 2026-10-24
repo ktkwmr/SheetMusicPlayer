@@ -728,7 +728,8 @@
       async function decodePdf(file) {
         if (!pdfjs) {
           pdfjs = await import("./vendor/pdf.min.mjs");
-          pdfjs.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", location.href.replace(/[?#].*$/, "")).href;
+          // document.baseURI, not location.href: ja/index.html has <base href="/sheetmusicplayer/">
+          pdfjs.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", document.baseURI).href;
         }
         let doc;
         try { doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false }).promise; }
@@ -807,7 +808,7 @@
         try {
           await Promise.race([timeout, (async function () {
             const T = await import("./engine/v3/tesseract/tesseract.esm.min.js");
-            const here = location.href.replace(/[?#].*$/, "");
+            const here = document.baseURI; // ja/index.html has <base href="/sheetmusicplayer/">
             ocr = await (T.default || T).createWorker("eng", 1, {
               workerPath: new URL("engine/v3/tesseract/worker.min.js", here).href,
               corePath: new URL("engine/v3/tesseract/tesseract-core-simd-lstm.js", here).href,

@@ -33,12 +33,23 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// omr-worker.mjs stores engine files with only their Content-Type. A worker script (Tesseract.js's
+// worker) started from the cross-origin isolated page must itself carry COEP, or the browser refuses
+// to start it, so the tempo marking was only read when the file came from the network.
+function withWorkerHeaders(req, res) {
+  if (req.destination !== "worker" || res.headers.has("cross-origin-embedder-policy")) return res;
+  const headers = new Headers(res.headers);
+  headers.set("Cross-Origin-Embedder-Policy", "credentialless");
+  headers.set("Cross-Origin-Resource-Policy", "same-origin");
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
   // Engine files never change for a version: cache first, and never copied into the page cache
   if (new URL(req.url).pathname.includes("/sheetmusicplayer/engine/")) {
-    event.respondWith(caches.match(req, { ignoreSearch: true }).then((r) => r || fetch(req)));
+    event.respondWith(caches.match(req, { ignoreSearch: true }).then((r) => (r ? withWorkerHeaders(req, r) : fetch(req))));
     return;
   }
   // Network first (always the latest when online), cache as offline fallback.
