@@ -15,6 +15,90 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/" />
   </url>
   <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/guide/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/guide/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/guide/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/guide/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/ja/guide/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/guide/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/guide/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/guide/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/faq/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/faq/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/faq/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/faq/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/ja/faq/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/faq/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/faq/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/faq/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/photo-tips/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/photo-tips/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/photo-tips/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/photo-tips/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/ja/photo-tips/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/photo-tips/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/photo-tips/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/photo-tips/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/fix-errors/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/fix-errors/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/fix-errors/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/fix-errors/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/ja/fix-errors/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/fix-errors/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/fix-errors/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/fix-errors/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/tempo-markings/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/tempo-markings/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/tempo-markings/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/tempo-markings/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/ja/tempo-markings/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/tempo-markings/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/tempo-markings/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/tempo-markings/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/musicxml/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/musicxml/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/musicxml/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/musicxml/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/ja/musicxml/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/musicxml/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/musicxml/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/musicxml/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/what-is-omr/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/what-is-omr/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/what-is-omr/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/what-is-omr/" />
+  </url>
+  <url>
+    <loc>https://ktkwmr.com/sheetmusicplayer/ja/what-is-omr/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/what-is-omr/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/what-is-omr/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ktkwmr.com/sheetmusicplayer/what-is-omr/" />
+  </url>
+  <url>
     <loc>https://ktkwmr.com/sheetmusicplayer/about/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/about/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/about/" />

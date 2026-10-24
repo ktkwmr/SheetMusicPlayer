@@ -217,6 +217,8 @@
     .help-list b { color: var(--ink); }
     ul.help-list { list-style: disc; }
     .help-list a { color: inherit; }
+    .help-more { margin: 14px 0 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+    .help-more a { color: var(--ink); }
     dialog.about { width: min(560px, calc(100vw - 32px)); height: min(640px, calc(100% - 32px)); }
     dialog.about[open] { display: flex; flex-direction: column; }
     dialog.msg p.about-license { margin: 0 0 12px; color: var(--subtle); font-size: 12px; }
@@ -335,6 +337,7 @@
         <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>
         <li><b>Save</b> – “MusicXML” saves the result. You can also open it in MuseScore and most notation apps.</li>
       </ol>
+      <p class="help-more" data-i18n-html="help.more">More: <a href="/sheetmusicplayer/guide/">guide with screenshots</a> · <a href="/sheetmusicplayer/photo-tips/">photo tips</a> · <a href="/sheetmusicplayer/fix-errors/">fixing mistakes</a> · <a href="/sheetmusicplayer/faq/">FAQ</a></p>
     </div>
     <div class="dlg-actions">
       <button class="primary" id="helpClose" type="button" data-i18n="close">Close</button>
@@ -359,6 +362,7 @@
 
   <div class="menu" id="settingsMenu" role="menu" aria-label="Settings" data-i18n-attr="aria-label:settings" hidden>
     <button type="button" role="menuitem" id="menuHelp" data-i18n="menu.help">How to use</button>
+    <a role="menuitem" id="menuGuides" href="/sheetmusicplayer/guide/" data-i18n="menu.guides" data-i18n-attr="href:menu.guides.href">Guides</a>
     <button type="button" role="menuitem" id="menuPrivacy" data-i18n="menu.privacy">Privacy</button>
     <button type="button" role="menuitem" id="menuAbout" data-i18n="menu.about">About</button>
   </div>
@@ -465,9 +469,12 @@
           "cam.hint": "Hold the page flat and fill the frame with it.",
           "cam.shoot": "Take photo",
           "menu.help": "How to use",
+          "menu.guides": "Guides",
+          "menu.guides.href": "/sheetmusicplayer/guide/",
           "menu.privacy": "Privacy",
           "menu.about": "About",
           "help.body": "<li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen; images and PDFs are read, and a MusicXML file (for example one saved from this app) opens as it is.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to move the cursor there; Play starts from it.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Save</b> – “MusicXML” saves the result. You can also open it in MuseScore and most notation apps.</li>",
+          "help.more": "More: <a href=\"/sheetmusicplayer/guide/\">guide with screenshots</a> · <a href=\"/sheetmusicplayer/photo-tips/\">photo tips</a> · <a href=\"/sheetmusicplayer/fix-errors/\">fixing mistakes</a> · <a href=\"/sheetmusicplayer/faq/\">FAQ</a>",
           "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – The last score (the notes the app read, as MusicXML), its file name, and the tempo are saved in your browser's storage so they are there next time. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\">about this site</a>.</li>",
           "about.license": "© 2026 ktkwmr · Licensed under the <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a> (the same as homr, the music recognition it uses) · <a href=\"/sheetmusicplayer/about/\">About this site</a>",
           "close": "Close",
@@ -562,9 +569,12 @@
           "cam.hint": "楽譜を平らにして、枠いっぱいに入れてください。",
           "cam.shoot": "撮影する",
           "menu.help": "使い方",
+          "menu.guides": "ガイド・記事",
+          "menu.guides.href": "/sheetmusicplayer/ja/guide/",
           "menu.privacy": "プライバシー",
           "menu.about": "このアプリについて",
           "help.body": "<li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べます。画像とPDFは読み取り、MusicXML（このアプリで保存したものなど）はそのまま開きます。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックするとカーソルがそこに移り、「再生」でそこから始まります。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>保存</b> – 「MusicXML」で結果を保存できます。MuseScore などの楽譜ソフトでも開けます。</li>",
+          "help.more": "詳しくは：<a href=\"/sheetmusicplayer/ja/guide/\">画面つきの使い方ガイド</a>・<a href=\"/sheetmusicplayer/ja/photo-tips/\">撮り方のコツ</a>・<a href=\"/sheetmusicplayer/ja/fix-errors/\">読み取りミスの直し方</a>・<a href=\"/sheetmusicplayer/ja/faq/\">よくある質問</a>",
           "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – 次に開いたときにも使えるよう、最後に開いた楽譜（読み取った音符のMusicXML）とファイル名、テンポをブラウザ内に保存します。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>をご覧ください。</li>",
           "about.license": "© 2026 ktkwmr · <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href=\"/sheetmusicplayer/ja/about/\">運営者情報</a>",
           "close": "閉じる",
@@ -732,7 +742,8 @@
       async function decodePdf(file) {
         if (!pdfjs) {
           pdfjs = await import("./vendor/pdf.min.mjs");
-          pdfjs.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", location.href.replace(/[?#].*$/, "")).href;
+          // document.baseURI, not location.href: ja/index.html has <base href="/sheetmusicplayer/">
+          pdfjs.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", document.baseURI).href;
         }
         let doc;
         try { doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()), isEvalSupported: false }).promise; }
@@ -811,7 +822,7 @@
         try {
           await Promise.race([timeout, (async function () {
             const T = await import("./engine/v3/tesseract/tesseract.esm.min.js");
-            const here = location.href.replace(/[?#].*$/, "");
+            const here = document.baseURI; // ja/index.html has <base href="/sheetmusicplayer/">
             ocr = await (T.default || T).createWorker("eng", 1, {
               workerPath: new URL("engine/v3/tesseract/worker.min.js", here).href,
               corePath: new URL("engine/v3/tesseract/tesseract-core-simd-lstm.js", here).href,
@@ -1458,7 +1469,7 @@
         else if (e.key === "ArrowDown") { e.preventDefault(); setBpm(state.bpm - (e.shiftKey ? 5 : 1)); }
       });
 
-      // ---------- Settings (gear) menu: How to use / Privacy / About ----------
+      // ---------- Settings (gear) menu: How to use / Guides (a link to the articles) / Privacy / About ----------
       const settingsBtn = $("settingsBtn"), settingsMenu = $("settingsMenu");
       const helpDlg = $("helpDlg"), privacyDlg = $("privacyDlg"), aboutDlg = $("aboutDlg");
       function closeMenu(returnFocus) {
