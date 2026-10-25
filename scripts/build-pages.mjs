@@ -25,7 +25,7 @@ import { fileURLToPath } from "node:url";
 import { renderPage, ORIGIN, APP_PATH, PUBLISHED, pagePath } from "./pages/layout.mjs";
 
 // Footer order
-const PAGES = []; // guides and articles: none yet (WEBAPP_BASELINE §10, only when the owner asks)
+const PAGES = ["guide", "faq", "photo-tips", "fix-errors", "tempo-markings", "musicxml", "what-is-omr"];
 // Site information (operator and privacy policy)
 const INFO_PAGES = ["about", "privacy"];
 

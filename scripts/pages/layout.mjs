@@ -92,6 +92,8 @@ const CSS = `
     figure.shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius); }
     figure.shot a { display: block; }
     figure.shot.phone img { max-width: 320px; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px 14px; margin: 0 0 20px; }
+    .gallery figure { margin: 0; }
     figure.shot figcaption { margin-top: 6px; }
     .note { margin: 0 0 20px; padding: 12px 16px; border-left: 3px solid var(--ink); background: var(--fill); border-radius: 0 var(--radius) var(--radius) 0; }
     .note p:last-child, .note ul:last-child { margin-bottom: 0; }
@@ -122,6 +124,8 @@ const CSS = `
     td.dim { color: var(--muted); background: var(--fill); }
     td.hit { background: var(--ink); color: var(--paper); font-weight: 700; }
     table.text td, table.text th { white-space: normal; text-align: left; }
+    td.wrap { white-space: normal; text-align: left; min-width: 11em; }
+    tbody th small { font-size: 12px; font-weight: 400; color: var(--muted); }
     td code, th code { white-space: nowrap; }
     table.text tbody th { white-space: nowrap; }
     th.group { font-weight: 400; color: var(--muted); font-size: 13px; }

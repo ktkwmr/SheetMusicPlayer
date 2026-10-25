@@ -73,7 +73,7 @@
 |---|---|---|---|
 | 5-1〜5-3 | title・description・canonical・hreflang・OGP | ✅ | |
 | 5-4 | og-image.png | ✅ | `scripts/og-image.html` から生成 |
-| 5-5 | JSON-LD | ✅ | `browserRequirements` に「PC の Chrome・Edge」 |
+| 5-5 | JSON-LD | ✅ | `browserRequirements` に JSPI が必要なこと（動作確認は PC の Chrome・Edge、Firefox 153・Safari 27 は未確認） |
 | 5-6 | robots.txt・sitemap | ✅ | sitemap は生成済み。robots.txt は `ktkwmr/ktkwmr.com` に記載 |
 | 5-7 | h1 | ✅ | |
 | 5-8 | 見えるテキスト | ✅ | 冒頭の説明と、撮影のコツ |
@@ -113,10 +113,10 @@
 
 | # | 項目 | 状態 | メモ |
 |---|---|---|---|
-| 9-1 | 設定メニュー | ⚠️ | 使い方・プライバシー・このアプリについて。ガイド記事はないので「ガイド・記事」は置いていない |
+| 9-1 | 設定メニュー | ✅ | 使い方・ガイド・記事（`/guide/` へのリンク）・プライバシー・このアプリについて |
 | 9-2 | 使い方 | ✅ | |
 | 9-3 | 状態の保存 | ✅ | 最後の楽譜（MusicXML）・ファイル名・テンポ。新しいファイルではテンポを楽譜の値に戻す |
-| 9-4 | スマホ対応 | ⚠️ | 390px で横スクロールなし。ただし読み取りエンジンは PC の Chrome・Edge のみ（JSPI が必要）。スマホでは案内を表示 |
+| 9-4 | スマホ対応 | ⚠️ | 390px で横スクロールなし。ただし読み取りエンジンの動作確認は PC の Chrome・Edge のみ（JSPI が必要。JSPI のないブラウザでは案内を表示）。Android の Chrome などは JSPI があり動き出すが未確認（メモリ不足の可能性） |
 | 9-5 | `accept` | ✅ | 「ファイルを選ぶ」は `accept` なし（どのファイルも選べ、中身で画像・PDF を判定）。「写真を撮る」はスマホではカメラ、PC では Web カメラ |
 | 9-6, 9-7 | 印刷・保存 | ✅ | MusicXML の保存（`a[download]`）。印刷はなし |
 | 9-8 | アクセシビリティ | ✅ | |
@@ -128,7 +128,13 @@
 
 | # | 項目 | 状態 | メモ |
 |---|---|---|---|
-| 10 | 記事 | — | 人間が「やる」と言ったときに作る |
+| 10-1 | 生成の仕組み | ✅ | `scripts/pages/<slug>.mjs`（英日を別々に書く）、共通部品は `parts.mjs` |
+| 10-2 | 最初の記事 | ✅ | 使い方ガイド・FAQ・撮り方のコツ・読み取りミスの直し方・速度記号と BPM・MusicXML とは・OMR の仕組み（7 本） |
+| 10-3 | 表は計算で | ✅ | 速度記号の表はアプリの `TEMPO_TERMS` から（範囲外ならビルドが止まる）。撮り方の比較表は実測（`photo-results.json`） |
+| 10-4 | 画面写真 | ⚠️ | `scripts/render-guide-images.mjs`（PC・日英）。スマホはアプリの動作が未確認のため撮らない |
+| 10-5 | 導線 | ✅ | 記事末尾の「アプリを開く」、フッターに全記事、日英切り替え。アプリ側は設定メニューと「使い方」の 2 か所 |
+| 10-6 | 公開前の UX レビュー | ✅ | 390px で全記事を確認（PR 本文に記録） |
+| 10-7 | 人間の内容確認 | 👤 待ち | PR のプレビューで確認（`docs/article-review.md`） |
 | 11-1〜11-3 | Web Analytics | ✅ | 同じ token |
 | 11-4 | 本番での beacon 確認 | 👤 待ち | COEP（credentialless）の下で beacon が読み込めるかも確認する |
 | 12-1, 12-2 | Actions | ✅ | |
@@ -141,3 +147,7 @@
 - 大きなファイル（WebAssembly・モデル）を配信するアプリ: Cloudflare Workers の 1 ファイル 25MiB 制限、キャッシュ優先の専用キャッシュ、バージョン付きフォルダ。
 - `SharedArrayBuffer`（スレッド）が要るアプリ: `_headers` に COOP/COEP。COEP は `credentialless` にすると Web Analytics の beacon をそのまま使える。
 - Playwright で検証するときは、毎回新しいプロファイルを使う（Cache Storage・IndexedDB の古いデータで結果が変わる）。
+- `<base href>` を使う生成ページ（`ja/index.html` など）では、JS で URL を組み立てるときに `location.href` ではなく `document.baseURI` を基準にする。このアプリでは日本語ページで PDF.js のワーカーと Tesseract.js が 404 になり、PDF が開けずテンポも読めていなかった。
+- COEP のページで、Service Worker がキャッシュから作り直したレスポンスでワーカーのスクリプトを返すと、COEP ヘッダーがないためワーカーが起動しない。キャッシュに入れるときに元のヘッダーを残すか、返すときに付ける。
+- 記事の画面写真や比較表は、同じ見本から Playwright で作り直せるスクリプトにしておく（`render-guide-images.mjs`）。実測値を本文で言葉にするときは、値が変わったらビルドが止まるようにする。
+- 実際に E2E で 2 回目以降の訪問（Service Worker が制御している状態）と日本語ページも通す。初回・英語だけの確認では上の 2 つは見つからなかった。
