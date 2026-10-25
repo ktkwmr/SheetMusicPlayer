@@ -19,7 +19,7 @@
 - ホスティング: Cloudflare Workers 静的アセット。ドメインの 4 つ目のアプリなので、別 Worker に Route `ktkwmr.com/sheetmusicplayer*` だけを割り当てる（ベースライン §0 の A）。
   ドメイン直下（`/` のトップページ、`robots.txt`、ルートの `sitemap.xml`、ルートの 404）は別リポジトリ `ktkwmr/ktkwmr.com`（Worker `ktkwmr-home`、ルート `ktkwmr.com/*`）にある。ほかのアプリには依存しない。このアプリの sitemap は `/sheetmusicplayer/sitemap.xml`。
 - ライセンス: **AGPL-3.0**（ベースラインの MIT ではない）。アプリの中で homr（AGPL-3.0）の Python コードを配信・実行するため、同じライセンスにしている。
-- 対応環境: PC の Chrome・Edge（JSPI が必要）。スマホ・Safari・Firefox は未対応（画面に案内を出す）。
+- 対応環境: 動作確認は PC の Chrome・Edge 137 以降。エンジンに JSPI が必要で、ないブラウザでは案内を出す（`supported` は `WebAssembly.Suspending` の有無で判定）。JSPI は Android の Chrome 137・Firefox 153・Safari 27 にも入ったが、これらでは未確認（Safari は COEP `credentialless` に対応しているかも確かめる）。動作を確かめたら README・記事（`guide`・`faq`）・アプリの文言（`err.unsupported`、JSON-LD の `browserRequirements`）を一緒に直す。
 
 ## ルール
 - 手で編集するのは `public/sheetmusicplayer/index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`sw.js`、`engine/python/`、`scripts/`。

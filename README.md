@@ -6,8 +6,8 @@ Take a photo of sheet music, or open an image or PDF, and hear it. The app reads
 
 **▶ https://ktkwmr.com/sheetmusicplayer/** (日本語: https://ktkwmr.com/sheetmusicplayer/ja/)
 
-> Works on the latest Chrome or Edge on a computer for now. Phones and Safari are not supported yet (see [Requirements](#requirements--動作環境)).
-> いまは PC の最新の Chrome・Edge で動きます。スマホと Safari には未対応です（[動作環境](#requirements--動作環境)）。
+> Tested on the latest Chrome and Edge on a computer. Newer Firefox and Safari, and Chrome on Android, may also work but are untested (see [Requirements](#requirements--動作環境)).
+> 動作を確認しているのは PC の最新の Chrome・Edge です。新しい Firefox・Safari や Android の Chrome でも動く可能性がありますが、未確認です（[動作環境](#requirements--動作環境)）。
 
 ## Features / 機能
 
@@ -30,14 +30,14 @@ Take a photo of sheet music, or open an image or PDF, and hear it. The app reads
 
 | | |
 |---|---|
-| Browser | Chrome or Edge 137 or later on a computer. The engine needs **JavaScript Promise Integration (JSPI)**, which Safari and Firefox do not have yet. Other browsers get a message instead of a broken page |
+| Browser | Tested on Chrome and Edge 137 or later on a computer. The engine needs **WebAssembly JavaScript Promise Integration (JSPI)**; browsers without it get a message instead of a broken page. Firefox 153+, Safari 27+, and Chrome on Android also have JSPI but are untested (phones often lack the memory) |
 | Memory | About 2 GB free while reading |
 | Time | Roughly 10–60 seconds per page, depending on the computer and the number of staves (measured: 40–70 s per page on a 2-core cloud machine) |
 | First visit | Downloads ~127 MB once |
 
 | | |
 |---|---|
-| ブラウザ | PC の Chrome・Edge 137 以降。エンジンが **JavaScript Promise Integration（JSPI）** を使うため、Safari と Firefox はまだ動かない（その場合は案内を表示） |
+| ブラウザ | 動作確認は PC の Chrome・Edge 137 以降。エンジンが **WebAssembly JavaScript Promise Integration（JSPI）** を使い、JSPI のないブラウザでは案内を表示する。Firefox 153 以降・Safari 27 以降・Android の Chrome にも JSPI はあるが未確認（スマホはメモリが足りないことが多い） |
 | メモリ | 読み取り中に約 2GB |
 | 時間 | PC の性能と段の数によって 1 ページ 10〜60 秒ほど（2 コアのクラウド環境で 1 ページ 40〜70 秒を実測） |
 | 初回 | 約 127MB を 1 回だけダウンロード |
