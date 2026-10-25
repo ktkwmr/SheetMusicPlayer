@@ -30,6 +30,15 @@ PR を出すと Cloudflare のプレビュー URL ができるので、そこで
 | I | guide ほか | 画面写真は PC（1280×800）だけ。アプリがスマホ未対応のため、スマホの画面写真は載せていない |
 | J | 全体 | 見本の楽譜は「歓喜の歌」（ベートーヴェン、パブリックドメイン）をスクリプトで 2 段に編曲したもの。作曲者表記「L. van Beethoven」でよいか |
 
+### Claude による校閲（2026-10-25）で直したこと
+
+| 記事 | 直したこと | 根拠 |
+|---|---|---|
+| guide・faq | 「Safari・Firefox・スマホにはまだ JSPI がない」は古かった。Android の Chrome 137・Firefox 153（2026-07）・Safari 27（2026-09）が対応済み。「動作確認は PC の Chrome・Edge だけ」に変更 | web-platform-dx の developer-signals、Mozilla の Bugzilla、WebKit のブログ |
+| fix-errors・what-is-omr | 弱起（アウフタクト）の小節は短いのが正しいので、「!」が正しい場合があると追記。臨時記号は「同じ高さの音」ではなく「同じ線・間の音」に効く | 記譜の慣習。アプリの `score-model.mjs` は弱起の小節にも「!」を付ける |
+| musicxml | 歴史を「2000 年から設計、2004 年に 1.0、2011 年に MakeMusic、2015 年から W3C」に。日本語の `duration` の説明の誤り（「divisions で割った数」）を直した。MIDI に「小節線の情報がない」は不正確（拍子は入る）なので、付点かタイか・連桁・段と声部に置き換えた | Wikipedia、MakeMusic の発表 |
+| tempo-markings | 「多くの資料に載っている範囲」は言い過ぎ（資料によってかなり違う。機械式メトロノームでは Allegro 120〜168 など）と明記。Lento の訳を「遅く」に。Allegro moderato の説明を「2 つ目の言葉が 1 つ目を補う」に | 各種の速度記号の表 |
+
 ## 確認が終わったら
 
 1. 直す点があれば Claude に伝える（Claude が直して PR を更新 → もう一度確認）。

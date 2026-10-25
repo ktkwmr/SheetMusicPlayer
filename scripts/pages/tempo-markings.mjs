@@ -8,7 +8,7 @@ import { TEMPO_TERMS, DEFAULT_BPM, BPM_RANGE, link } from "./parts.mjs";
 const TERMS = {
   grave:       { range: [25, 45],   en: "very slow, solemn",                 ja: "重々しく、きわめて遅く", kana: "グラーヴェ" },
   largo:       { range: [40, 60],   en: "slow and broad",                    ja: "幅広く、ゆるやかに",     kana: "ラルゴ" },
-  lento:       { range: [45, 60],   en: "slow",                              ja: "ゆるやかに",             kana: "レント" },
+  lento:       { range: [45, 60],   en: "slow",                              ja: "遅く",                   kana: "レント" },
   larghetto:   { range: [60, 66],   en: "rather slow (a little faster than largo)", ja: "ラルゴより少し速く", kana: "ラルゲット" },
   adagio:      { range: [66, 76],   en: "slow, at ease",                     ja: "ゆるやかに、くつろいで", kana: "アダージョ" },
   adagietto:   { range: [72, 76],   en: "a little faster than adagio",       ja: "アダージョより少し速く", kana: "アダージェット" },
@@ -120,9 +120,9 @@ ${durationTable("en")}
 <p class="cap">Lengths at a few tempos (4/4, played straight through without repeats).</p>
 
 <h2 id="chart">Tempo markings chart</h2>
-<p>The words describe a character as much as a speed, so the numbers are only a guide. The ranges below are the ones most references give; metronome scales and other books differ by a few BPM; the same word is also taken faster or slower depending on the period, the composer, and the piece. "This app" is the tempo the app uses when it finds only the word on the page.</p>
+<p>The words describe a character as much as a speed, so the numbers are only a guide. The ranges below are a commonly quoted summary, but published tables disagree, sometimes widely: many mechanical metronomes mark Allegro as 120–168, and some textbooks give much lower figures. The same word is also taken faster or slower depending on the period, the composer, and the piece. "This app" is the tempo the app uses when it finds only the word on the page.</p>
 ${termTable("en")}
-<p class="cap">From slowest to fastest. When a word is combined with another (<i lang="it">Allegro moderato</i>), the speed is between the two.</p>
+<p class="cap">From slowest to fastest. A second word qualifies the first: <i lang="it">Allegro moderato</i> is a moderate (somewhat held-back) allegro.</p>
 
 <h2 id="units">When the beat is not a quarter note</h2>
 <p>A metronome mark counts whatever note is shown before the equals sign. In 6/8 the beat is usually a dotted quarter, and in 2/2 (cut time) it is a half note. To compare tempos, or to set a player that counts quarter notes, multiply by the length of the beat in quarter notes.</p>
@@ -181,9 +181,9 @@ ${durationTable("ja")}
 <p class="cap">いくつかのテンポでの長さ（4/4 拍子、繰り返しなしで通した場合）。</p>
 
 <h2 id="chart">速度記号の一覧</h2>
-<p>速度記号は速さだけでなく曲の性格も表すので、数字はあくまで目安です。下の範囲は多くの資料に載っているもので、メトロノームの目盛りや本によって数 BPM ずつ違います。同じ言葉でも、時代・作曲家・曲によって速めにも遅めにも取られます。「このアプリ」は、楽譜に速度記号だけが書かれていたときにアプリが使うテンポです。</p>
+<p>速度記号は速さだけでなく曲の性格も表すので、数字はあくまで目安です。下の範囲はよく引用されるまとめの値ですが、資料によってかなり違います。たとえば機械式メトロノームの目盛りでは Allegro を 120〜168 としているものが多く、もっと低い値を載せている教科書もあります。同じ言葉でも、時代・作曲家・曲によって速めにも遅めにも取られます。「このアプリ」は、楽譜に速度記号だけが書かれていたときにアプリが使うテンポです。</p>
 ${termTable("ja")}
-<p class="cap">遅い順。2 つの言葉を組み合わせたとき（<i lang="it">Allegro moderato</i> など）は、その間の速さになります。</p>
+<p class="cap">遅い順。2 つ目の言葉は 1 つ目を補います（<i lang="it">Allegro moderato</i> は「ほどよく抑えたアレグロ」）。</p>
 
 <h2 id="units">拍が 4分音符でないとき</h2>
 <p>メトロノーム記号は「=」の前に書かれた音符を 1 拍として数えます。6/8 拍子ではふつう付点4分音符、2/2 拍子では 2分音符が 1 拍です。4分音符で数える再生アプリに入れるときや、ほかの曲と速さを比べるときは、その音符が 4分音符いくつ分かを掛けます。</p>

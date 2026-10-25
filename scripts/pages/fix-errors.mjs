@@ -32,7 +32,7 @@ export default {
 
 <h2 id="flag">Start with the measures marked “!”</h2>
 ${shot("en", "app-edit", "The editor with measure 4 highlighted and marked with an exclamation mark because one note is missing", "Measure 4 is marked “!”: one note is missing, so the measure is a quarter note short.")}
-<p>Every measure must add up to the time signature: four quarter notes in 4/4, three in 3/4, and so on. When a measure the app read has too many or too few beats, it is highlighted and marked <b>!</b> in the editor. This almost always means a note was missed, added, or given the wrong length. Measures that add up can still have a wrong pitch, so listen to those too.</p>
+<p>Every measure must add up to the time signature: four quarter notes in 4/4, three in 3/4, and so on. When a measure the app read has too many or too few beats, it is highlighted and marked <b>!</b> in the editor. This almost always means a note was missed, added, or given the wrong length. One exception: a piece that starts with a pickup (an upbeat before the first full measure) has a short first measure on purpose, and often a short last measure too, so a “!” there can be correct. Measures that add up can still have a wrong pitch, so listen to those too.</p>
 
 <h2 id="editor">How the editor works</h2>
 <p>Switch to <b>Edit</b>. Each note is a box on a piano roll: the keyboard on the left shows the pitch, and time runs from left to right. For a piano score, choose the <b>upper</b> or <b>lower</b> staff at the top.</p>
@@ -106,7 +106,7 @@ ${shot("en", "app-edit", "The editor with measure 4 highlighted and marked with 
 
 <h2 id="flag">「!」の付いた小節から確かめる</h2>
 ${shot("ja", "app-edit", "4 小節目の音符が 1 つ抜けているため、4 小節目が色づけされ「!」が付いた編集画面", "4 小節目に「!」が付いています。音符が 1 つ抜けて、4分音符 1 つ分足りません。")}
-<p>どの小節も、拍の合計は拍子と同じになるはずです（4/4 拍子なら 4分音符 4 つ分、3/4 拍子なら 3 つ分）。読み取った小節の拍が多すぎたり少なすぎたりすると、編集画面でその小節に色が付き、<b>!</b> が表示されます。たいていは、音符の見落とし・余分な音符・長さの読み違いのどれかです。拍が合っている小節にも音の高さの間違いはあり得るので、そちらも聴いて確かめてください。</p>
+<p>どの小節も、拍の合計は拍子と同じになるはずです（4/4 拍子なら 4分音符 4 つ分、3/4 拍子なら 3 つ分）。読み取った小節の拍が多すぎたり少なすぎたりすると、編集画面でその小節に色が付き、<b>!</b> が表示されます。たいていは、音符の見落とし・余分な音符・長さの読み違いのどれかです。ただし、弱起（アウフタクト）で始まる曲は、最初の小節がもともと短く、最後の小節も短いことが多いので、そこに「!」が付くのは正しい場合があります。拍が合っている小節にも音の高さの間違いはあり得るので、そちらも聴いて確かめてください。</p>
 
 <h2 id="editor">編集画面の使い方</h2>
 <p><b>編集</b>に切り替えると、音符がピアノロールの上の四角で表示されます。左の鍵盤が音の高さ、左から右が時間です。ピアノの楽譜では、上の「段」で<b>上段</b>・<b>下段</b>を切り替えます。</p>

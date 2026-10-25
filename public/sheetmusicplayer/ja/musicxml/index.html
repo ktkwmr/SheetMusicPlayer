@@ -215,8 +215,8 @@
   &lt;/note&gt;
   &lt;!-- … three more quarter notes: E, F, G --&gt;
 &lt;/measure&gt;</code></pre>
-<p>音符ごとに、高さ（<code>octave</code> <code>4</code> の <code>E</code>、つまりミ）と長さ（<code>duration</code>。4分音符を <code>divisions</code> で割った数）が書かれています。音楽としての意味が残っているので、開いたソフトは楽譜を組み直したり、再生・移調・編集したりできます。</p>
-<p>MusicXML は 2004 年に Recordare 社が作り、今は W3C の Music Notation Community Group が開発しています。最新版は 4.0 です。</p>
+<p>音符ごとに、高さ（<code>octave</code> <code>4</code> の <code>E</code>、つまりミ）と長さ（<code>duration</code>。4分音符を <code>divisions</code> 等分した単位で数えた長さで、この例では 24 なので 4分音符 1 つ）が書かれています。音楽としての意味が残っているので、開いたソフトは楽譜を組み直したり、再生・移調・編集したりできます。</p>
+<p>MusicXML は、Recordare 社のマイケル・グッドが 2000 年から設計し、2004 年に 1.0 を公開しました。2011 年に MakeMusic 社が引き継ぎ、2015 年からは W3C の Music Notation Community Group が開発しています。最新版は 4.0（2021 年）です。</p>
 
 <h2 id="compare">MusicXML・MIDI・PDF の違い</h2>
 <div class="table-wrap">
@@ -229,7 +229,7 @@
 </tbody>
 </table>
 </div>
-<p>MIDI には、その音がソ♯なのかラ♭なのか、小節線や連桁がどこにあるのかという情報がありません。そのため MIDI から楽譜を作るときは、どうしても推測が入ります。MusicXML ならそうした情報も残ります。</p>
+<p>MIDI には、その音がソ♯なのかラ♭なのか、付点4分音符なのか 4分音符と 8分音符のタイなのか、連桁のつなぎ方やどの段・声部の音なのか、という情報がありません。音の長さも演奏した秒数に近い値です。そのため MIDI から楽譜を作るときは、どうしても推測が入ります。MusicXML ならそうした情報も残ります。</p>
 
 <h2 id="files">.musicxml・.mxl・.xml</h2>
 <ul>

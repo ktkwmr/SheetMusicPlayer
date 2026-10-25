@@ -32,8 +32,8 @@ ${image("sample-score.webp", 900, 1273, "A printed page of sheet music: Ode to J
   <li><b>Position carries meaning.</b> The same note head means a different pitch on each line and space, and a different pitch again under another clef or key signature.</li>
   <li><b>Music is two-dimensional.</b> Text is read in one line; music has chords stacked vertically, several voices on one staff, and two staves read together on a piano score.</li>
   <li><b>Symbols overlap.</b> Note heads sit on staff lines, beams join several notes, and slurs cross everything.</li>
-  <li><b>Small marks change a lot.</b> A dot after a note adds half its length; a sharp in the middle of a measure also applies to every later note of the same pitch until the end of the measure.</li>
-  <li><b>Everything must add up.</b> The notes in each measure must fill exactly the time signature, so one missed flag throws the measure off.</li>
+  <li><b>Small marks change a lot.</b> A dot after a note adds half its length; a sharp in the middle of a measure also applies to the later notes on the same line or space until the end of the measure.</li>
+  <li><b>Everything must add up.</b> Apart from special cases such as a pickup measure, the notes in each measure must fill exactly the time signature, so one missed flag throws the measure off.</li>
 </ul>
 
 <h2 id="steps">How it works, step by step</h2>
@@ -84,8 +84,8 @@ ${image("sample-score.webp", 900, 1273, "印刷された楽譜のページ。ピ
   <li><b>位置に意味がある。</b>同じ符頭でも、どの線・間にあるかで音の高さが変わり、音部記号や調号が違えばまた変わります。</li>
   <li><b>楽譜は 2 次元。</b>文字は 1 行ずつ読めますが、楽譜には縦に重なる和音、1 つの五線に複数の声部、ピアノの楽譜なら同時に読む 2 段があります。</li>
   <li><b>記号が重なる。</b>符頭は五線の上に乗り、連桁はいくつもの音符をつなぎ、スラーはあらゆるものの上を横切ります。</li>
-  <li><b>小さな記号の影響が大きい。</b>音符の後の付点は長さを 1.5 倍にし、小節の途中のシャープはその小節の終わりまで、同じ高さの音すべてに効きます。</li>
-  <li><b>合計が合わなければならない。</b>各小節の音符は拍子ぴったりの長さになる必要があり、旗を 1 本見落とすだけで小節が崩れます。</li>
+  <li><b>小さな記号の影響が大きい。</b>音符の後の付点は長さを 1.5 倍にし、小節の途中のシャープはその小節の終わりまで、同じ線・間にある後の音にも効きます。</li>
+  <li><b>合計が合わなければならない。</b>弱起の小節などの例外を除き、各小節の音符は拍子ぴったりの長さになる必要があり、旗を 1 本見落とすだけで小節が崩れます。</li>
 </ul>
 
 <h2 id="steps">読み取りの手順</h2>

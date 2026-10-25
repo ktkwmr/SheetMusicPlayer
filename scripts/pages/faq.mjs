@@ -6,7 +6,7 @@ ${items.map((qa) => `<dt id="${qa.id}">${qa.q}</dt>\n<dd>${qa.a}</dd>`).join("\n
 </dl>`;
 
 const en = [
-  { id: "phone", q: "Can I use it on a phone, an iPad, or Safari?", a: `<p>Not yet. The reading engine needs a browser feature called JavaScript Promise Integration (JSPI), which only Chrome and Edge 137 or later on a computer have at the moment. Safari, Firefox, and the browsers on phones and tablets show a message instead. You can take the photo with your phone and open it on a computer.</p>` },
+  { id: "phone", q: "Can I use it on a phone, an iPad, Safari, or Firefox?", a: `<p>The app is tested on Chrome and Edge 137 or later on a computer. The reading engine needs a browser feature called JavaScript Promise Integration (JSPI). Browsers without it show a message instead. Chrome on Android (137 or later), Firefox (153 or later), and Safari (27 or later) have added it, but the app has not been tested on them yet, and phones and tablets often do not have enough memory for reading (about 2 GB). If it does not work, take the photo with your phone and open it on a computer.</p>` },
   { id: "free", q: "Is it free? Do I need an account?", a: `<p>It is free, with no account, no sign-up, and no ads.</p>` },
   { id: "upload", q: "Is my sheet music uploaded anywhere?", a: `<p>No. The photo, image, or PDF is read inside your browser on your computer and is never sent to a server. Photos taken with the camera are not saved. Only the last score (as MusicXML) and its tempo are kept in the browser so they are there next time. See the <a href="/sheetmusicplayer/privacy/">privacy policy</a>.</p>` },
   { id: "time", q: "How long does reading take?", a: `<p>Roughly 10 to 60 seconds per page, depending on the computer and the number of staves. The first time, the app also downloads its reading engine (about 130 MB) once; after that it starts right away and works offline.</p>` },
@@ -22,7 +22,7 @@ const en = [
 ];
 
 const ja = [
-  { id: "phone", q: "スマホや iPad、Safari で使えますか？", a: `<p>今は使えません。読み取りエンジンに JavaScript Promise Integration（JSPI）というブラウザの機能が必要で、今のところ PC の Chrome・Edge（137 以降）にしかないためです。Safari・Firefox・スマホやタブレットのブラウザでは案内を表示します。写真をスマホで撮って、PC で開くことはできます。</p>` },
+  { id: "phone", q: "スマホや iPad、Safari、Firefox で使えますか？", a: `<p>動作を確認しているのは、PC の Chrome・Edge（137 以降）です。読み取りエンジンには JavaScript Promise Integration（JSPI）というブラウザの機能が必要で、この機能がないブラウザでは案内を表示します。Android の Chrome（137 以降）、Firefox（153 以降）、Safari（27 以降）にもこの機能が入りましたが、これらでの動作はまだ確かめていません。また、スマホやタブレットは読み取りに必要なメモリ（約 2GB）が足りないことがよくあります。うまくいかないときは、写真をスマホで撮って PC で開いてください。</p>` },
   { id: "free", q: "無料ですか？ 登録は必要ですか？", a: `<p>無料です。アカウント登録は要らず、広告もありません。</p>` },
   { id: "upload", q: "楽譜はどこかにアップロードされますか？", a: `<p>されません。写真・画像・PDF は PC のブラウザの中で読み取り、サーバーには送りません。カメラで撮った写真も保存しません。次に開いたときのために、最後の楽譜（MusicXML）とテンポだけをブラウザに保存します。<a href="/sheetmusicplayer/ja/privacy/">プライバシーポリシー</a>もご覧ください。</p>` },
   { id: "time", q: "読み取りにはどのくらい時間がかかりますか？", a: `<p>PC の性能と段の数によって、1 ページ 10〜60 秒ほどです。初回だけ、読み取りエンジン（約 130MB）のダウンロードが入ります。2 回目からはすぐに始まり、オフラインでも使えます。</p>` },

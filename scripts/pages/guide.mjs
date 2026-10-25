@@ -25,7 +25,7 @@ export default {
 
 <h2 id="need">What you need</h2>
 <ul>
-  <li><b>A computer with Chrome or Edge (version 137 or later).</b> The reading engine uses a browser feature (JavaScript Promise Integration) that Safari, Firefox, and phone browsers do not have yet. On those, the app shows a message instead.</li>
+  <li><b>A computer with Chrome or Edge (version 137 or later).</b> The reading engine needs a browser feature called JavaScript Promise Integration (JSPI); browsers without it show a message instead. Newer Firefox (153+) and Safari (27+) and Chrome on Android also have it, but the app is tested only on Chrome and Edge on a computer.</li>
   <li><b>About 2 GB of free memory</b> while a page is being read. Close other heavy tabs if the computer is short of memory.</li>
   <li><b>An internet connection the first time.</b> The app downloads its reading engine once (about 130 MB) and keeps it in the browser. After that it starts right away and also works offline.</li>
   <li><b>Printed sheet music</b> in standard notation. Handwritten music and tablature are not supported.</li>
@@ -106,7 +106,7 @@ ${shot("en", "app-edit", "The editor: a piano roll with the notes of the upper s
 
 <h2 id="need">必要なもの</h2>
 <ul>
-  <li><b>PC の Chrome か Edge（バージョン 137 以降）。</b>読み取りエンジンが使うブラウザの機能（JavaScript Promise Integration）が、Safari・Firefox・スマホのブラウザにはまだありません。これらのブラウザでは案内を表示します。</li>
+  <li><b>PC の Chrome か Edge（バージョン 137 以降）。</b>読み取りエンジンには JavaScript Promise Integration（JSPI）というブラウザの機能が必要で、この機能がないブラウザでは案内を表示します。新しい Firefox（153 以降）・Safari（27 以降）や Android の Chrome にもこの機能はありますが、動作を確認しているのは PC の Chrome・Edge だけです。</li>
   <li><b>読み取り中に 2GB ほどの空きメモリ。</b>メモリが少ないときは、ほかの重いタブを閉じてください。</li>
   <li><b>初回だけインターネット接続。</b>読み取りエンジン（約 130MB）を 1 回だけダウンロードしてブラウザに保存します。次からはすぐに始まり、オフラインでも使えます。</li>
   <li><b>印刷された五線譜。</b>手書きの楽譜とタブ譜には対応していません。</li>

@@ -43,7 +43,7 @@ export default {
 <p>A MusicXML file describes the score itself: parts and staves, clefs, key and time signatures, and every note with its pitch and length, plus rests, ties, slurs, articulations, dynamics, lyrics, and text. It is plain text in XML, so you can open it in a text editor. One measure looks like this:</p>
 ${pre(SNIPPET)}
 <p>Each note says which pitch it is (<code>E</code> in octave <code>4</code>) and how long it lasts (<code>duration</code>, counted in <code>divisions</code> per quarter note). Because the file keeps the musical meaning, a program that opens it can lay out the score again, play it, transpose it, or change it.</p>
-<p>MusicXML was created by Recordare in 2004 and is now developed by the W3C Music Notation Community Group. The current version is 4.0.</p>
+<p>MusicXML was designed by Michael Good at Recordare from 2000, and version 1.0 was released in 2004. MakeMusic took it over in 2011, and since 2015 it has been developed by the W3C Music Notation Community Group. The current version is 4.0 (2021).</p>
 
 <h2 id="compare">MusicXML, MIDI, and PDF</h2>
 <div class="table-wrap">
@@ -56,7 +56,7 @@ ${pre(SNIPPET)}
 </tbody>
 </table>
 </div>
-<p>A MIDI file does not know whether a note is a G sharp or an A flat, or where the bar lines and beams are, so turning MIDI into sheet music always needs guessing. MusicXML keeps those details.</p>
+<p>A MIDI file does not know whether a note is a G sharp or an A flat, whether a length is a dotted quarter or a quarter tied to an eighth, how notes are beamed, or which staff and voice a note belongs to, and its lengths are close to how long the keys were held. Turning MIDI into sheet music therefore always needs guessing. MusicXML keeps those details.</p>
 
 <h2 id="files">.musicxml, .mxl, and .xml</h2>
 <ul>
@@ -102,8 +102,8 @@ ${pre(SNIPPET)}
 <h2 id="what">MusicXML の中身</h2>
 <p>MusicXML のファイルには、楽譜そのものが書かれています。パートと段、音部記号、調号と拍子記号、すべての音符の高さと長さ、さらに休符・タイ・スラー・アーティキュレーション・強弱記号・歌詞・文字などです。中身は XML のテキストなので、テキストエディターでも開けます。1 小節はこのようになります。</p>
 ${pre(SNIPPET)}
-<p>音符ごとに、高さ（<code>octave</code> <code>4</code> の <code>E</code>、つまりミ）と長さ（<code>duration</code>。4分音符を <code>divisions</code> で割った数）が書かれています。音楽としての意味が残っているので、開いたソフトは楽譜を組み直したり、再生・移調・編集したりできます。</p>
-<p>MusicXML は 2004 年に Recordare 社が作り、今は W3C の Music Notation Community Group が開発しています。最新版は 4.0 です。</p>
+<p>音符ごとに、高さ（<code>octave</code> <code>4</code> の <code>E</code>、つまりミ）と長さ（<code>duration</code>。4分音符を <code>divisions</code> 等分した単位で数えた長さで、この例では 24 なので 4分音符 1 つ）が書かれています。音楽としての意味が残っているので、開いたソフトは楽譜を組み直したり、再生・移調・編集したりできます。</p>
+<p>MusicXML は、Recordare 社のマイケル・グッドが 2000 年から設計し、2004 年に 1.0 を公開しました。2011 年に MakeMusic 社が引き継ぎ、2015 年からは W3C の Music Notation Community Group が開発しています。最新版は 4.0（2021 年）です。</p>
 
 <h2 id="compare">MusicXML・MIDI・PDF の違い</h2>
 <div class="table-wrap">
@@ -116,7 +116,7 @@ ${pre(SNIPPET)}
 </tbody>
 </table>
 </div>
-<p>MIDI には、その音がソ♯なのかラ♭なのか、小節線や連桁がどこにあるのかという情報がありません。そのため MIDI から楽譜を作るときは、どうしても推測が入ります。MusicXML ならそうした情報も残ります。</p>
+<p>MIDI には、その音がソ♯なのかラ♭なのか、付点4分音符なのか 4分音符と 8分音符のタイなのか、連桁のつなぎ方やどの段・声部の音なのか、という情報がありません。音の長さも演奏した秒数に近い値です。そのため MIDI から楽譜を作るときは、どうしても推測が入ります。MusicXML ならそうした情報も残ります。</p>
 
 <h2 id="files">.musicxml・.mxl・.xml</h2>
 <ul>

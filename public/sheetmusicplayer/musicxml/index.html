@@ -216,7 +216,7 @@
   &lt;!-- … three more quarter notes: E, F, G --&gt;
 &lt;/measure&gt;</code></pre>
 <p>Each note says which pitch it is (<code>E</code> in octave <code>4</code>) and how long it lasts (<code>duration</code>, counted in <code>divisions</code> per quarter note). Because the file keeps the musical meaning, a program that opens it can lay out the score again, play it, transpose it, or change it.</p>
-<p>MusicXML was created by Recordare in 2004 and is now developed by the W3C Music Notation Community Group. The current version is 4.0.</p>
+<p>MusicXML was designed by Michael Good at Recordare from 2000, and version 1.0 was released in 2004. MakeMusic took it over in 2011, and since 2015 it has been developed by the W3C Music Notation Community Group. The current version is 4.0 (2021).</p>
 
 <h2 id="compare">MusicXML, MIDI, and PDF</h2>
 <div class="table-wrap">
@@ -229,7 +229,7 @@
 </tbody>
 </table>
 </div>
-<p>A MIDI file does not know whether a note is a G sharp or an A flat, or where the bar lines and beams are, so turning MIDI into sheet music always needs guessing. MusicXML keeps those details.</p>
+<p>A MIDI file does not know whether a note is a G sharp or an A flat, whether a length is a dotted quarter or a quarter tied to an eighth, how notes are beamed, or which staff and voice a note belongs to, and its lengths are close to how long the keys were held. Turning MIDI into sheet music therefore always needs guessing. MusicXML keeps those details.</p>
 
 <h2 id="files">.musicxml, .mxl, and .xml</h2>
 <ul>
