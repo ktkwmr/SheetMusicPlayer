@@ -69,7 +69,10 @@
     :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
     /* Toolbar */
-    .topbar { background: var(--paper); border-bottom: 1px solid var(--line); padding: calc(10px + env(safe-area-inset-top, 0px)) var(--gr) 10px var(--gl); }
+    /* Sticky with an opaque background: iOS 26 Safari (and home-screen apps) blurs whatever is under the status
+       bar, unless a full-width fixed / sticky element with a background sits at the top edge; then it uses that
+       element's colour instead of the blur */
+    .topbar { position: sticky; top: 0; z-index: 900; background: var(--paper); border-bottom: 1px solid var(--line); padding: calc(10px + env(safe-area-inset-top, 0px)) var(--gr) 10px var(--gl); }
     .toolbar { display: flex; align-items: center; gap: 12px 20px; }
     .brand { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .01em; white-space: nowrap; }
     .brand svg { width: 28px; height: 28px; flex: 0 0 auto; }
@@ -142,7 +145,8 @@
     .steps li + li { margin-top: 2px; }
 
     /* The score and the player */
-    .player { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 10px 12px; background: var(--paper); border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
+    /* Sits just under the sticky top bar (--topbar-h is set from its height by the script) */
+    .player { position: sticky; top: var(--topbar-h, 0px); z-index: 5; display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 10px 12px; background: var(--paper); border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
     .play { appearance: none; height: 40px; min-width: 112px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--ink); color: var(--paper); font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; }
     .play svg { width: 16px; height: 16px; }
     .play:disabled { opacity: .4; cursor: default; }
@@ -621,6 +625,10 @@
       const DEFAULT_BPM = 120;
       const MAX_PDF_PAGES = 12;
       const MAX_SIDE = 3200; // the engine works at 1920 px wide; larger photos only cost memory
+
+      // The player sticks just under the sticky top bar, whose height changes with wrapping and the status bar
+      const topbar = document.querySelector(".topbar");
+      new ResizeObserver(function () { document.documentElement.style.setProperty("--topbar-h", topbar.offsetHeight + "px"); }).observe(topbar);
 
       // ---------- Saved state ----------
       // The last score is saved, so it is still there next time. A new file resets the tempo to the one on its page.
@@ -1219,7 +1227,7 @@
       }
       function keepInView(a) {
         const r = $("score").getBoundingClientRect();
-        const top = r.top + a.y, bottom = top + a.h, pad = $("player").offsetHeight + 24, vh = window.innerHeight;
+        const top = r.top + a.y, bottom = top + a.h, pad = topbar.offsetHeight + $("player").offsetHeight + 24, vh = window.innerHeight;
         if (top < pad || bottom > vh - 24) window.scrollBy({ top: top - pad - 40, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
         const wrap = $("scoreWrap");
         if (a.x < wrap.scrollLeft + 20 || a.x > wrap.scrollLeft + wrap.clientWidth - 40) wrap.scrollLeft = a.x - 60;
