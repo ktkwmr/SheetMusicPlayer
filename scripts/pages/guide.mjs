@@ -25,7 +25,7 @@ export default {
 
 <h2 id="need">What you need</h2>
 <ul>
-  <li><b>A computer with Chrome or Edge (version 137 or later).</b> The reading engine needs a browser feature called JavaScript Promise Integration (JSPI); browsers without it show a message instead. Newer Firefox (153+) and Safari (27+) and Chrome on Android also have it, but the app is tested only on Chrome and Edge on a computer.</li>
+  <li><b>A computer with Chrome or Edge (version 137 or later), or an iPhone with Safari (iOS 27.2 or later).</b> The reading engine needs a browser feature called JavaScript Promise Integration (JSPI); browsers without it show a message instead. Newer Firefox (153+), Safari on a Mac or iPad (27+), and Chrome on Android also have it, but the app is tested only on Chrome and Edge on a computer and Safari on iPhone.</li>
   <li><b>About 2 GB of free memory</b> while a page is being read. Close other heavy tabs if the computer is short of memory.</li>
   <li><b>An internet connection the first time.</b> The app downloads its reading engine once (about 130 MB) and keeps it in the browser. After that it starts right away and also works offline.</li>
   <li><b>Printed sheet music</b> in standard notation. Handwritten music and tablature are not supported.</li>
@@ -45,7 +45,7 @@ ${shot("en", "app-start", "The app before a score is opened: the Open a score pa
 
 <h2 id="read">2. Wait for the reading</h2>
 ${shot("en", "app-reading", "The app while reading: the file card shows the photo, and a progress bar says Reading the staves (0 / 3), 50%", "While the app reads, the left panel shows each step and a progress bar.")}
-<p>The app first looks for the tempo marking at the top of the page, then finds the staves and notes, and finally reads the staves one by one. This takes roughly 10 to 60 seconds per page, depending on the computer and the number of staves. The first time, the download of the engine comes before this. You can cancel at any time.</p>
+<p>The app first looks for the tempo marking at the top of the page, then finds the staves and notes, and finally reads the staves one by one. This takes roughly 10 to 60 seconds per page, depending on the device and the number of staves. The first time, the download of the engine comes before this. You can cancel at any time.</p>
 
 <h2 id="play">3. Play and follow the cursor</h2>
 ${shot("en", "app-playing", "The score read from the photo, playing: a blue cursor is on the second measure", "The score the app read from the photo, playing. The blue cursor follows the music.")}
@@ -74,7 +74,7 @@ ${shot("en", "app-edit", "The editor: a piano roll with the notes of the upper s
 <table class="text stack">
 <thead><tr><th scope="col">Message or problem</th><th scope="col">What to try</th></tr></thead>
 <tbody>
-<tr><th scope="row">“This browser cannot run the reading engine”</th><td>Use the latest Chrome or Edge on a computer.</td></tr>
+<tr><th scope="row">“This browser cannot run the reading engine”</th><td>Use the latest Chrome or Edge on a computer, or update your iPhone to iOS 27.2 or later and use Safari.</td></tr>
 <tr><th scope="row">“No staves or notes were found”</th><td>Use a sharper photo or a scan, with the whole page in the frame and the page filling most of it.</td></tr>
 <tr><th scope="row">“The browser ran out of memory”</th><td>Close other tabs, or read fewer pages at a time.</td></tr>
 <tr><th scope="row">“The reading engine could not be downloaded”</th><td>Check the connection and try again. This is needed only the first time.</td></tr>
@@ -106,7 +106,7 @@ ${shot("en", "app-edit", "The editor: a piano roll with the notes of the upper s
 
 <h2 id="need">必要なもの</h2>
 <ul>
-  <li><b>PC の Chrome か Edge（バージョン 137 以降）。</b>読み取りエンジンには JavaScript Promise Integration（JSPI）というブラウザの機能が必要で、この機能がないブラウザでは案内を表示します。新しい Firefox（153 以降）・Safari（27 以降）や Android の Chrome にもこの機能はありますが、動作を確認しているのは PC の Chrome・Edge だけです。</li>
+  <li><b>PC の Chrome か Edge（バージョン 137 以降）、または iPhone の Safari（iOS 27.2 以降）。</b>読み取りエンジンには JavaScript Promise Integration（JSPI）というブラウザの機能が必要で、この機能がないブラウザでは案内を表示します。新しい Firefox（153 以降）・Mac や iPad の Safari（27 以降）・Android の Chrome にもこの機能はありますが、動作を確認しているのは PC の Chrome・Edge と iPhone の Safari だけです。</li>
   <li><b>読み取り中に 2GB ほどの空きメモリ。</b>メモリが少ないときは、ほかの重いタブを閉じてください。</li>
   <li><b>初回だけインターネット接続。</b>読み取りエンジン（約 130MB）を 1 回だけダウンロードしてブラウザに保存します。次からはすぐに始まり、オフラインでも使えます。</li>
   <li><b>印刷された五線譜。</b>手書きの楽譜とタブ譜には対応していません。</li>
@@ -126,7 +126,7 @@ ${shot("ja", "app-start", "楽譜を開く前の画面。左に「ファイル�
 
 <h2 id="read">2. 読み取りを待つ</h2>
 ${shot("ja", "app-reading", "読み取り中の画面。開いた写真の名前の下に「段ごとに読み取り中 (0 / 3)」と 50% の進み具合が出ている", "読み取り中は、左のパネルに今の作業と進み具合が出ます。")}
-<p>アプリはまず 1 ページ目の上からテンポの指定を探し、次に五線と音符の位置を見つけ、最後に段ごとに音符を読み取ります。PC の性能と段の数によって、1 ページ 10〜60 秒ほどかかります。初回は、その前にエンジンのダウンロードが入ります。途中で「キャンセル」もできます。</p>
+<p>アプリはまず 1 ページ目の上からテンポの指定を探し、次に五線と音符の位置を見つけ、最後に段ごとに音符を読み取ります。端末の性能と段の数によって、1 ページ 10〜60 秒ほどかかります。初回は、その前にエンジンのダウンロードが入ります。途中で「キャンセル」もできます。</p>
 
 <h2 id="play">3. 再生してカーソルを追う</h2>
 ${shot("ja", "app-playing", "写真から読み取った楽譜を再生している画面。青いカーソルが 2 小節目にある", "写真から読み取った楽譜を再生しているところ。青いカーソルが音に合わせて進みます。")}
@@ -155,7 +155,7 @@ ${shot("ja", "app-edit", "編集画面。上段の音符が黒い四角でピア
 <table class="text stack">
 <thead><tr><th scope="col">メッセージ・症状</th><th scope="col">試すこと</th></tr></thead>
 <tbody>
-<tr><th scope="row">「このブラウザでは読み取りエンジンを動かせません」</th><td>PC の最新の Chrome か Edge で開いてください。</td></tr>
+<tr><th scope="row">「このブラウザでは読み取りエンジンを動かせません」</th><td>PC の最新の Chrome か Edge で開くか、iPhone を iOS 27.2 以降に更新して Safari で開いてください。</td></tr>
 <tr><th scope="row">「五線や音符が見つかりませんでした」</th><td>ページ全体が入り、画面の大部分を楽譜が占める、はっきりした写真かスキャンでお試しください。</td></tr>
 <tr><th scope="row">「ブラウザのメモリが足りなくなりました」</th><td>ほかのタブを閉じるか、一度に読むページを減らしてください。</td></tr>
 <tr><th scope="row">「読み取りエンジンをダウンロードできませんでした」</th><td>接続を確かめて、もう一度お試しください。必要なのは初回だけです。</td></tr>
