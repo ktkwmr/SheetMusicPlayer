@@ -63,6 +63,79 @@ export function expandMultiRests(xml) {
   return new XMLSerializer().serializeToString(doc);
 }
 
+// ---------- Ties read as slurs ----------
+// The reader (homr) has no symbol for a tie: a tie comes out as a slur. A slur that joins a
+// note to the very next note of the same pitch (same staff, no gap) is a tie, so make it one,
+// or the player strikes the held note again. Longer slurs and slurs between different
+// pitches stay as they are.
+export function slursToTies(xml) {
+  if (!/<slur[\s/>]/.test(xml)) return xml;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const parts = Array.from(doc.querySelectorAll("score-partwise > part"));
+  let changed = false;
+  for (const part of parts) {
+    // open[staff]: notes with a slur start, waiting for the note that ends the slur
+    const open = new Map();
+    let divisions = 1, mStart = 0;
+    for (const m of kids(part, "measure")) {
+      let pos = 0, last = 0, end = 0;
+      for (const el of Array.from(m.children)) {
+        if (el.localName === "attributes") { if (text(el, "divisions")) divisions = +text(el, "divisions"); continue; }
+        const dur = +(text(el, ":scope > duration") || 0) / divisions;
+        if (el.localName === "backup") { pos -= dur; continue; }
+        if (el.localName === "forward") { pos += dur; end = Math.max(end, pos); continue; }
+        if (el.localName !== "note") continue;
+        const chord = kids(el, "chord").length > 0;
+        const onset = chord ? last : pos;
+        if (!chord) { last = pos; pos += dur; end = Math.max(end, pos); }
+        if (kids(el, "grace").length) continue;
+        const pitch = kids(el, "pitch")[0];
+        const slurs = Array.from(el.querySelectorAll("notations > slur"));
+        if (!pitch || !slurs.length) continue;
+        const staff = text(el, ":scope > staff") || "1", at = mStart + onset;
+        const name = text(pitch, "step") + text(pitch, "octave");
+        // Starts that ended before this note can no longer be tied
+        const list = (open.get(staff) || []).filter((o) => o.end > at - 1e-6);
+        open.set(staff, list);
+        // homr writes the stop before the start on a note that does both
+        for (const sl of slurs) {
+          const type = sl.getAttribute("type");
+          if (type === "stop") {
+            const prev = list.find((o) => o.name === name && Math.abs(o.end - at) < 1e-6);
+            if (!prev) continue;
+            list.splice(list.indexOf(prev), 1);
+            // Keep the first note's accidental (it is not printed again on the tied note)
+            const alter = kids(prev.pitch, "alter")[0], mine = kids(pitch, "alter")[0];
+            if (mine) mine.remove();
+            if (alter) kids(pitch, "step")[0].after(alter.cloneNode(true));
+            prev.slur.remove(); sl.remove();
+            addTie(prev.note, "start"); addTie(el, "stop");
+            changed = true;
+          } else if (type === "start") {
+            list.push({ note: el, pitch, name, slur: sl, end: at + dur });
+          }
+        }
+      }
+      mStart += end;
+    }
+  }
+  if (!changed) return xml;
+  doc.querySelectorAll("notations").forEach((n) => { if (!n.children.length) n.remove(); });
+  return new XMLSerializer().serializeToString(doc);
+}
+
+// <tie> (for the sound) goes after <duration>, <tied> (for the drawing) in <notations>
+function addTie(note, type) {
+  const doc = note.ownerDocument;
+  const tie = doc.createElement("tie"); tie.setAttribute("type", type);
+  const dur = kids(note, "duration")[0];
+  if (dur) dur.after(tie); else note.appendChild(tie);
+  let notations = kids(note, "notations")[0];
+  if (!notations) { notations = doc.createElement("notations"); note.appendChild(notations); }
+  const tied = doc.createElement("tied"); tied.setAttribute("type", type);
+  if (type === "stop") notations.prepend(tied); else notations.appendChild(tied);
+}
+
 // Length of measure i in divisions, from the time signature and divisions in force there
 function measureDivisions(part, index) {
   let divisions = 1, beats = 4, beatType = 4;
