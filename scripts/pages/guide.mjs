@@ -25,7 +25,7 @@ export default {
 
 <h2 id="need">What you need</h2>
 <ul>
-  <li><b>A computer with Chrome or Edge (version 137 or later), or an iPhone with Safari (iOS 27.2 or later).</b> The reading engine needs a browser feature called JavaScript Promise Integration (JSPI); browsers without it show a message instead. Newer Firefox (153+), Safari on a Mac or iPad (27+), and Chrome on Android also have it, but the app is tested only on Chrome and Edge on a computer and Safari on iPhone.</li>
+  <li><b>A computer with Chrome or Edge (version 137 or later), an Android phone with Chrome (137 or later), or an iPhone with Safari (iOS 27.2 or later).</b> The reading engine needs a browser feature called JavaScript Promise Integration (JSPI); browsers without it show a message instead. Newer Firefox (153+) and Safari on a Mac or iPad (27+) also have it, but the app is tested only on Chrome and Edge on a computer, Safari on iPhone, and Chrome on Android.</li>
   <li><b>About 2 GB of free memory</b> while a page is being read. Close other heavy tabs if the computer is short of memory.</li>
   <li><b>An internet connection the first time.</b> The app downloads its reading engine once (about 130 MB) and keeps it in the browser. After that it starts right away and also works offline.</li>
   <li><b>Printed sheet music</b> in standard notation. Handwritten music and tablature are not supported.</li>
@@ -74,7 +74,7 @@ ${shot("en", "app-edit", "The editor: a piano roll with the notes of the upper s
 <table class="text stack">
 <thead><tr><th scope="col">Message or problem</th><th scope="col">What to try</th></tr></thead>
 <tbody>
-<tr><th scope="row">“This browser cannot run the reading engine”</th><td>Use the latest Chrome or Edge on a computer, or update your iPhone to iOS 27.2 or later and use Safari.</td></tr>
+<tr><th scope="row">“This browser cannot run the reading engine”</th><td>Use the latest Chrome or Edge on a computer or the latest Chrome on Android, or update your iPhone to iOS 27.2 or later and use Safari.</td></tr>
 <tr><th scope="row">“No staves or notes were found”</th><td>Use a sharper photo or a scan, with the whole page in the frame and the page filling most of it.</td></tr>
 <tr><th scope="row">“The browser ran out of memory”</th><td>Close other tabs, or read fewer pages at a time.</td></tr>
 <tr><th scope="row">“The reading engine could not be downloaded”</th><td>Check the connection and try again. This is needed only the first time.</td></tr>
@@ -106,7 +106,7 @@ ${shot("en", "app-edit", "The editor: a piano roll with the notes of the upper s
 
 <h2 id="need">必要なもの</h2>
 <ul>
-  <li><b>PC の Chrome か Edge（バージョン 137 以降）、または iPhone の Safari（iOS 27.2 以降）。</b>読み取りエンジンには JavaScript Promise Integration（JSPI）というブラウザの機能が必要で、この機能がないブラウザでは案内を表示します。新しい Firefox（153 以降）・Mac や iPad の Safari（27 以降）・Android の Chrome にもこの機能はありますが、動作を確認しているのは PC の Chrome・Edge と iPhone の Safari だけです。</li>
+  <li><b>PC の Chrome か Edge（バージョン 137 以降）、Android の Chrome（137 以降）、または iPhone の Safari（iOS 27.2 以降）。</b>読み取りエンジンには JavaScript Promise Integration（JSPI）というブラウザの機能が必要で、この機能がないブラウザでは案内を表示します。新しい Firefox（153 以降）・Mac や iPad の Safari（27 以降）にもこの機能はありますが、動作を確認しているのは PC の Chrome・Edge、iPhone の Safari、Android の Chrome だけです。</li>
   <li><b>読み取り中に 2GB ほどの空きメモリ。</b>メモリが少ないときは、ほかの重いタブを閉じてください。</li>
   <li><b>初回だけインターネット接続。</b>読み取りエンジン（約 130MB）を 1 回だけダウンロードしてブラウザに保存します。次からはすぐに始まり、オフラインでも使えます。</li>
   <li><b>印刷された五線譜。</b>手書きの楽譜とタブ譜には対応していません。</li>
@@ -155,7 +155,7 @@ ${shot("ja", "app-edit", "編集画面。上段の音符が黒い四角でピア
 <table class="text stack">
 <thead><tr><th scope="col">メッセージ・症状</th><th scope="col">試すこと</th></tr></thead>
 <tbody>
-<tr><th scope="row">「このブラウザでは読み取りエンジンを動かせません」</th><td>PC の最新の Chrome か Edge で開くか、iPhone を iOS 27.2 以降に更新して Safari で開いてください。</td></tr>
+<tr><th scope="row">「このブラウザでは読み取りエンジンを動かせません」</th><td>PC か Android の最新の Chrome（PC は Edge も可）で開くか、iPhone を iOS 27.2 以降に更新して Safari で開いてください。</td></tr>
 <tr><th scope="row">「五線や音符が見つかりませんでした」</th><td>ページ全体が入り、画面の大部分を楽譜が占める、はっきりした写真かスキャンでお試しください。</td></tr>
 <tr><th scope="row">「ブラウザのメモリが足りなくなりました」</th><td>ほかのタブを閉じるか、一度に読むページを減らしてください。</td></tr>
 <tr><th scope="row">「読み取りエンジンをダウンロードできませんでした」</th><td>接続を確かめて、もう一度お試しください。必要なのは初回だけです。</td></tr>
