@@ -150,7 +150,7 @@ async function start() {
   // is called from Python through JSPI (onnxruntime-web on its own works with threads). Investigating.
   ort.env.wasm.numThreads = 1;
   const { loadPyodide } = await import(ENGINE + "pyodide/pyodide.mjs");
-  py = await loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} });
+  py = await withoutAppleMobileCheck(() => loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} }));
   await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions",
     ENGINE + "pyodide/" + wheel("verysimpletree"), ENGINE + "pyodide/" + wheel("musicxml")], { messageCallback: () => {} });
   const zip = await (await engineFetch(ENGINE + "homr.zip")).arrayBuffer();
@@ -162,6 +162,34 @@ async function start() {
   recognize = mod.recognize;
   post("ready");
 }
+
+// CPython calls Python functions through a "trampoline". It normally uses a small wasm-gc module,
+// but on iPhone / iPad (navigator.userAgent, or "MacIntel" with touch points) it falls back to a
+// JavaScript trampoline because of a WebKit GC bug seen in iOS 18.3.1 (python/cpython#130418,
+// https://bugs.webkit.org/show_bug.cgi?id=293113). With the JavaScript trampoline there are
+// JavaScript frames on every Python call, and JSPI cannot suspend through them ("JavaScript frames
+// found between WebAssembly.Suspending and WebAssembly.promising"), so recognition always fails.
+// The check runs once while Pyodide starts, so hide those values from it during loadPyodide only.
+// Every browser with JSPI also has wasm-gc.
+const isAppleMobile = (nav) => /iPad|iPhone|iPod/.test(nav.userAgent) ||
+  (nav.platform === "MacIntel" && typeof nav.maxTouchPoints !== "undefined" && nav.maxTouchPoints > 1);
+async function withoutAppleMobileCheck(fn) {
+  const nav = self.navigator;
+  if (!nav || !isAppleMobile(nav)) return fn();
+  const masked = new Proxy(nav, {
+    get(target, key) {
+      if (key === "userAgent") return target.userAgent.replace(/iPad|iPhone|iPod/g, "Mobile");
+      if (key === "platform" && target.platform === "MacIntel") return "";
+      const v = Reflect.get(target, key, target);
+      return typeof v === "function" ? v.bind(target) : v;
+    },
+  });
+  let masking = false;
+  try { Object.defineProperty(self, "navigator", { value: masked, configurable: true, writable: true }); masking = true; } catch (e) {}
+  try { return await fn(); }
+  finally { if (masking) delete self.navigator; }
+}
+
 const wheel = (name) => Object.keys(manifest.files).map((f) => f.split("/").pop()).find((f) => f.startsWith(name + "-") && f.endsWith(".whl"));
 
 let starting = null;
@@ -179,7 +207,10 @@ self.onmessage = async (ev) => {
       const xml = await recognize.callPromising(new Uint8Array(msg.rgba), msg.width, msg.height, msg.tempo || null);
       post("result", { id: msg.id, xml, ms: Math.round(performance.now() - t0) });
     } catch (e) {
-      post("error", { id: msg.id, ...errorInfo(e) });
+      const info = errorInfo(e);
+      // Anything but "no staff found" may leave Pyodide unusable (a failed JSPI suspension is a fatal
+      // error, and the next call then fails with "undefined is not an object"): ask for a fresh worker.
+      post("error", { id: msg.id, ...info, restart: info.code !== "no-staff" });
     }
   }
 };
@@ -188,6 +219,7 @@ function errorInfo(e) {
   const message = String((e && e.message) || e);
   let code = (e && e.code) || "recognize";
   if (/no-staff/.test(message)) code = "no-staff";
+  else if (/JavaScript frames found between|trying to suspend JS frames/i.test(message)) code = "unsupported";
   else if (/memory|Out of bounds|RangeError: Array buffer allocation/i.test(message)) code = "memory";
   return { code, message: message.slice(-2000) };
 }
