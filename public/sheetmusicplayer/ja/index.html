@@ -785,7 +785,7 @@
           else if (m.type === "error") {
             if (m.id != null && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); p.reject(m); }
             else pending.forEach(function (p, id) { pending.delete(id); p.reject(m); });
-            if (m.id == null) { worker.terminate(); worker = null; engineReady = false; }
+            if (m.id == null || m.restart) { worker.terminate(); worker = null; engineReady = false; }
           }
         };
         worker.onerror = function () {
