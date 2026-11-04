@@ -113,3 +113,49 @@ test("expandMultiRests turns a multi-measure rest into that many measures", () =
 test("a score with no notes or a non-MusicXML file does not crash", () => {
   assert.doesNotThrow(() => SM.expandMultiRests("<foo/>"));
 });
+
+// homr has no tie symbol: a tie comes out as a slur (stop written before start on a middle note)
+const homrNote = (step, octave, dur, slurs, { alter, chord, staff = 1 } = {}) =>
+  `<note>${chord ? "<chord/>" : ""}<pitch><step>${step}</step>${alter ? `<alter>${alter}</alter>` : ""}<octave>${octave}</octave></pitch><type>quarter</type><duration>${dur}</duration><staff>${staff}</staff><voice>1</voice>` +
+  `<notations>${slurs.map((t) => `<slur type="${t}" number="${staff}"/>`).join("")}</notations></note>`;
+const homrScore = (...measures) => `<?xml version="1.0"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>M</part-name></score-part></part-list><part id="P1">` +
+  measures.map((m, i) => `<measure number="${i + 1}">${i === 0 ? "<attributes><divisions>2</divisions><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>" : ""}${m}</measure>`).join("") + `</part></score-partwise>`;
+
+test("slursToTies turns a slur between two notes of the same pitch into a tie", () => {
+  const xml = homrScore(
+    homrNote("E", 4, 4, []) + homrNote("C", 5, 4, ["start"]),
+    homrNote("C", 5, 4, ["stop"]) + homrNote("D", 5, 4, []),
+  );
+  const out = SM.slursToTies(xml);
+  assert.doesNotMatch(out, /<slur/);
+  assert.match(out, /<tie type="start"\/>/);
+  assert.match(out, /<tied type="stop"\/>/);
+  const m = SM.parseScore(out);
+  assert.deepEqual(m.notes.map((n) => [n.start, n.dur, n.midi]), [[0, 48, 64], [48, 96, 72], [144, 48, 74]]);
+});
+
+test("slursToTies joins a chain of tied notes and keeps the first note's accidental", () => {
+  const xml = homrScore(
+    homrNote("F", 4, 2, ["start"], { alter: 1 }) + homrNote("F", 4, 2, ["stop", "start"]) + homrNote("F", 4, 4, ["stop"]),
+  );
+  const m = SM.parseScore(SM.slursToTies(xml));
+  assert.deepEqual(m.notes.map((n) => [n.start, n.dur, n.midi]), [[0, 96, 66]]);
+});
+
+test("slursToTies leaves real slurs alone", () => {
+  // Different pitches, and a slur over several notes that starts and ends on the same pitch
+  const xml = homrScore(
+    homrNote("C", 5, 4, ["start"]) + homrNote("D", 5, 4, ["stop"]),
+    homrNote("E", 5, 2, ["start"]) + homrNote("D", 5, 2, []) + homrNote("E", 5, 4, ["stop"]),
+  );
+  assert.equal(SM.slursToTies(xml), xml);
+});
+
+test("slursToTies ties only the matching notes of a chord", () => {
+  const xml = homrScore(
+    homrNote("C", 4, 4, ["start"]) + homrNote("E", 4, 4, ["start"], { chord: true }) +
+    homrNote("C", 4, 4, ["stop"]) + homrNote("G", 4, 4, ["stop"], { chord: true }),
+  );
+  const m = SM.parseScore(SM.slursToTies(xml));
+  assert.deepEqual(m.notes.map((n) => [n.start, n.dur, n.midi]).sort((a, b) => a[2] - b[2]), [[0, 96, 60], [0, 48, 64], [48, 48, 67]]);
+});
