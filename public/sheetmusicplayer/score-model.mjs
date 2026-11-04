@@ -124,6 +124,64 @@ export function slursToTies(xml) {
   return new XMLSerializer().serializeToString(doc);
 }
 
+// ---------- Notes read as stray tuplets ----------
+// The reader (homr) sometimes reads a plain note as a tuplet note (a 16th as a triplet 16th):
+// it then gets 2/3 of its length, plays too early and the measure comes out short. homr marks
+// a tuplet with a bracket (<tuplet> start / stop) only when the whole group is there, so a
+// tuplet note outside a bracket is suspect. In a measure that is too short, make those notes
+// plain again, but only when that makes the voice fill the measure exactly.
+export function fixStrayTuplets(xml) {
+  if (!/<time-modification>/.test(xml)) return xml;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  let changed = false;
+  for (const part of Array.from(doc.querySelectorAll("score-partwise > part"))) {
+    let divisions = 1, beats = 4, beatType = 4;
+    for (const m of kids(part, "measure")) {
+      for (const a of kids(m, "attributes")) {
+        if (text(a, "divisions")) divisions = +text(a, "divisions");
+        if (text(a, "time beats")) { beats = +text(a, "time beats"); beatType = +text(a, "time beat-type"); }
+      }
+      const len = beats * 4 / beatType * divisions;
+      // voices[v] = { total, open (inside a bracket), stray: [{ note, dur, plain }], extra }
+      const voices = new Map();
+      const voice = (el) => {
+        const v = text(el, ":scope > voice") || "1";
+        if (!voices.has(v)) voices.set(v, { total: 0, open: false, stray: [], extra: 0 });
+        return voices.get(v);
+      };
+      for (const el of Array.from(m.children)) {
+        if (el.localName === "forward") { voice(el).total += +(text(el, ":scope > duration") || 0); continue; }
+        if (el.localName !== "note" || kids(el, "grace").length) continue;
+        const v = voice(el), dur = +(text(el, ":scope > duration") || 0);
+        const chord = kids(el, "chord").length > 0;
+        if (!chord) v.total += dur;
+        const tm = kids(el, "time-modification")[0];
+        if (!tm) continue;
+        const marks = Array.from(el.querySelectorAll("notations > tuplet")).map((x) => x.getAttribute("type"));
+        if (marks.includes("start")) v.open = true;
+        const inBracket = v.open;
+        if (marks.includes("stop")) v.open = false;
+        if (inBracket) continue;
+        const actual = +(text(tm, "actual-notes") || 0), normal = +(text(tm, "normal-notes") || 0);
+        const plain = dur * actual / normal;
+        // Not a whole number of divisions: cannot be written plainly, leave the voice alone
+        if (!actual || !normal || !Number.isInteger(plain)) { v.extra = NaN; continue; }
+        v.stray.push({ note: el, plain });
+        if (!chord) v.extra += plain - dur;
+      }
+      for (const v of voices.values()) {
+        if (!v.stray.length || v.total >= len - 1e-6 || Math.abs(v.total + v.extra - len) > 1e-6) continue;
+        for (const { note, plain } of v.stray) {
+          kids(note, "duration")[0].textContent = String(plain);
+          kids(note, "time-modification")[0].remove();
+        }
+        changed = true;
+      }
+    }
+  }
+  return changed ? new XMLSerializer().serializeToString(doc) : xml;
+}
+
 // <tie> (for the sound) goes after <duration>, <tied> (for the drawing) in <notations>
 function addTie(note, type) {
   const doc = note.ownerDocument;
