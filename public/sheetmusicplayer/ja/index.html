@@ -1045,8 +1045,9 @@
           }
           if (!xmls.length) throw { code: "no-staff" };
           SM = SM || await import("./score-model.mjs");
-          // The reader writes ties as slurs: turn them back into ties so held notes are not struck again
-          const xml = SM.slursToTies(SM.expandMultiRests(xmls.length > 1 ? mergePages(xmls) : xmls[0]));
+          // The reader writes ties as slurs: turn them back into ties so held notes are not struck again.
+          // It also reads some plain notes as tuplet notes: make them plain where that fills the measure.
+          const xml = SM.slursToTies(SM.fixStrayTuplets(SM.expandMultiRests(xmls.length > 1 ? mergePages(xmls) : xmls[0])));
           showStatus(t("st.render"), {});
           state.xml = xml; state.name = $("fileName").textContent;
           state.scoreBpm = tempo ? tempo.bpm : DEFAULT_BPM; state.bpm = state.scoreBpm;

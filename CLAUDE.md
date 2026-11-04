@@ -37,6 +37,7 @@
 - 編集機能: `score-model.mjs` が MusicXML ⇄ 音符のリスト（24 tick/4分音符、小節は拍子から決める）を変換し、`editor.mjs` がピアノロールを描く。「楽譜」に戻るか保存するときに `buildXml` で MusicXML を作り直す（ヘッダー・パート・各小節の繰り返し記号と改行は元の XML から引き継ぎ、歌詞・スラー等は消える）。`score-model.mjs` を変えたら `npm test`（`tests/score-model.test.mjs`。「読み込み → 書き出し → 読み込み」で音符が一致するか等）を通し、OSMD で描けることも確かめる。直した不具合や新しい機能にはテストを足す。
 - homr は複数小節休符をふつうの 1 小節として読むことがある。`expandMultiRests` は `<multiple-rest>` が付いたときだけ小節を増やす。それ以外は編集画面の「小節を追加」で直してもらう。
 - homr の認識モデルにはタイの記号がなく、タイはスラーとして出力される。読み取り結果は `slursToTies`（`score-model.mjs`）で「同じ譜表で隣り合う同じ高さの 2 音を結ぶスラー」をタイに直してから表示・再生する（直さないとタイの先の音符も鳴る）。MusicXML ファイルを開いたときは変換しない。
+- homr はふつうの音符を 3 連符の音符（`<time-modification>` 3:2）として読むことがある（16分音符が 3 連の 16分音符になり、短く鳴る）。homr は 3 連符がそろったときだけ括弧（`<tuplet>`）を付けるので、読み取り結果は `fixStrayTuplets`（`score-model.mjs`）で「足りない小節の、括弧のない連符の音符」を元の長さに戻す。戻して小節がちょうど埋まるときだけ直す。MusicXML ファイルには使わない。
 - `ja/index.html` には `<base href="/sheetmusicplayer/">` がある。JS で URL を組み立てるときは `location.href` ではなく `document.baseURI` を基準にする（`location.href` だと `/ja/` の下を指して 404 になる）。
 - Service Worker がエンジンのキャッシュからワーカーのスクリプト（Tesseract.js）を返すときは COEP ヘッダーを付ける（`sw.js` の `withWorkerHeaders`）。付けないと cross-origin isolation のページではワーカーが起動せず、テンポを読めない。
 - 最後の楽譜は `localStorage` の `sheetmusicplayer-state` に保存する。読み込んだ値は検証してから使う。新しいファイルを開いたらテンポは楽譜の値に戻す。

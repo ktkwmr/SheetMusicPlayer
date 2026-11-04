@@ -159,3 +159,44 @@ test("slursToTies ties only the matching notes of a chord", () => {
   const m = SM.parseScore(SM.slursToTies(xml));
   assert.deepEqual(m.notes.map((n) => [n.start, n.dur, n.midi]).sort((a, b) => a[2] - b[2]), [[0, 96, 60], [0, 48, 64], [48, 48, 67]]);
 });
+
+// homr sometimes reads a 16th as a triplet 16th (time-modification 3:2, no <tuplet> bracket)
+const tupNote = (step, type, dur, { tm, bracket, voice = 1, staff = 1 } = {}) =>
+  `<note><pitch><step>${step}</step><octave>5</octave></pitch><duration>${dur}</duration><voice>${voice}</voice><type>${type}</type>` +
+  (tm ? "<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>" : "") +
+  `<staff>${staff}</staff>${bracket ? `<notations><tuplet type="${bracket}"/></notations>` : ""}</note>`;
+const tupScore = (...measures) => `<?xml version="1.0"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>M</part-name></score-part></part-list><part id="P1">` +
+  measures.map((m, i) => `<measure number="${i + 1}">${i === 0 ? "<attributes><divisions>12</divisions><time><beats>4</beats><beat-type>4</beat-type></time><staves>2</staves><clef number=\"1\"><sign>G</sign><line>2</line></clef><clef number=\"2\"><sign>F</sign><line>4</line></clef></attributes>" : ""}${m}</measure>`).join("") + `</part></score-partwise>`;
+const bass = `<backup><duration>48</duration></backup><note><pitch><step>C</step><octave>3</octave></pitch><duration>48</duration><voice>5</voice><type>whole</type><staff>2</staff></note>`;
+
+test("fixStrayTuplets makes stray triplet notes plain when that fills the measure", () => {
+  // 16th(triplet) + dotted 8th + half + 16th(triplet) 16th(triplet) + 8th = 45 of 48
+  const xml = tupScore(
+    tupNote("G", "16th", 2, { tm: true }) + tupNote("G", "eighth", 9) + tupNote("E", "half", 24) +
+    tupNote("E", "16th", 2, { tm: true }) + tupNote("D", "16th", 2, { tm: true }) + tupNote("C", "eighth", 6) + bass,
+  );
+  const out = SM.fixStrayTuplets(xml);
+  assert.doesNotMatch(out, /time-modification/);
+  const m = SM.parseScore(out);
+  assert.equal(m.measures[0].flagged, false);
+  const top = m.notes.filter((n) => n.track === 0).map((n) => [n.start, n.dur]);
+  assert.deepEqual(top, [[0, 6], [6, 18], [24, 48], [72, 6], [78, 6], [84, 12]]);
+});
+
+test("fixStrayTuplets keeps real triplets and measures it cannot fix", () => {
+  // A full bracketed triplet of 8ths
+  const real = tupScore(
+    tupNote("C", "eighth", 4, { tm: true, bracket: "start" }) + tupNote("D", "eighth", 4, { tm: true }) + tupNote("E", "eighth", 4, { tm: true, bracket: "stop" }) +
+    tupNote("F", "quarter", 12) + tupNote("G", "half", 24),
+  );
+  assert.equal(SM.fixStrayTuplets(real), real);
+  // Making the triplets plain would overfill the measure (47 -> 51)
+  const over = tupScore(
+    tupNote("E", "eighth", 6) + tupNote("E", "eighth", 6) + tupNote("E", "eighth", 6) + tupNote("D", "eighth", 6) +
+    tupNote("E", "16th", 3) + tupNote("D", "eighth", 4, { tm: true }) + tupNote("C", "eighth", 4, { tm: true }) + tupNote("C", "eighth", 12),
+  );
+  assert.equal(SM.fixStrayTuplets(over), over);
+  // A full measure is left as it is
+  const full = tupScore(tupNote("C", "16th", 2, { tm: true }) + tupNote("C", "16th", 4) + tupNote("C", "half", 42));
+  assert.equal(SM.fixStrayTuplets(full), full);
+});
