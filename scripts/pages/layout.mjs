@@ -28,6 +28,8 @@ const UI = {
     footer: "Sheet Music Player · © 2026 ktkwmr",
     source: "Source code on GitHub",
     feedback: "Feedback",
+    home: "More apps by ktkwmr",
+    homeUrl: "https://ktkwmr.com/",
   },
   ja: {
     locale: "ja_JP",
@@ -39,6 +41,8 @@ const UI = {
     footer: "Sheet Music Player · © 2026 ktkwmr",
     source: "GitHub のソースコード",
     feedback: "ご意見・ご質問",
+    home: "ktkwmr のほかのアプリ",
+    homeUrl: "https://ktkwmr.com/ja/",
   },
 };
 
@@ -251,6 +255,7 @@ ${nav}
 ${infoPages.map((p) => `        <a href="${pagePath(lang, p.slug)}"${p.slug === page.slug ? ' aria-current="page"' : ""}>${escapeHtml(p[lang].nav)}</a>`).join("\n")}
         <a href="https://github.com/ktkwmr/SheetMusicPlayer" rel="noopener">${ui.source}</a>
         <a href="https://github.com/ktkwmr/SheetMusicPlayer/issues" rel="noopener">${ui.feedback}</a>
+        <a href="${ui.homeUrl}">${ui.home}</a>
       </p>
     </div>
   </footer>
