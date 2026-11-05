@@ -10,17 +10,17 @@
       "match": 100,
       "bpm": 108,
       "tempoSource": "ocr",
-      "secs": 61
+      "secs": 68
     },
     "tilt": {
-      "notes": 112,
+      "notes": 119,
       "originalNotes": 126,
       "measures": 16,
-      "flagged": 1,
-      "match": 86.5,
+      "flagged": 0,
+      "match": 91.3,
       "bpm": 108,
       "tempoSource": "ocr",
-      "secs": 57
+      "secs": 59
     },
     "perspective": {
       "notes": 126,
@@ -30,7 +30,7 @@
       "match": 100,
       "bpm": 108,
       "tempoSource": "ocr",
-      "secs": 62
+      "secs": 61
     },
     "shadow": {
       "notes": 126,
@@ -40,17 +40,17 @@
       "match": 100,
       "bpm": 120,
       "tempoSource": "none",
-      "secs": 66
+      "secs": 65
     },
     "blur": {
       "notes": 128,
       "originalNotes": 126,
       "measures": 16,
-      "flagged": 4,
-      "match": 73.4,
+      "flagged": 5,
+      "match": 62.5,
       "bpm": 120,
       "tempoSource": "none",
-      "secs": 61
+      "secs": 60
     },
     "small": {
       "notes": 126,
@@ -60,7 +60,7 @@
       "match": 100,
       "bpm": 120,
       "tempoSource": "none",
-      "secs": 59
+      "secs": 58
     }
   }
 }

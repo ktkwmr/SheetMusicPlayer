@@ -99,7 +99,8 @@ async function prefetchAll() {
 
 // ---------- onnxruntime-web layer (called from engine/python/onnxruntime/__init__.py) ----------
 let ort = null;
-const sessions = [];
+const sessions = [], sessionOf = {};
+const SEGNET_BATCH = 2;
 const MODELS = {
   segnet: ["models/segnet.int8.onnx"],
   encoder: ["models/encoder.int8.onnx"],
@@ -118,9 +119,19 @@ self.ortShim = {
   async create(path) {
     const key = Object.keys(MODELS).find((k) => path.includes(k));
     if (!key) throw new Error("Unknown model: " + path);
-    const s = await ort.InferenceSession.create(await modelBytes(key), { executionProviders: ["wasm"], graphOptimizationLevel: "all" });
-    sessions.push(s);
-    return { id: sessions.length - 1, inputNames: s.inputNames, outputNames: s.outputNames };
+    // homr makes a new segmentation session for every page: reuse the one already loaded, or
+    // every page would keep another copy of the model in memory
+    let id = sessionOf[key];
+    if (id == null) {
+      // Without the memory arena and pattern, onnxruntime gives memory back after each run
+      // instead of keeping the largest buffers of every model (less memory, about as fast)
+      sessions.push(await ort.InferenceSession.create(await modelBytes(key), {
+        executionProviders: ["wasm"], graphOptimizationLevel: "all", enableCpuMemArena: false, enableMemPattern: false,
+      }));
+      id = sessionOf[key] = sessions.length - 1;
+    }
+    const s = sessions[id];
+    return { id, inputNames: s.inputNames, outputNames: s.outputNames };
   },
   tensor(type, u8, dims) {
     const C = TYPED[type];
@@ -131,8 +142,27 @@ self.ortShim = {
     return new Uint8Array(d.buffer, d.byteOffset, d.byteLength);
   },
   async run(id, feeds, names) {
-    const out = await sessions[id].run(feeds, Array.from(names));
-    return Array.from(names, (n) => out[n]);
+    names = Array.from(names);
+    if (id !== sessionOf.segnet) {
+      const out = await sessions[id].run(feeds, names);
+      return Array.from(names, (n) => out[n]);
+    }
+    // homr gives the segmentation model 8 image tiles at a time. Its working memory grows with
+    // the batch (about 200 MB for 8), and the WebAssembly heap never shrinks: run a few at a time
+    const feed = Object.values(feeds)[0], key = Object.keys(feeds)[0];
+    const n = feed.dims[0], per = feed.data.length / n, parts = [];
+    for (let i = 0; i < n; i += SEGNET_BATCH) {
+      const k = Math.min(SEGNET_BATCH, n - i);
+      const t = new ort.Tensor(feed.type, feed.data.subarray(i * per, (i + k) * per), [k, ...feed.dims.slice(1)]);
+      parts.push(await sessions[id].run({ [key]: t }, names));
+    }
+    return names.map((name) => {
+      const ts = parts.map((p) => p[name]);
+      const data = new ts[0].data.constructor(ts.reduce((s, t) => s + t.data.length, 0));
+      let o = 0;
+      for (const t of ts) { data.set(t.data, o); o += t.data.length; }
+      return new ort.Tensor(ts[0].type, data, [n, ...ts[0].dims.slice(1)]);
+    });
   },
 };
 
@@ -206,6 +236,8 @@ self.onmessage = async (ev) => {
       const t0 = performance.now();
       const xml = await recognize.callPromising(new Uint8Array(msg.rgba), msg.width, msg.height, msg.tempo || null);
       post("result", { id: msg.id, xml, ms: Math.round(performance.now() - t0) });
+      // Free the page's images now, so the next page reuses that memory instead of growing the heap
+      try { py.runPython("import gc; gc.collect()"); } catch (e) {}
     } catch (e) {
       const info = errorInfo(e);
       // Anything but "no staff found" may leave Pyodide unusable (a failed JSPI suspension is a fatal
