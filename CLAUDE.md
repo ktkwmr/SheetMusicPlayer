@@ -43,6 +43,7 @@
 - 最後の楽譜は `localStorage` の `sheetmusicplayer-state` に保存する。読み込んだ値は検証してから使う。新しいファイルを開いたらテンポは楽譜の値に戻す。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。
 - トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（`ktkwmr/ktkwmr.com` の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`。`public/robots.txt` の `Sitemap:` 行も）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ktkwmr.com` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。
+- アプリの下のフッター（`index.html` の `foot.guides`、英日）に記事の一覧を手で書いている（このアプリはアプリの下の説明に記事の一覧がないため。ベースライン §9-14）。記事を追加・改名・削除したら、ここも直す。
 - 記事（ガイド）は 7 本（`scripts/pages/` の `guide`・`faq`・`photo-tips`・`fix-errors`・`tempo-markings`・`musicxml`・`what-is-omr`、一覧は README）。記事の追加・変更は PR のプレビューで人間が内容を確認してからマージする（ベースライン §10-7、`docs/article-review.md`）。
   - 記事の説明（ボタン名・手順・既定値）はアプリと合わせる。速度記号の表・既定のテンポ・PDF のページ上限は `scripts/pages/parts.mjs` が `index.html` から読む。画面・文言・操作を変えたら、該当する記事と画面写真（`render-guide-images.mjs`）も直す。
   - `photo-tips` の表は実測値（`photo-results.json`）から作る。測り直して結果が本文と合わなくなると `build-pages.mjs` が止まるので、本文を直す。
