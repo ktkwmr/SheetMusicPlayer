@@ -200,3 +200,46 @@ test("fixStrayTuplets keeps real triplets and measures it cannot fix", () => {
   const full = tupScore(tupNote("C", "16th", 2, { tm: true }) + tupNote("C", "16th", 4) + tupNote("C", "half", 42));
   assert.equal(SM.fixStrayTuplets(full), full);
 });
+
+// homr sometimes misses a <backup> when it goes back to the other staff: the note is put
+// after the long note of the other staff, past the bar line (first measure of a test photo)
+const back = (d) => `<backup><duration>${d}</duration></backup>`;
+const bassNote = (step, type, dur) => tupNote(step, type, dur, { voice: 5, staff: 2 });
+
+test("fixVoiceOverflow moves a note put past the bar line back into its gap", () => {
+  // divisions 12: treble 8th 8th 8th 8th 8th | quarter rest | 8th; bass 8th 8th quarter | 8th 8th quarter.
+  // The last treble 8th should start at 42, but comes after the bass quarter (36-48) at 48.
+  const xml = tupScore(
+    tupNote("F", "eighth", 6) + back(6) + bassNote("D", "eighth", 6) + tupNote("E", "eighth", 6) + back(6) + bassNote("F", "eighth", 6) +
+    tupNote("F", "eighth", 6) + back(6) + bassNote("A", "quarter", 12) + back(6) + tupNote("G", "eighth", 6) +
+    tupNote("A", "eighth", 6) + back(6) + bassNote("A", "eighth", 6) +
+    `<note><rest/><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff></note>` + back(12) +
+    bassNote("C", "eighth", 6) + bassNote("E", "quarter", 12) + `<direction><direction-type><words>x</words></direction-type></direction>` +
+    tupNote("C", "eighth", 6) + `<barline location="right"><bar-style>light-heavy</bar-style></barline>`,
+  );
+  assert.equal(SM.parseScore(xml).measures[0].flagged, true);
+  const out = SM.fixVoiceOverflow(xml);
+  const m = SM.parseScore(out);
+  assert.equal(m.measures[0].flagged, false);
+  const top = m.notes.filter((n) => n.track === 0).map((n) => [n.start, n.dur]);
+  assert.deepEqual(top, [[0, 12], [12, 12], [24, 12], [36, 12], [48, 12], [84, 12]]);
+  const low = m.notes.filter((n) => n.track === 1).map((n) => [n.start, n.dur]);
+  assert.deepEqual(low, [[0, 12], [12, 12], [24, 24], [48, 12], [60, 12], [72, 24]]);
+  // The direction stays with its note and the bar line at the end
+  assert.match(out, /<\/direction><note><pitch><step>C<\/step><octave>5/);
+  assert.match(out, /<barline[^>]*>.*<\/barline><\/measure>/);
+  // Nothing more to fix
+  assert.equal(SM.fixVoiceOverflow(out), out);
+});
+
+test("fixVoiceOverflow leaves measures it cannot fix", () => {
+  // Fits the measure
+  const full = tupScore(tupNote("C", "half", 24) + tupNote("D", "half", 24) + bass);
+  assert.equal(SM.fixVoiceOverflow(full), full);
+  // Too long with no gap in the voice
+  const long = tupScore(tupNote("C", "half", 24) + tupNote("D", "half", 24) + tupNote("E", "quarter", 12));
+  assert.equal(SM.fixVoiceOverflow(long), long);
+  // The gap is not as long as the overrun
+  const odd = tupScore(tupNote("C", "half", 24) + `<forward><duration>6</duration></forward>` + tupNote("D", "half", 24) + tupNote("E", "eighth", 6));
+  assert.equal(SM.fixVoiceOverflow(odd), odd);
+});

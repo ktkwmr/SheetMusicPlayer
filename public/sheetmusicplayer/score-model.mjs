@@ -182,6 +182,80 @@ export function fixStrayTuplets(xml) {
   return changed ? new XMLSerializer().serializeToString(doc) : xml;
 }
 
+// ---------- Notes placed after the bar line ----------
+// The reader (homr) writes the notes of a grand staff in one stream and moves back with
+// <backup> when it goes to the other staff. Sometimes it misses a backup: a note that starts
+// while a longer note of the other staff is still sounding is then put after that note, past
+// the bar line (a treble 8th at beat 4.5 of 4/4 goes to beat 5), and plays late. In a voice
+// that runs past the bar line, if the last gap in the voice is exactly as long as the overrun,
+// move the notes after the gap back by that much, so the voice fills the measure.
+export function fixVoiceOverflow(xml) {
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  let changed = false;
+  for (const part of Array.from(doc.querySelectorAll("score-partwise > part"))) {
+    let divisions = 1, beats = 4, beatType = 4;
+    for (const m of kids(part, "measure")) {
+      for (const a of kids(m, "attributes")) {
+        if (text(a, "divisions")) divisions = +text(a, "divisions");
+        if (text(a, "time beats")) { beats = +text(a, "time beats"); beatType = +text(a, "time beat-type"); }
+      }
+      if (m.querySelector("multiple-rest")) continue;
+      const len = beats * 4 / beatType * divisions;
+      // groups: a note with its chord tones and the elements just before it (directions …), in order
+      const groups = [], voices = new Map();
+      let pos = 0, last = null, lead = [];
+      for (const el of Array.from(m.children)) {
+        const dur = +(text(el, ":scope > duration") || 0);
+        if (el.localName === "backup") { pos -= dur; last = null; continue; }
+        if (el.localName === "forward") { pos += dur; last = null; continue; }
+        if (el.localName !== "note") { lead.push(el); last = null; continue; }
+        if (kids(el, "chord").length && last) { last.els.push(el); continue; }
+        const step = kids(el, "grace").length ? 0 : dur;
+        last = { lead, els: [el], start: pos, step };
+        lead = [];
+        groups.push(last);
+        const v = text(el, ":scope > voice") || "1";
+        if (!voices.has(v)) voices.set(v, []);
+        voices.get(v).push(last);
+        pos += step;
+      }
+      let moved = false;
+      for (const vg of voices.values()) {
+        const over = Math.max(...vg.map((g) => g.start + g.step)) - len;
+        if (over <= 1e-6) continue;
+        // The last gap in the voice (in time order), and the notes after it
+        const sorted = [...vg].sort((a, b) => a.start - b.start);
+        let reach = 0, gapAt = -1, gap = 0;
+        sorted.forEach((g, i) => {
+          if (g.start > reach + 1e-6) { gapAt = i; gap = g.start - reach; }
+          reach = Math.max(reach, g.start + g.step);
+        });
+        if (gapAt < 0 || Math.abs(gap - over) > 1e-6) continue;
+        for (const g of sorted.slice(gapAt)) g.start -= over;
+        moved = true;
+      }
+      if (!moved) continue;
+      // Write the measure again in time order, with the <backup>s and <forward>s it needs
+      const tail = lead;
+      for (const c of Array.from(m.children)) c.remove();
+      let at = 0;
+      for (const g of groups.sort((a, b) => a.start - b.start)) {
+        if (g.start !== at) {
+          const el = doc.createElement(g.start < at ? "backup" : "forward");
+          const d = doc.createElement("duration"); d.textContent = String(Math.abs(at - g.start));
+          el.appendChild(d);
+          m.appendChild(el);
+        }
+        for (const el of [...g.lead, ...g.els]) m.appendChild(el);
+        at = g.start + g.step;
+      }
+      for (const el of tail) m.appendChild(el);
+      changed = true;
+    }
+  }
+  return changed ? new XMLSerializer().serializeToString(doc) : xml;
+}
+
 // <tie> (for the sound) goes after <duration>, <tied> (for the drawing) in <notations>
 function addTie(note, type) {
   const doc = note.ownerDocument;
