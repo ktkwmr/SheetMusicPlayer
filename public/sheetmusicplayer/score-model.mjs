@@ -185,10 +185,10 @@ export function fixStrayTuplets(xml) {
 // ---------- Notes placed after the bar line ----------
 // The reader (homr) writes the notes of a grand staff in one stream and moves back with
 // <backup> when it goes to the other staff. Sometimes it misses a backup: a note that starts
-// while a longer note of the other staff is still sounding is then put after that note, past
-// the bar line (a treble 8th at beat 4.5 of 4/4 goes to beat 5), and plays late. In a voice
-// that runs past the bar line, if the last gap in the voice is exactly as long as the overrun,
-// move the notes after the gap back by that much, so the voice fills the measure.
+// while a longer note of the other staff is still sounding is then put after that note, and
+// the notes after it come out late, past the bar line. The notes of each voice are still
+// written in order and their lengths still add up. In a measure that runs past the bar line,
+// place each voice whose notes add up to the measure one after another from the start.
 export function fixVoiceOverflow(xml) {
   const doc = new DOMParser().parseFromString(xml, "application/xml");
   let changed = false;
@@ -220,19 +220,16 @@ export function fixVoiceOverflow(xml) {
         pos += step;
       }
       let moved = false;
+      // Only measures where a voice runs past the bar line
+      if (!groups.some((g) => g.start + g.step > len + 1e-6)) continue;
       for (const vg of voices.values()) {
-        const over = Math.max(...vg.map((g) => g.start + g.step)) - len;
-        if (over <= 1e-6) continue;
-        // The last gap in the voice (in time order), and the notes after it
-        const sorted = [...vg].sort((a, b) => a.start - b.start);
-        let reach = 0, gapAt = -1, gap = 0;
-        sorted.forEach((g, i) => {
-          if (g.start > reach + 1e-6) { gapAt = i; gap = g.start - reach; }
-          reach = Math.max(reach, g.start + g.step);
-        });
-        if (gapAt < 0 || Math.abs(gap - over) > 1e-6) continue;
-        for (const g of sorted.slice(gapAt)) g.start -= over;
-        moved = true;
+        // A voice whose notes add up to the measure: place them one after another, in the order written
+        if (Math.abs(vg.reduce((s, g) => s + g.step, 0) - len) > 1e-6) continue;
+        let at = 0;
+        for (const g of vg) {
+          if (Math.abs(g.start - at) > 1e-6) { g.start = at; moved = true; }
+          at += g.step;
+        }
       }
       if (!moved) continue;
       // Write the measure again in time order, with the <backup>s and <forward>s it needs

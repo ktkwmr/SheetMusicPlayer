@@ -232,6 +232,24 @@ test("fixVoiceOverflow moves a note put past the bar line back into its gap", ()
   assert.equal(SM.fixVoiceOverflow(out), out);
 });
 
+test("fixVoiceOverflow fixes a measure with several missed backups", () => {
+  // Measure 13 of a test photo (divisions 4): treble F E F E | F G(8th) A | rest(8th) E E | E E(dotted 8th),
+  // bass eight 8ths. homr missed the backups after the G, the bass D and the dotted E.
+  const n = (step, dur, voice = 1, staff = 1) => `<note><pitch><step>${step}</step><octave>${staff === 1 ? 4 : 3}</octave></pitch><duration>${dur}</duration><voice>${voice}</voice><staff>${staff}</staff></note>`;
+  const b = (step) => n(step, 2, 5, 2);
+  const r = `<note><rest/><duration>2</duration><voice>1</voice><staff>1</staff></note>`;
+  const body = n("F", 1) + back(1) + b("D") + back(1) + n("E", 1) + n("F", 1) + back(1) + b("A") + back(1) + n("E", 1) +
+    n("F", 1) + back(1) + b("F") + back(1) + n("G", 2) + b("D") + n("A", 1) + r + back(2) + b("C") +
+    n("E", 1) + back(1) + b("G") + back(1) + n("E", 1) + n("E", 1) + back(1) + b("E") + back(1) + n("E", 3) + b("G");
+  const xml = `<?xml version="1.0"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>M</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions><time><beats>4</beats><beat-type>4</beat-type></time><staves>2</staves></attributes>${body}</measure></part></score-partwise>`;
+  assert.equal(SM.parseScore(xml).measures[0].flagged, true);
+  const m = SM.parseScore(SM.fixVoiceOverflow(xml));
+  assert.equal(m.measures[0].flagged, false);
+  const at = (t) => m.notes.filter((x) => x.track === t).map((x) => [x.start / 6, x.dur / 6]);
+  assert.deepEqual(at(0), [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 2], [7, 1], [10, 1], [11, 1], [12, 1], [13, 3]]);
+  assert.deepEqual(at(1), [[0, 2], [2, 2], [4, 2], [6, 2], [8, 2], [10, 2], [12, 2], [14, 2]]);
+});
+
 test("fixVoiceOverflow leaves measures it cannot fix", () => {
   // Fits the measure
   const full = tupScore(tupNote("C", "half", 24) + tupNote("D", "half", 24) + bass);
