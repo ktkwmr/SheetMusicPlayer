@@ -98,8 +98,27 @@ async function prefetchAll() {
 }
 
 // ---------- onnxruntime-web layer (called from engine/python/onnxruntime/__init__.py) ----------
+// onnxruntime-web (its threaded build, used here with one thread) makes a shared WebAssembly.Memory
+// with a 4 GB maximum. A shared memory cannot move, so Safari reserves the whole maximum up front,
+// and on iPhone that sometimes fails ("no available backend found. ERR: [wasm] RangeError: Out of
+// memory"; seen in the Home Screen app right after it was started again). It uses about 200 MB for a
+// photo, so cap shared memories at 1 GB. A module may import a memory with a smaller maximum than it
+// declares, and onnxruntime treats a failed grow as out of memory. Pyodide's memory is not shared.
+const SHARED_MEMORY_MAX_PAGES = 16384; // 1 GB (64 KiB pages)
+{
+  const Memory = WebAssembly.Memory;
+  const Capped = function Memory_(desc) {
+    if (desc && desc.shared && !(desc.maximum <= SHARED_MEMORY_MAX_PAGES)) {
+      desc = { ...desc, maximum: Math.max(SHARED_MEMORY_MAX_PAGES, desc.initial || 0) };
+    }
+    return new Memory(desc);
+  };
+  Capped.prototype = Memory.prototype;
+  WebAssembly.Memory = Capped;
+}
 let ort = null;
-const sessions = [];
+const sessions = [], sessionOf = {};
+const SEGNET_BATCH = 2;
 const MODELS = {
   segnet: ["models/segnet.int8.onnx"],
   encoder: ["models/encoder.int8.onnx"],
@@ -118,9 +137,19 @@ self.ortShim = {
   async create(path) {
     const key = Object.keys(MODELS).find((k) => path.includes(k));
     if (!key) throw new Error("Unknown model: " + path);
-    const s = await ort.InferenceSession.create(await modelBytes(key), { executionProviders: ["wasm"], graphOptimizationLevel: "all" });
-    sessions.push(s);
-    return { id: sessions.length - 1, inputNames: s.inputNames, outputNames: s.outputNames };
+    // homr makes a new segmentation session for every page: reuse the one already loaded, or
+    // every page would keep another copy of the model in memory
+    let id = sessionOf[key];
+    if (id == null) {
+      // Without the memory arena and pattern, onnxruntime gives memory back after each run
+      // instead of keeping the largest buffers of every model (less memory, about as fast)
+      sessions.push(await ort.InferenceSession.create(await modelBytes(key), {
+        executionProviders: ["wasm"], graphOptimizationLevel: "all", enableCpuMemArena: false, enableMemPattern: false,
+      }));
+      id = sessionOf[key] = sessions.length - 1;
+    }
+    const s = sessions[id];
+    return { id, inputNames: s.inputNames, outputNames: s.outputNames };
   },
   tensor(type, u8, dims) {
     const C = TYPED[type];
@@ -131,8 +160,27 @@ self.ortShim = {
     return new Uint8Array(d.buffer, d.byteOffset, d.byteLength);
   },
   async run(id, feeds, names) {
-    const out = await sessions[id].run(feeds, Array.from(names));
-    return Array.from(names, (n) => out[n]);
+    names = Array.from(names);
+    if (id !== sessionOf.segnet) {
+      const out = await sessions[id].run(feeds, names);
+      return Array.from(names, (n) => out[n]);
+    }
+    // homr gives the segmentation model 8 image tiles at a time. Its working memory grows with
+    // the batch (about 200 MB for 8), and the WebAssembly heap never shrinks: run a few at a time
+    const feed = Object.values(feeds)[0], key = Object.keys(feeds)[0];
+    const n = feed.dims[0], per = feed.data.length / n, parts = [];
+    for (let i = 0; i < n; i += SEGNET_BATCH) {
+      const k = Math.min(SEGNET_BATCH, n - i);
+      const t = new ort.Tensor(feed.type, feed.data.subarray(i * per, (i + k) * per), [k, ...feed.dims.slice(1)]);
+      parts.push(await sessions[id].run({ [key]: t }, names));
+    }
+    return names.map((name) => {
+      const ts = parts.map((p) => p[name]);
+      const data = new ts[0].data.constructor(ts.reduce((s, t) => s + t.data.length, 0));
+      let o = 0;
+      for (const t of ts) { data.set(t.data, o); o += t.data.length; }
+      return new ort.Tensor(ts[0].type, data, [n, ...ts[0].dims.slice(1)]);
+    });
   },
 };
 
@@ -150,21 +198,7 @@ async function start() {
   // is called from Python through JSPI (onnxruntime-web on its own works with threads). Investigating.
   ort.env.wasm.numThreads = 1;
   const { loadPyodide } = await import(ENGINE + "pyodide/pyodide.mjs");
-  // On iPhone / iPad, CPython (getPyEMTrampolinePtr in pyodide.asm.mjs) calls Python functions through a
-  // JavaScript trampoline instead of its WebAssembly one. Those JavaScript frames sit between
-  // WebAssembly.promising and WebAssembly.Suspending, so Safari refuses to suspend ("JavaScript frames
-  // found between WebAssembly.Suspending and WebAssembly.promising") and every page fails. The check
-  // reads navigator.userAgent once, while Pyodide starts: hide "iPhone" / "iPad" from it for that moment.
-  const ua = self.navigator && self.navigator.userAgent;
-  const hideIOS = ua && /iPad|iPhone|iPod/.test(ua);
-  if (hideIOS) {
-    try { Object.defineProperty(self.navigator, "userAgent", { value: ua.replace(/iPad|iPhone|iPod/g, "Mobile"), configurable: true }); } catch (e) {}
-  }
-  try {
-    py = await loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} });
-  } finally {
-    if (hideIOS) { try { delete self.navigator.userAgent; } catch (e) {} }
-  }
+  py = await withoutAppleMobileCheck(() => loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} }));
   await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions",
     ENGINE + "pyodide/" + wheel("verysimpletree"), ENGINE + "pyodide/" + wheel("musicxml")], { messageCallback: () => {} });
   const zip = await (await engineFetch(ENGINE + "homr.zip")).arrayBuffer();
@@ -176,6 +210,34 @@ async function start() {
   recognize = mod.recognize;
   post("ready");
 }
+
+// CPython calls Python functions through a "trampoline". It normally uses a small wasm-gc module,
+// but on iPhone / iPad (navigator.userAgent, or "MacIntel" with touch points) it falls back to a
+// JavaScript trampoline because of a WebKit GC bug seen in iOS 18.3.1 (python/cpython#130418,
+// https://bugs.webkit.org/show_bug.cgi?id=293113). With the JavaScript trampoline there are
+// JavaScript frames on every Python call, and JSPI cannot suspend through them ("JavaScript frames
+// found between WebAssembly.Suspending and WebAssembly.promising"), so recognition always fails.
+// The check runs once while Pyodide starts, so hide those values from it during loadPyodide only.
+// Every browser with JSPI also has wasm-gc.
+const isAppleMobile = (nav) => /iPad|iPhone|iPod/.test(nav.userAgent) ||
+  (nav.platform === "MacIntel" && typeof nav.maxTouchPoints !== "undefined" && nav.maxTouchPoints > 1);
+async function withoutAppleMobileCheck(fn) {
+  const nav = self.navigator;
+  if (!nav || !isAppleMobile(nav)) return fn();
+  const masked = new Proxy(nav, {
+    get(target, key) {
+      if (key === "userAgent") return target.userAgent.replace(/iPad|iPhone|iPod/g, "Mobile");
+      if (key === "platform" && target.platform === "MacIntel") return "";
+      const v = Reflect.get(target, key, target);
+      return typeof v === "function" ? v.bind(target) : v;
+    },
+  });
+  let masking = false;
+  try { Object.defineProperty(self, "navigator", { value: masked, configurable: true, writable: true }); masking = true; } catch (e) {}
+  try { return await fn(); }
+  finally { if (masking) delete self.navigator; }
+}
+
 const wheel = (name) => Object.keys(manifest.files).map((f) => f.split("/").pop()).find((f) => f.startsWith(name + "-") && f.endsWith(".whl"));
 
 let starting = null;
@@ -192,8 +254,13 @@ self.onmessage = async (ev) => {
       const t0 = performance.now();
       const xml = await recognize.callPromising(new Uint8Array(msg.rgba), msg.width, msg.height, msg.tempo || null);
       post("result", { id: msg.id, xml, ms: Math.round(performance.now() - t0) });
+      // Free the page's images now, so the next page reuses that memory instead of growing the heap
+      try { py.runPython("import gc; gc.collect()"); } catch (e) {}
     } catch (e) {
-      post("error", { id: msg.id, ...errorInfo(e) });
+      const info = errorInfo(e);
+      // Anything but "no staff found" may leave Pyodide unusable (a failed JSPI suspension is a fatal
+      // error, and the next call then fails with "undefined is not an object"): ask for a fresh worker.
+      post("error", { id: msg.id, ...info, restart: info.code !== "no-staff" });
     }
   }
 };
@@ -202,6 +269,7 @@ function errorInfo(e) {
   const message = String((e && e.message) || e);
   let code = (e && e.code) || "recognize";
   if (/no-staff/.test(message)) code = "no-staff";
+  else if (/JavaScript frames found between|trying to suspend JS frames/i.test(message)) code = "unsupported";
   else if (/memory|Out of bounds|RangeError: Array buffer allocation/i.test(message)) code = "memory";
   // Where a JavaScript error happened (Safari's messages do not say), e.g. "ort.min.mjs:6"
   const m = /([\w.-]+\.m?js):(\d+):\d+/.exec(String((e && e.stack) || ""));

@@ -176,3 +176,151 @@ test("scoreTitle / withTitle", () => {
   assert.match(out, /<score-partwise[^>]*><work><work-title>/, "work comes first");
   assert.deepEqual(pitches(out), pitches(noTitle));
 });
+
+// homr has no tie symbol: a tie comes out as a slur (stop written before start on a middle note)
+const homrNote = (step, octave, dur, slurs, { alter, chord, staff = 1 } = {}) =>
+  `<note>${chord ? "<chord/>" : ""}<pitch><step>${step}</step>${alter ? `<alter>${alter}</alter>` : ""}<octave>${octave}</octave></pitch><type>quarter</type><duration>${dur}</duration><staff>${staff}</staff><voice>1</voice>` +
+  `<notations>${slurs.map((t) => `<slur type="${t}" number="${staff}"/>`).join("")}</notations></note>`;
+const homrScore = (...measures) => `<?xml version="1.0"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>M</part-name></score-part></part-list><part id="P1">` +
+  measures.map((m, i) => `<measure number="${i + 1}">${i === 0 ? "<attributes><divisions>2</divisions><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>" : ""}${m}</measure>`).join("") + `</part></score-partwise>`;
+
+test("slursToTies turns a slur between two notes of the same pitch into a tie", () => {
+  const xml = homrScore(
+    homrNote("E", 4, 4, []) + homrNote("C", 5, 4, ["start"]),
+    homrNote("C", 5, 4, ["stop"]) + homrNote("D", 5, 4, []),
+  );
+  const out = SM.slursToTies(xml);
+  assert.doesNotMatch(out, /<slur/);
+  assert.match(out, /<tie type="start"\/>/);
+  assert.match(out, /<tied type="stop"\/>/);
+  const m = SM.parseScore(out);
+  assert.deepEqual(m.notes.map((n) => [n.start, n.dur, n.midi]), [[0, 48, 64], [48, 96, 72], [144, 48, 74]]);
+});
+
+test("slursToTies joins a chain of tied notes and keeps the first note's accidental", () => {
+  const xml = homrScore(
+    homrNote("F", 4, 2, ["start"], { alter: 1 }) + homrNote("F", 4, 2, ["stop", "start"]) + homrNote("F", 4, 4, ["stop"]),
+  );
+  const m = SM.parseScore(SM.slursToTies(xml));
+  assert.deepEqual(m.notes.map((n) => [n.start, n.dur, n.midi]), [[0, 96, 66]]);
+});
+
+test("slursToTies leaves real slurs alone", () => {
+  // Different pitches, and a slur over several notes that starts and ends on the same pitch
+  const xml = homrScore(
+    homrNote("C", 5, 4, ["start"]) + homrNote("D", 5, 4, ["stop"]),
+    homrNote("E", 5, 2, ["start"]) + homrNote("D", 5, 2, []) + homrNote("E", 5, 4, ["stop"]),
+  );
+  assert.equal(SM.slursToTies(xml), xml);
+});
+
+test("slursToTies ties only the matching notes of a chord", () => {
+  const xml = homrScore(
+    homrNote("C", 4, 4, ["start"]) + homrNote("E", 4, 4, ["start"], { chord: true }) +
+    homrNote("C", 4, 4, ["stop"]) + homrNote("G", 4, 4, ["stop"], { chord: true }),
+  );
+  const m = SM.parseScore(SM.slursToTies(xml));
+  assert.deepEqual(m.notes.map((n) => [n.start, n.dur, n.midi]).sort((a, b) => a[2] - b[2]), [[0, 96, 60], [0, 48, 64], [48, 48, 67]]);
+});
+
+// homr sometimes reads a 16th as a triplet 16th (time-modification 3:2, no <tuplet> bracket)
+const tupNote = (step, type, dur, { tm, bracket, voice = 1, staff = 1 } = {}) =>
+  `<note><pitch><step>${step}</step><octave>5</octave></pitch><duration>${dur}</duration><voice>${voice}</voice><type>${type}</type>` +
+  (tm ? "<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>" : "") +
+  `<staff>${staff}</staff>${bracket ? `<notations><tuplet type="${bracket}"/></notations>` : ""}</note>`;
+const tupScore = (...measures) => `<?xml version="1.0"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>M</part-name></score-part></part-list><part id="P1">` +
+  measures.map((m, i) => `<measure number="${i + 1}">${i === 0 ? "<attributes><divisions>12</divisions><time><beats>4</beats><beat-type>4</beat-type></time><staves>2</staves><clef number=\"1\"><sign>G</sign><line>2</line></clef><clef number=\"2\"><sign>F</sign><line>4</line></clef></attributes>" : ""}${m}</measure>`).join("") + `</part></score-partwise>`;
+const bass = `<backup><duration>48</duration></backup><note><pitch><step>C</step><octave>3</octave></pitch><duration>48</duration><voice>5</voice><type>whole</type><staff>2</staff></note>`;
+
+test("fixStrayTuplets makes stray triplet notes plain when that fills the measure", () => {
+  // 16th(triplet) + dotted 8th + half + 16th(triplet) 16th(triplet) + 8th = 45 of 48
+  const xml = tupScore(
+    tupNote("G", "16th", 2, { tm: true }) + tupNote("G", "eighth", 9) + tupNote("E", "half", 24) +
+    tupNote("E", "16th", 2, { tm: true }) + tupNote("D", "16th", 2, { tm: true }) + tupNote("C", "eighth", 6) + bass,
+  );
+  const out = SM.fixStrayTuplets(xml);
+  assert.doesNotMatch(out, /time-modification/);
+  const m = SM.parseScore(out);
+  assert.equal(m.measures[0].flagged, false);
+  const top = m.notes.filter((n) => n.track === 0).map((n) => [n.start, n.dur]);
+  assert.deepEqual(top, [[0, 6], [6, 18], [24, 48], [72, 6], [78, 6], [84, 12]]);
+});
+
+test("fixStrayTuplets keeps real triplets and measures it cannot fix", () => {
+  // A full bracketed triplet of 8ths
+  const real = tupScore(
+    tupNote("C", "eighth", 4, { tm: true, bracket: "start" }) + tupNote("D", "eighth", 4, { tm: true }) + tupNote("E", "eighth", 4, { tm: true, bracket: "stop" }) +
+    tupNote("F", "quarter", 12) + tupNote("G", "half", 24),
+  );
+  assert.equal(SM.fixStrayTuplets(real), real);
+  // Making the triplets plain would overfill the measure (47 -> 51)
+  const over = tupScore(
+    tupNote("E", "eighth", 6) + tupNote("E", "eighth", 6) + tupNote("E", "eighth", 6) + tupNote("D", "eighth", 6) +
+    tupNote("E", "16th", 3) + tupNote("D", "eighth", 4, { tm: true }) + tupNote("C", "eighth", 4, { tm: true }) + tupNote("C", "eighth", 12),
+  );
+  assert.equal(SM.fixStrayTuplets(over), over);
+  // A full measure is left as it is
+  const full = tupScore(tupNote("C", "16th", 2, { tm: true }) + tupNote("C", "16th", 4) + tupNote("C", "half", 42));
+  assert.equal(SM.fixStrayTuplets(full), full);
+});
+
+// homr sometimes misses a <backup> when it goes back to the other staff: the note is put
+// after the long note of the other staff, past the bar line (first measure of a test photo)
+const back = (d) => `<backup><duration>${d}</duration></backup>`;
+const bassNote = (step, type, dur) => tupNote(step, type, dur, { voice: 5, staff: 2 });
+
+test("fixVoiceOverflow moves a note put past the bar line back into its gap", () => {
+  // divisions 12: treble 8th 8th 8th 8th 8th | quarter rest | 8th; bass 8th 8th quarter | 8th 8th quarter.
+  // The last treble 8th should start at 42, but comes after the bass quarter (36-48) at 48.
+  const xml = tupScore(
+    tupNote("F", "eighth", 6) + back(6) + bassNote("D", "eighth", 6) + tupNote("E", "eighth", 6) + back(6) + bassNote("F", "eighth", 6) +
+    tupNote("F", "eighth", 6) + back(6) + bassNote("A", "quarter", 12) + back(6) + tupNote("G", "eighth", 6) +
+    tupNote("A", "eighth", 6) + back(6) + bassNote("A", "eighth", 6) +
+    `<note><rest/><duration>12</duration><voice>1</voice><type>quarter</type><staff>1</staff></note>` + back(12) +
+    bassNote("C", "eighth", 6) + bassNote("E", "quarter", 12) + `<direction><direction-type><words>x</words></direction-type></direction>` +
+    tupNote("C", "eighth", 6) + `<barline location="right"><bar-style>light-heavy</bar-style></barline>`,
+  );
+  assert.equal(SM.parseScore(xml).measures[0].flagged, true);
+  const out = SM.fixVoiceOverflow(xml);
+  const m = SM.parseScore(out);
+  assert.equal(m.measures[0].flagged, false);
+  const top = m.notes.filter((n) => n.track === 0).map((n) => [n.start, n.dur]);
+  assert.deepEqual(top, [[0, 12], [12, 12], [24, 12], [36, 12], [48, 12], [84, 12]]);
+  const low = m.notes.filter((n) => n.track === 1).map((n) => [n.start, n.dur]);
+  assert.deepEqual(low, [[0, 12], [12, 12], [24, 24], [48, 12], [60, 12], [72, 24]]);
+  // The direction stays with its note and the bar line at the end
+  assert.match(out, /<\/direction><note><pitch><step>C<\/step><octave>5/);
+  assert.match(out, /<barline[^>]*>.*<\/barline><\/measure>/);
+  // Nothing more to fix
+  assert.equal(SM.fixVoiceOverflow(out), out);
+});
+
+test("fixVoiceOverflow fixes a measure with several missed backups", () => {
+  // Measure 13 of a test photo (divisions 4): treble F E F E | F G(8th) A | rest(8th) E E | E E(dotted 8th),
+  // bass eight 8ths. homr missed the backups after the G, the bass D and the dotted E.
+  const n = (step, dur, voice = 1, staff = 1) => `<note><pitch><step>${step}</step><octave>${staff === 1 ? 4 : 3}</octave></pitch><duration>${dur}</duration><voice>${voice}</voice><staff>${staff}</staff></note>`;
+  const b = (step) => n(step, 2, 5, 2);
+  const r = `<note><rest/><duration>2</duration><voice>1</voice><staff>1</staff></note>`;
+  const body = n("F", 1) + back(1) + b("D") + back(1) + n("E", 1) + n("F", 1) + back(1) + b("A") + back(1) + n("E", 1) +
+    n("F", 1) + back(1) + b("F") + back(1) + n("G", 2) + b("D") + n("A", 1) + r + back(2) + b("C") +
+    n("E", 1) + back(1) + b("G") + back(1) + n("E", 1) + n("E", 1) + back(1) + b("E") + back(1) + n("E", 3) + b("G");
+  const xml = `<?xml version="1.0"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>M</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><divisions>4</divisions><time><beats>4</beats><beat-type>4</beat-type></time><staves>2</staves></attributes>${body}</measure></part></score-partwise>`;
+  assert.equal(SM.parseScore(xml).measures[0].flagged, true);
+  const m = SM.parseScore(SM.fixVoiceOverflow(xml));
+  assert.equal(m.measures[0].flagged, false);
+  const at = (t) => m.notes.filter((x) => x.track === t).map((x) => [x.start / 6, x.dur / 6]);
+  assert.deepEqual(at(0), [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 2], [7, 1], [10, 1], [11, 1], [12, 1], [13, 3]]);
+  assert.deepEqual(at(1), [[0, 2], [2, 2], [4, 2], [6, 2], [8, 2], [10, 2], [12, 2], [14, 2]]);
+});
+
+test("fixVoiceOverflow leaves measures it cannot fix", () => {
+  // Fits the measure
+  const full = tupScore(tupNote("C", "half", 24) + tupNote("D", "half", 24) + bass);
+  assert.equal(SM.fixVoiceOverflow(full), full);
+  // Too long with no gap in the voice
+  const long = tupScore(tupNote("C", "half", 24) + tupNote("D", "half", 24) + tupNote("E", "quarter", 12));
+  assert.equal(SM.fixVoiceOverflow(long), long);
+  // The gap is not as long as the overrun
+  const odd = tupScore(tupNote("C", "half", 24) + `<forward><duration>6</duration></forward>` + tupNote("D", "half", 24) + tupNote("E", "eighth", 6));
+  assert.equal(SM.fixVoiceOverflow(odd), odd);
+});

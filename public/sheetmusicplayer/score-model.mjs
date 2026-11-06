@@ -63,6 +63,208 @@ export function expandMultiRests(xml) {
   return new XMLSerializer().serializeToString(doc);
 }
 
+// ---------- Ties read as slurs ----------
+// The reader (homr) has no symbol for a tie: a tie comes out as a slur. A slur that joins a
+// note to the very next note of the same pitch (same staff, no gap) is a tie, so make it one,
+// or the player strikes the held note again. Longer slurs and slurs between different
+// pitches stay as they are.
+export function slursToTies(xml) {
+  if (!/<slur[\s/>]/.test(xml)) return xml;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const parts = Array.from(doc.querySelectorAll("score-partwise > part"));
+  let changed = false;
+  for (const part of parts) {
+    // open[staff]: notes with a slur start, waiting for the note that ends the slur
+    const open = new Map();
+    let divisions = 1, mStart = 0;
+    for (const m of kids(part, "measure")) {
+      let pos = 0, last = 0, end = 0;
+      for (const el of Array.from(m.children)) {
+        if (el.localName === "attributes") { if (text(el, "divisions")) divisions = +text(el, "divisions"); continue; }
+        const dur = +(text(el, ":scope > duration") || 0) / divisions;
+        if (el.localName === "backup") { pos -= dur; continue; }
+        if (el.localName === "forward") { pos += dur; end = Math.max(end, pos); continue; }
+        if (el.localName !== "note") continue;
+        const chord = kids(el, "chord").length > 0;
+        const onset = chord ? last : pos;
+        if (!chord) { last = pos; pos += dur; end = Math.max(end, pos); }
+        if (kids(el, "grace").length) continue;
+        const pitch = kids(el, "pitch")[0];
+        const slurs = Array.from(el.querySelectorAll("notations > slur"));
+        if (!pitch || !slurs.length) continue;
+        const staff = text(el, ":scope > staff") || "1", at = mStart + onset;
+        const name = text(pitch, "step") + text(pitch, "octave");
+        // Starts that ended before this note can no longer be tied
+        const list = (open.get(staff) || []).filter((o) => o.end > at - 1e-6);
+        open.set(staff, list);
+        // homr writes the stop before the start on a note that does both
+        for (const sl of slurs) {
+          const type = sl.getAttribute("type");
+          if (type === "stop") {
+            const prev = list.find((o) => o.name === name && Math.abs(o.end - at) < 1e-6);
+            if (!prev) continue;
+            list.splice(list.indexOf(prev), 1);
+            // Keep the first note's accidental (it is not printed again on the tied note)
+            const alter = kids(prev.pitch, "alter")[0], mine = kids(pitch, "alter")[0];
+            if (mine) mine.remove();
+            if (alter) kids(pitch, "step")[0].after(alter.cloneNode(true));
+            prev.slur.remove(); sl.remove();
+            addTie(prev.note, "start"); addTie(el, "stop");
+            changed = true;
+          } else if (type === "start") {
+            list.push({ note: el, pitch, name, slur: sl, end: at + dur });
+          }
+        }
+      }
+      mStart += end;
+    }
+  }
+  if (!changed) return xml;
+  doc.querySelectorAll("notations").forEach((n) => { if (!n.children.length) n.remove(); });
+  return new XMLSerializer().serializeToString(doc);
+}
+
+// ---------- Notes read as stray tuplets ----------
+// The reader (homr) sometimes reads a plain note as a tuplet note (a 16th as a triplet 16th):
+// it then gets 2/3 of its length, plays too early and the measure comes out short. homr marks
+// a tuplet with a bracket (<tuplet> start / stop) only when the whole group is there, so a
+// tuplet note outside a bracket is suspect. In a measure that is too short, make those notes
+// plain again, but only when that makes the voice fill the measure exactly.
+export function fixStrayTuplets(xml) {
+  if (!/<time-modification>/.test(xml)) return xml;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  let changed = false;
+  for (const part of Array.from(doc.querySelectorAll("score-partwise > part"))) {
+    let divisions = 1, beats = 4, beatType = 4;
+    for (const m of kids(part, "measure")) {
+      for (const a of kids(m, "attributes")) {
+        if (text(a, "divisions")) divisions = +text(a, "divisions");
+        if (text(a, "time beats")) { beats = +text(a, "time beats"); beatType = +text(a, "time beat-type"); }
+      }
+      const len = beats * 4 / beatType * divisions;
+      // voices[v] = { total, open (inside a bracket), stray: [{ note, dur, plain }], extra }
+      const voices = new Map();
+      const voice = (el) => {
+        const v = text(el, ":scope > voice") || "1";
+        if (!voices.has(v)) voices.set(v, { total: 0, open: false, stray: [], extra: 0 });
+        return voices.get(v);
+      };
+      for (const el of Array.from(m.children)) {
+        if (el.localName === "forward") { voice(el).total += +(text(el, ":scope > duration") || 0); continue; }
+        if (el.localName !== "note" || kids(el, "grace").length) continue;
+        const v = voice(el), dur = +(text(el, ":scope > duration") || 0);
+        const chord = kids(el, "chord").length > 0;
+        if (!chord) v.total += dur;
+        const tm = kids(el, "time-modification")[0];
+        if (!tm) continue;
+        const marks = Array.from(el.querySelectorAll("notations > tuplet")).map((x) => x.getAttribute("type"));
+        if (marks.includes("start")) v.open = true;
+        const inBracket = v.open;
+        if (marks.includes("stop")) v.open = false;
+        if (inBracket) continue;
+        const actual = +(text(tm, "actual-notes") || 0), normal = +(text(tm, "normal-notes") || 0);
+        const plain = dur * actual / normal;
+        // Not a whole number of divisions: cannot be written plainly, leave the voice alone
+        if (!actual || !normal || !Number.isInteger(plain)) { v.extra = NaN; continue; }
+        v.stray.push({ note: el, plain });
+        if (!chord) v.extra += plain - dur;
+      }
+      for (const v of voices.values()) {
+        if (!v.stray.length || v.total >= len - 1e-6 || Math.abs(v.total + v.extra - len) > 1e-6) continue;
+        for (const { note, plain } of v.stray) {
+          kids(note, "duration")[0].textContent = String(plain);
+          kids(note, "time-modification")[0].remove();
+        }
+        changed = true;
+      }
+    }
+  }
+  return changed ? new XMLSerializer().serializeToString(doc) : xml;
+}
+
+// ---------- Notes placed after the bar line ----------
+// The reader (homr) writes the notes of a grand staff in one stream and moves back with
+// <backup> when it goes to the other staff. Sometimes it misses a backup: a note that starts
+// while a longer note of the other staff is still sounding is then put after that note, and
+// the notes after it come out late, past the bar line. The notes of each voice are still
+// written in order and their lengths still add up. In a measure that runs past the bar line,
+// place each voice whose notes add up to the measure one after another from the start.
+export function fixVoiceOverflow(xml) {
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  let changed = false;
+  for (const part of Array.from(doc.querySelectorAll("score-partwise > part"))) {
+    let divisions = 1, beats = 4, beatType = 4;
+    for (const m of kids(part, "measure")) {
+      for (const a of kids(m, "attributes")) {
+        if (text(a, "divisions")) divisions = +text(a, "divisions");
+        if (text(a, "time beats")) { beats = +text(a, "time beats"); beatType = +text(a, "time beat-type"); }
+      }
+      if (m.querySelector("multiple-rest")) continue;
+      const len = beats * 4 / beatType * divisions;
+      // groups: a note with its chord tones and the elements just before it (directions …), in order
+      const groups = [], voices = new Map();
+      let pos = 0, last = null, lead = [];
+      for (const el of Array.from(m.children)) {
+        const dur = +(text(el, ":scope > duration") || 0);
+        if (el.localName === "backup") { pos -= dur; last = null; continue; }
+        if (el.localName === "forward") { pos += dur; last = null; continue; }
+        if (el.localName !== "note") { lead.push(el); last = null; continue; }
+        if (kids(el, "chord").length && last) { last.els.push(el); continue; }
+        const step = kids(el, "grace").length ? 0 : dur;
+        last = { lead, els: [el], start: pos, step };
+        lead = [];
+        groups.push(last);
+        const v = text(el, ":scope > voice") || "1";
+        if (!voices.has(v)) voices.set(v, []);
+        voices.get(v).push(last);
+        pos += step;
+      }
+      let moved = false;
+      // Only measures where a voice runs past the bar line
+      if (!groups.some((g) => g.start + g.step > len + 1e-6)) continue;
+      for (const vg of voices.values()) {
+        // A voice whose notes add up to the measure: place them one after another, in the order written
+        if (Math.abs(vg.reduce((s, g) => s + g.step, 0) - len) > 1e-6) continue;
+        let at = 0;
+        for (const g of vg) {
+          if (Math.abs(g.start - at) > 1e-6) { g.start = at; moved = true; }
+          at += g.step;
+        }
+      }
+      if (!moved) continue;
+      // Write the measure again in time order, with the <backup>s and <forward>s it needs
+      const tail = lead;
+      for (const c of Array.from(m.children)) c.remove();
+      let at = 0;
+      for (const g of groups.sort((a, b) => a.start - b.start)) {
+        if (g.start !== at) {
+          const el = doc.createElement(g.start < at ? "backup" : "forward");
+          const d = doc.createElement("duration"); d.textContent = String(Math.abs(at - g.start));
+          el.appendChild(d);
+          m.appendChild(el);
+        }
+        for (const el of [...g.lead, ...g.els]) m.appendChild(el);
+        at = g.start + g.step;
+      }
+      for (const el of tail) m.appendChild(el);
+      changed = true;
+    }
+  }
+  return changed ? new XMLSerializer().serializeToString(doc) : xml;
+}
+
+// <tie> (for the sound) goes after <duration>, <tied> (for the drawing) in <notations>
+function addTie(note, type) {
+  const doc = note.ownerDocument;
+  const tie = doc.createElement("tie"); tie.setAttribute("type", type);
+  const dur = kids(note, "duration")[0];
+  if (dur) dur.after(tie); else note.appendChild(tie);
+  let notations = kids(note, "notations")[0];
+  if (!notations) { notations = doc.createElement("notations"); note.appendChild(notations); }
+  const tied = doc.createElement("tied"); tied.setAttribute("type", type);
+  if (type === "stop") notations.prepend(tied); else notations.appendChild(tied);
+}
+
 // Length of measure i in divisions, from the time signature and divisions in force there
 function measureDivisions(part, index) {
   let divisions = 1, beats = 4, beatType = 4;
