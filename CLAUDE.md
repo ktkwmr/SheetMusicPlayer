@@ -22,7 +22,7 @@
 - 対応環境: 動作確認は PC の Chrome・Edge 137 以降。エンジンに JSPI が必要で、ないブラウザでは案内を出す（`supported` は `WebAssembly.Suspending` の有無で判定）。JSPI は Android の Chrome 137・Firefox 153・Safari 27 にも入ったが、これらでは未確認（Safari は COEP `credentialless` に対応しているかも確かめる）。動作を確かめたら README・記事（`guide`・`faq`）・アプリの文言（`err.unsupported`、JSON-LD の `browserRequirements`）を一緒に直す。
 
 ## ルール
-- 手で編集するのは `public/sheetmusicplayer/index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`sw.js`、`engine/python/`、`scripts/`。
+- 手で編集するのは `public/sheetmusicplayer/index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`export.mjs`・`sw.js`、`engine/python/`、`scripts/`。
   生成ファイルは編集しない:
   - `public/sheetmusicplayer/ja/index.html`、記事と情報ページ（`guide/` など・`about/`・`privacy/` とその `ja/`）、`sitemap.xml` → `node scripts/build-ja.mjs`・`node scripts/build-pages.mjs`（`--check` で確認）
   - `public/sheetmusicplayer/guide/img/`、`scripts/pages/data/photo-results.json` → `node scripts/render-guide-images.mjs`（`npx wrangler dev` を起動してから。10〜20 分）
@@ -37,7 +37,10 @@
 - homr は複数小節休符をふつうの 1 小節として読むことがある。`expandMultiRests` は `<multiple-rest>` が付いたときだけ小節を増やす。それ以外は編集画面の「小節を追加」で直してもらう。
 - `ja/index.html` には `<base href="/sheetmusicplayer/">` がある。JS で URL を組み立てるときは `location.href` ではなく `document.baseURI` を基準にする（`location.href` だと `/ja/` の下を指して 404 になる）。
 - Service Worker がエンジンのキャッシュからワーカーのスクリプト（Tesseract.js）を返すときは COEP ヘッダーを付ける（`sw.js` の `withWorkerHeaders`）。付けないと cross-origin isolation のページではワーカーが起動せず、テンポを読めない。
-- 最後の楽譜は `localStorage` の `sheetmusicplayer-state` に保存する。読み込んだ値は検証してから使う。新しいファイルを開いたらテンポは楽譜の値に戻す。
+- 開いている楽譜は `localStorage` の `sheetmusicplayer-state`、最近の楽譜（最大 10 曲）は IndexedDB の `sheetmusicplayer-history` に保存する。どちらも読み込んだ値は `validScore` で検証してから使う。新しいファイルを開いたらテンポは楽譜の値に、移調は 0 に戻す。タイトルは MusicXML の `work-title`／`movement-title`、なければ読み込んだ日時（タイトルの OCR はしない）。
+- 再生ボタンは共通ルール（ベースライン）どおり、▶／❚❚ のアイコンだけで切り替える一時停止と、■（停止して最初に戻る。ループ中はループの最初）。
+- 移調: `state.xml` は移調前のまま持ち、表示・再生・書き出しは `transposeXml` を通す。編集画面は移調前の音を表示・再生する。
+- 書き出し（`export.mjs`）: MIDI と MP3。MP3 は聞こえているとおり（テンポ・パートの強調／消音・移調）に、アプリの音源を OfflineAudioContext で 20 秒ずつ作って lamejs（`vendor/lame.min.js`、LGPL-3.0、`build-engine.py` が配置）で変換する。共有は Web Share で URL と MusicXML を送り、ファイルを添付できないブラウザでは保存してから URL だけ共有（またはコピー）する。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。
 - トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（`ktkwmr/ktkwmr.com` の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`。`public/robots.txt` の `Sitemap:` 行も）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ktkwmr.com` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。
 - 記事（ガイド）は 7 本（`scripts/pages/` の `guide`・`faq`・`photo-tips`・`fix-errors`・`tempo-markings`・`musicxml`・`what-is-omr`、一覧は README）。記事の追加・変更は PR のプレビューで人間が内容を確認してからマージする（ベースライン §10-7、`docs/article-review.md`）。

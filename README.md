@@ -67,11 +67,11 @@ file / photo ──► page canvas (PDF.js for PDF) ──► RGBA pixels
 ## Privacy / プライバシー
 
 - The photos, images, and PDFs you open are read only in your browser and are never sent to a server. Camera photos are not saved. The app has no accounts, cookies, or ads.
-- The last score (as MusicXML), its file name, and the tempo, plus the app and its reading engine (for offline use), are saved in your browser's storage. Clear this site's data to remove them.
+- Up to the last 10 scores (as MusicXML) with their titles, file names, tempo, and transposition, plus the app and its reading engine (for offline use), are saved in your browser's storage. Clear this site's data to remove them.
 - The site is hosted on Cloudflare, which keeps standard access logs (IP address, time, requested page or file) for operation and security. Page views are counted with Cloudflare Web Analytics, which uses no cookies.
 
 - 開いた写真・画像・PDF はブラウザの中だけで読み取り、サーバーには送りません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。
-- 最後の楽譜（MusicXML）・ファイル名・テンポと、オフラインで使うためのアプリ本体・読み取りエンジンをブラウザ内に保存します。サイトデータを削除すると消えます。
+- 最近開いた楽譜（最大 10 曲。MusicXML）・タイトル・ファイル名・テンポ・移調の設定と、オフラインで使うためのアプリ本体・読み取りエンジンをブラウザ内に保存します。サイトデータを削除すると消えます。
 - サイトは Cloudflare で配信しており、運用・セキュリティのために標準的なアクセスログ（IP アドレス、日時、アクセスしたページやファイル）が記録されます。閲覧数は Cookie を使わない Cloudflare Web Analytics で集計しています。
 
 The same notice is shown in the app under ⚙ → **Privacy**. The full privacy policy is at `/sheetmusicplayer/privacy/` (Japanese: `/sheetmusicplayer/ja/privacy/`), and the operator information is at `/sheetmusicplayer/about/`.

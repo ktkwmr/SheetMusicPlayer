@@ -159,9 +159,9 @@ export function parseScore(xml) {
 }
 
 // ---------- model -> playback events ----------
-// [start in quarters, length in quarters, MIDI note], sorted by start
+// [start in quarters, length in quarters, MIDI note, track], sorted by start
 export function modelEvents(model) {
-  return model.notes.map((n) => [n.start / PPQ, n.dur / PPQ, n.midi]).sort((a, b) => a[0] - b[0] || a[2] - b[2]);
+  return model.notes.map((n) => [n.start / PPQ, n.dur / PPQ, n.midi, n.track]).sort((a, b) => a[0] - b[0] || a[2] - b[2]);
 }
 
 export const modelEnd = (model) => {
@@ -346,5 +346,109 @@ export function buildXml(model, sourceXml, tempo) {
     });
     partEl.innerHTML = xml;
   });
+  return new XMLSerializer().serializeToString(doc);
+}
+
+// ---------- Transposition ----------
+// Moves every note (and chord symbol) by a number of semitones and changes the key signatures to
+// match. The notes keep their spelling relative to the key (in C -> D, F# becomes G#, not Ab), and
+// everything else in the file (lyrics, slurs, dynamics, layout) is kept as it is.
+const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
+const NATURAL = [0, 2, 4, 5, 7, 9, 11];
+// Letter (0 = C … 6 = B) of the major key with this many sharps (+) or flats (-)
+const tonicLetter = (fifths) => (((fifths * 4) % 7) + 7) % 7;
+
+export function transposedFifths(fifths, semis) {
+  let f = (((fifths + 7 * semis) % 12) + 12) % 12; // 0 … 11
+  if (f > 6) f -= 12;                                // -5 … 6: as few accidentals as possible
+  if (f === 6 && fifths < 0) f = -6;                 // from a flat key, Gb rather than F#
+  return f;
+}
+
+// The spelling of a pitch moved by semis, with its letter moved by shift (0 … 6) letters
+function respell(step, alter, octave, semis, shift) {
+  const li = LETTERS.indexOf(step);
+  if (li < 0) return null;
+  const midi = (octave + 1) * 12 + NATURAL[li] + alter + semis;
+  const nl = (li + shift) % 7;
+  let best = null;
+  for (let o = Math.floor(midi / 12) - 2; o <= Math.floor(midi / 12) + 1; o++) {
+    const a = midi - ((o + 1) * 12 + NATURAL[nl]);
+    if (Math.abs(a) <= 2 && (!best || Math.abs(a) < Math.abs(best.alter))) best = { step: LETTERS[nl], alter: a, octave: o };
+  }
+  return best || spell(midi, semis >= 0 ? 1 : -1);
+}
+
+function setChild(parent, name, value, before) {
+  let el = kids(parent, name)[0];
+  if (value == null) { if (el) el.remove(); return; }
+  if (!el) {
+    el = parent.ownerDocument.createElement(name);
+    const ref = before && kids(parent, before)[0];
+    if (ref) parent.insertBefore(el, ref); else parent.appendChild(el);
+  }
+  el.textContent = String(value);
+}
+
+export function transposeXml(xml, semis) {
+  semis = Math.round(+semis || 0);
+  if (!semis) return xml;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  for (const part of Array.from(doc.querySelectorAll("score-partwise > part"))) {
+    if (part.querySelector("clef > sign") && text(part, "clef > sign") === "percussion") continue;
+    let shift = (tonicLetter(transposedFifths(0, semis)) + 7) % 7; // no key signature: as in C major
+    for (const el of Array.from(part.querySelectorAll("key, note, harmony"))) {
+      if (el.localName === "key") {
+        const f = el.querySelector("fifths");
+        if (!f) continue;
+        const old = +f.textContent || 0, nf = transposedFifths(old, semis);
+        f.textContent = String(nf);
+        // A minor key's mode does not change; only the number of sharps / flats does
+        shift = (tonicLetter(nf) - tonicLetter(old) + 7) % 7;
+      } else if (el.localName === "note") {
+        const p = kids(el, "pitch")[0];
+        if (!p) continue;
+        const r = respell(text(p, "step"), Math.round(+(text(p, "alter") || 0)), +(text(p, "octave") || 4), semis, shift);
+        if (!r) continue;
+        setChild(p, "step", r.step);
+        setChild(p, "alter", r.alter || null, "octave");
+        setChild(p, "octave", r.octave);
+        // The printed accidental was for the old pitch; the score display works it out again
+        kids(el, "accidental").forEach((a) => a.remove());
+      } else {
+        for (const [box, stepName, alterName] of [["root", "root-step", "root-alter"], ["bass", "bass-step", "bass-alter"]]) {
+          const b = kids(el, box)[0];
+          if (!b || !text(b, stepName)) continue;
+          const r = respell(text(b, stepName), Math.round(+(text(b, alterName) || 0)), 4, semis, shift);
+          if (!r) continue;
+          setChild(b, stepName, r.step);
+          setChild(b, alterName, r.alter || null);
+        }
+      }
+    }
+  }
+  return new XMLSerializer().serializeToString(doc);
+}
+
+// ---------- Title ----------
+// The title written in the file (work title, or movement title), or "" when there is none
+export function scoreTitle(xml) {
+  const m = /<work-title>([^<]*)<\/work-title>/.exec(xml) || /<movement-title>([^<]*)<\/movement-title>/.exec(xml);
+  if (!m) return "";
+  const box = new DOMParser().parseFromString("<t>" + m[1] + "</t>", "application/xml");
+  return (box.documentElement.textContent || "").replace(/\s+/g, " ").trim().slice(0, 200);
+}
+
+// Writes the title into the file (work title, and the movement title when there is one)
+export function withTitle(xml, title) {
+  title = String(title || "").trim();
+  if (!title) return xml;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const root = doc.documentElement;
+  let work = kids(root, "work")[0];
+  if (!work) { work = doc.createElement("work"); root.insertBefore(work, root.firstElementChild); }
+  setChild(work, "work-title", title);
+  const mt = kids(root, "movement-title")[0];
+  if (mt) mt.textContent = title;
   return new XMLSerializer().serializeToString(doc);
 }

@@ -38,7 +38,7 @@ export default {
 <h2 id="storage">3. Data saved in your browser</h2>
 <p>The following data is saved in your browser's storage on your device. It is not sent to us.</p>
 <ul>
-  <li><b>The last score:</b> the notes read from the last file you opened (as MusicXML text), the file name, and the tempo, so the score is still there next time. The photo, image, or PDF itself is not saved.</li>
+  <li><b>Recent scores:</b> for up to the last 10 scores you opened, the notes that were read (as MusicXML text), the title, the file name, the tempo, and the transposition, so you can open them again. The photo, image, or PDF itself is not saved. “Clear history” removes them.</li>
   <li><b>App files and the reading engine:</b> the pages of this site you have opened and the reading engine (about 130 MB), so the app starts quickly and works offline.</li>
 </ul>
 <p>To delete this data, clear this site's data (site data, cookies, and storage for ktkwmr.com) in your browser settings.</p>
@@ -103,7 +103,7 @@ export default {
 <h2 id="storage">3. ブラウザに保存するデータ</h2>
 <p>次のデータを、お使いの端末のブラウザ内に保存します。運営者に送られることはありません。</p>
 <ul>
-  <li><b>最後に開いた楽譜：</b>次に開いたときにも表示できるよう、最後に開いたファイルから読み取った音符（MusicXML のテキスト）、ファイル名、テンポを保存します。写真・画像・PDF そのものは保存しません。</li>
+  <li><b>最近開いた楽譜：</b>もう一度開けるよう、最近開いた楽譜を最大 10 曲まで、読み取った音符（MusicXML のテキスト）・タイトル・ファイル名・テンポ・移調の設定を保存します。写真・画像・PDF そのものは保存しません。「履歴を消去」で消せます。</li>
   <li><b>アプリのファイルと読み取りエンジン：</b>すぐに起動でき、オフラインでも使えるよう、開いた本サイトのページと読み取りエンジン（約 130MB）を保存します。</li>
 </ul>
 <p>消したいときは、ブラウザの設定でこのサイト（ktkwmr.com）のデータ（サイトデータ・Cookie・ストレージ）を削除してください。</p>
