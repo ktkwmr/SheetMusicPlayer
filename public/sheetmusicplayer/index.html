@@ -836,7 +836,7 @@
           else if (m.type === "error") {
             if (m.id != null && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); p.reject(m); }
             else pending.forEach(function (p, id) { pending.delete(id); p.reject(m); });
-            if (m.id == null || m.restart) { worker.terminate(); worker = null; engineReady = false; }
+            if (m.id == null || m.restart) stopWorker();
           }
         };
         worker.onerror = function () {
@@ -845,6 +845,12 @@
         };
         worker.postMessage({ type: "init" });
         return worker;
+      }
+      // The engine's WebAssembly memory never shrinks (about 1.4 GB in Chromium after one photo), so
+      // stop it once a file has been read: the next file starts a fresh one (from the cache) instead
+      // of piling on top of it, which ran out of memory on iPhone
+      function stopWorker() {
+        if (worker) { worker.terminate(); worker = null; engineReady = false; }
       }
       function recognizePage(page, tempo) {
         const id = ++jobSeq;
@@ -1135,6 +1141,7 @@
           else { showError(t("err.recognize", { msg: String((e && e.message) || e).split("\n").filter(Boolean).pop().slice(0, 160) })); console.error(e); }
           if (!timeline.steps.length) $("fileCard").hidden = true;
         } finally {
+          stopWorker();
           busy = false; onProgress = null;
           $("score").classList.remove("busy");
           renderPlayer();
@@ -1143,7 +1150,7 @@
       $("cancelBtn").onclick = function () {
         cancelled = true;
         // Stop the engine right away; it starts again (from the cache) for the next file
-        if (worker) { worker.terminate(); worker = null; engineReady = false; }
+        stopWorker();
         pending.forEach(function (p, id) { pending.delete(id); p.reject({ code: "cancel" }); });
       };
 
