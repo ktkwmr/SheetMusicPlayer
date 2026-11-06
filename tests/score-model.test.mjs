@@ -114,6 +114,69 @@ test("a score with no notes or a non-MusicXML file does not crash", () => {
   assert.doesNotThrow(() => SM.expandMultiRests("<foo/>"));
 });
 
+// ---------- Transposition ----------
+const pitches = (xml) => SM.parseScore(xml).notes.map((n) => n.midi);
+const one = (key, notes) => `<?xml version="1.0"?><score-partwise version="4.0"><part-list><score-part id="P1"><part-name>M</part-name></score-part></part-list>
+<part id="P1"><measure number="1"><attributes><divisions>1</divisions>${key == null ? "" : `<key><fifths>${key}</fifths></key>`}<time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>
+${notes.map(([s, a, o]) => `<note><pitch><step>${s}</step>${a ? `<alter>${a}</alter>` : ""}<octave>${o}</octave></pitch><duration>1</duration>${a ? "<accidental>sharp</accidental>" : ""}<type>quarter</type></note>`).join("")}
+</measure></part></score-partwise>`;
+const spelled = (xml) => Array.from(new DOMParser().parseFromString(xml, "application/xml").querySelectorAll("note pitch"))
+  .map((p) => p.querySelector("step").textContent + (+(p.querySelector("alter") || { textContent: 0 }).textContent || "") + p.querySelector("octave").textContent);
+
+for (const name of SCORES) {
+  for (const semis of [-5, 2, 7, 12]) {
+    test(`${name}: transposing by ${semis} moves every note by ${semis} semitones`, () => {
+      const xml = fixture(name);
+      const out = SM.transposeXml(xml, semis);
+      assert.deepEqual(pitches(out), pitches(xml).map((m) => m + semis));
+    });
+  }
+}
+
+test("transposeXml: 0 returns the same file", () => {
+  const xml = fixture("twinkle.musicxml");
+  assert.equal(SM.transposeXml(xml, 0), xml);
+});
+
+test("transposeXml: the key signature follows, and notes keep their spelling in the key", () => {
+  // C major: C E F# G  -> up a major 2nd: D major, D F# G# A
+  const out = SM.transposeXml(one(0, [["C", 0, 4], ["E", 0, 4], ["F", 1, 4], ["G", 0, 4]]), 2);
+  assert.match(out, /<fifths>2<\/fifths>/);
+  assert.deepEqual(spelled(out), ["D4", "F14", "G14", "A4"]);
+  assert.doesNotMatch(out, /<accidental>/, "printed accidentals are left to the display");
+});
+
+test("transposeXml: flat keys stay on the flat side", () => {
+  // F major (1 flat), B flat -> down a semitone: E major (4 sharps), A
+  const down = SM.transposeXml(one(-1, [["B", -1, 4]]), -1);
+  assert.match(down, /<fifths>4<\/fifths>/);
+  assert.deepEqual(spelled(down), ["A4"]);
+  // E flat major (3 flats) up 3 semitones: G flat major (6 flats), not F sharp
+  const up = SM.transposeXml(one(-3, [["E", -1, 4]]), 3);
+  assert.match(up, /<fifths>-6<\/fifths>/);
+  assert.deepEqual(spelled(up), ["G-14"]);
+  // Octave: across B -> C the octave number changes
+  assert.deepEqual(spelled(SM.transposeXml(one(0, [["B", 0, 4]]), 1)), ["C5"]);
+});
+
+test("transposedFifths keeps the number of accidentals small", () => {
+  assert.equal(SM.transposedFifths(0, 1), -5);  // C -> Db
+  assert.equal(SM.transposedFifths(0, 6), 6);   // C -> F#
+  assert.equal(SM.transposedFifths(-1, 1), -6); // F -> Gb
+  assert.equal(SM.transposedFifths(2, -2), 0);  // D -> C
+});
+
+// ---------- Title ----------
+test("scoreTitle / withTitle", () => {
+  assert.equal(SM.scoreTitle(fixture("piano.musicxml")), "Piano Duet Line (test)");
+  const noTitle = one(0, [["C", 0, 4]]);
+  assert.equal(SM.scoreTitle(noTitle), "");
+  const out = SM.withTitle(noTitle, "Ode & Joy <1>");
+  assert.equal(SM.scoreTitle(out), "Ode & Joy <1>");
+  assert.match(out, /<score-partwise[^>]*><work><work-title>/, "work comes first");
+  assert.deepEqual(pitches(out), pitches(noTitle));
+});
+
 // homr has no tie symbol: a tie comes out as a slur (stop written before start on a middle note)
 const homrNote = (step, octave, dur, slurs, { alter, chord, staff = 1 } = {}) =>
   `<note>${chord ? "<chord/>" : ""}<pitch><step>${step}</step>${alter ? `<alter>${alter}</alter>` : ""}<octave>${octave}</octave></pitch><type>quarter</type><duration>${dur}</duration><staff>${staff}</staff><voice>1</voice>` +

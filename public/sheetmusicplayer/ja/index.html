@@ -149,8 +149,15 @@
     /* The score and the player */
     /* Sits just under the sticky top bar (--topbar-h is set from its height by the script) */
     .player { position: sticky; top: var(--topbar-h, 0px); z-index: 5; display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 10px 12px; background: var(--paper); border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
-    .play { appearance: none; height: 40px; min-width: 112px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--ink); color: var(--paper); font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; }
-    .play svg { width: 16px; height: 16px; }
+    /* Transport (common rule): one play / pause button that shows only the icon of what it does next, and a
+       stop button (■) that stops and goes back to the beginning */
+    .transport { display: inline-flex; gap: 6px; align-items: center; }
+    .play { appearance: none; height: 40px; width: 52px; padding: 0; border: 0; border-radius: 10px; background: var(--ink); color: var(--paper); font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; }
+    .play svg { width: 18px; height: 18px; }
+    .stop-btn { width: 40px; height: 40px; padding: 0; }
+    .stop-btn svg { width: 14px; height: 14px; }
+    .chip.toggle[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .chip.toggle.picking { border-color: var(--cursor); color: var(--cursor); }
     .play:disabled { opacity: .4; cursor: default; }
     .play:active:not(:disabled) { background: var(--press); }
     @media (hover: hover) { .play:hover:not(:disabled) { background: var(--press-hover); } }
@@ -160,7 +167,30 @@
     .bpm-input::-webkit-outer-spin-button, .bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .bpm-input:focus { outline: none; border-color: var(--ink); }
     .tempo input[type=range] { flex: 1; min-width: 80px; }
-    .player .end { display: flex; gap: 6px; margin-left: auto; }
+    .player .end { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+    .practice { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--paper); }
+    .practice .grp { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+    .practice .lbl { font-size: 12px; color: var(--subtle); margin-right: 2px; }
+    .practice .chip { height: 30px; padding: 0 10px; }
+    .chip.part[data-mode="solo"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .chip.part[data-mode="mute"] { color: var(--subtle); text-decoration: line-through; border-style: dashed; }
+    .chip.part .st { font-weight: 400; font-size: 11px; }
+    .tr-val { min-width: 2.6em; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 13px; }
+    .loop-info { font-size: 12px; color: var(--muted); }
+    .title-row { padding: 12px 16px 0; }
+    .title-input { width: 100%; border: 1px solid transparent; border-radius: var(--radius); padding: 4px 8px; margin-left: -8px; font: inherit; font-size: 18px; font-weight: 700; color: var(--ink); background: transparent; text-overflow: ellipsis; }
+    .title-input:hover { border-color: var(--line); }
+    .title-input:focus { outline: none; border-color: var(--ink); background: var(--paper); }
+    #score .loop-box { position: absolute; z-index: 1; background: var(--cursor-fill); border-radius: 4px; pointer-events: none; }
+    .history { display: flex; flex-direction: column; gap: 6px; }
+    .history .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 700; font-size: 12px; color: var(--muted); }
+    .history .hd .linkish { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .hist-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+    .hist-list button { appearance: none; width: 100%; border: 0; border-radius: 6px; background: transparent; padding: 6px 8px; text-align: left; cursor: pointer; color: var(--ink); font: inherit; display: block; }
+    .hist-list button:active { background: var(--line); }
+    @media (hover: hover) { .hist-list button:hover { background: var(--hover-fill); } }
+    .hist-list .nm { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-list .sub { display: block; color: var(--subtle); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .score-wrap { position: relative; min-height: 360px; padding: 8px 4px 24px; overflow-x: auto; }
     #score { position: relative; cursor: pointer; }
     #score.busy { cursor: default; }
@@ -284,6 +314,10 @@
             <button type="button" class="chip" id="cancelBtn" data-i18n="cancel">キャンセル</button>
           </div>
           <p class="error" id="error" role="alert" hidden></p>
+          <div class="history" id="history" hidden>
+            <div class="hd"><span data-i18n="hist">最近の楽譜</span><button type="button" class="linkish" id="histClear" data-i18n="hist.clear">履歴を消去</button></div>
+            <ul class="hist-list" id="histList"></ul>
+          </div>
 
           <p class="note" id="firstNote" data-i18n-html="first">初回だけ、読み取りエンジン（約130MB）をダウンロードします。次からはすぐに始まり、オフラインでも使えます。</p>
           <ul class="steps" data-i18n-html="tips"><li>楽譜は正面から、明るい場所で、ページ全体が入るように撮ってください。</li>
@@ -298,8 +332,10 @@
             <button type="button" class="chip" id="modeScore" aria-pressed="true" data-i18n="mode.score">楽譜</button>
             <button type="button" class="chip" id="modeEdit" aria-pressed="false" disabled data-i18n="mode.edit">編集</button>
           </div>
-          <button type="button" class="play" id="playBtn" disabled></button>
-          <button type="button" class="chip" id="rewindBtn" aria-label="最初に戻る" data-i18n-attr="aria-label:rewind" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5v11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M13.5 2.8v10.4L5 8z" fill="currentColor"></path></svg></button>
+          <div class="transport">
+            <button type="button" class="play" id="playBtn" aria-label="Play" disabled></button>
+            <button type="button" class="chip stop-btn" id="stopBtn" aria-label="停止（最初に戻る）" data-i18n-attr="aria-label:stop" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1.5" fill="currentColor"></rect></svg></button>
+          </div>
           <div class="tempo">
             <span class="note-sym" aria-hidden="true">♩=</span>
             <button type="button" class="chip mono" data-bpm="-5" aria-label="テンポを5下げる" data-i18n-attr="aria-label:bpm.m5">−5</button>
@@ -308,11 +344,27 @@
             <input id="bpmSlider" type="range" min="20" max="300" step="1" aria-label="テンポのスライダー" data-i18n-attr="aria-label:bpm.slider">
           </div>
           <div class="end">
+            <button type="button" class="chip toggle" id="practiceBtn" aria-pressed="false" aria-controls="practice" disabled data-i18n="practice">練習モード</button>
+            <button type="button" class="chip" id="exportBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"></path></svg><span data-i18n="export">保存・共有</span></button>
             <button type="button" class="chip" id="clearBtn" disabled data-i18n="clear">クリア</button>
-            <button type="button" class="chip" id="saveBtn" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"></path></svg><span data-i18n="save">MusicXML</span></button>
+          </div>
+        </div>
+        <div class="practice" id="practice" hidden>
+          <div class="grp">
+            <button type="button" class="chip toggle" id="loopBtn" aria-pressed="false" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V6a2 2 0 0 1 2-2h7.5M10.5 2 12.5 4l-2 2M13 9v1a2 2 0 0 1-2 2H3.5M5.5 14l-2-2 2-2"></path></svg><span data-i18n="loop">ループ</span></button>
+            <button type="button" class="chip toggle" id="metroBtn" aria-pressed="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1.8h4l3 12.4H3z"></path><path d="M8 11 12 3.5"></path><path d="M4.2 10.5h7.6"></path></svg><span data-i18n="metro">メトロノーム</span></button>
+            <button type="button" class="chip toggle" id="countBtn" aria-pressed="false" data-i18n="countin">カウントイン</button>
+          </div>
+          <div class="grp"><span class="loop-info" id="loopInfo"></span></div>
+          <div class="grp" id="partsGrp"><span class="lbl" data-i18n="parts">パート</span><span id="partsList" class="grp"></span></div>
+          <div class="grp"><span class="lbl" data-i18n="transpose">移調</span>
+            <button type="button" class="chip mono" id="trDown" aria-label="半音下げる" data-i18n-attr="aria-label:tr.down">−</button>
+            <span class="tr-val" id="trVal" aria-live="polite"></span>
+            <button type="button" class="chip mono" id="trUp" aria-label="半音上げる" data-i18n-attr="aria-label:tr.up">+</button>
           </div>
         </div>
         <div class="warn" id="pageWarn" hidden></div>
+        <div class="title-row" id="titleRow" hidden><input id="titleInput" class="title-input" type="text" maxlength="200" aria-label="タイトル" data-i18n-attr="aria-label:title.aria;title:title.hint" title="クリックで名前を変更" enterkeyhint="done" autocomplete="off"></div>
         <div class="score-wrap" id="scoreWrap">
           <div id="score"></div>
           <div id="playhead" hidden></div>
@@ -322,10 +374,10 @@
           </div>
         </div>
         <div class="edit-wrap" id="editWrap" hidden></div>
-        <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでカーソルを移動</p>
+        <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> 再生/一時停止　<kbd>Home</kbd> 停止（最初に戻る）　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでカーソルを移動</p>
       </section>
     </div>
-    <div class="foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span id="saveState" data-i18n="foot">楽譜はこの端末の中で読み取り、アップロードはしません。最後に開いた楽譜はこのブラウザに保存されます。</span></div>
+    <div class="foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span id="saveState" data-i18n="foot">楽譜はこの端末の中で読み取り、アップロードはしません。最近開いた楽譜はこのブラウザに保存されます。</span></div>
   </main>
 
   <!-- サイトのフッター（ベースライン §9-14）。アプリの外へ出るリンクは新しいタブで開く -->
@@ -380,7 +432,7 @@
     <h2 id="privacyTitle" data-i18n="menu.privacy">プライバシー</h2>
     <div class="help-body">
       <ul class="help-list" data-i18n-html="privacy.body"><li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>
-        <li><b>ブラウザに保存するデータ</b> – 次に開いたときにも使えるよう、最後に開いた楽譜（読み取った音符のMusicXML）とファイル名、テンポをブラウザ内に保存します。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>
+        <li><b>ブラウザに保存するデータ</b> – もう一度開けるよう、最近開いた楽譜（読み取った音符のMusicXML）を最大10曲まで、タイトル・ファイル名・テンポ・移調の設定と一緒にブラウザ内に保存します。「履歴を消去」で消せます。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>
         <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>
         <li><b>お問い合わせ</b> – ご質問・ご意見は <a href="https://github.com/ktkwmr/SheetMusicPlayer/issues" target="_blank" rel="noopener">GitHub の Issues</a> へ。</li>
         <li><b>詳しくは</b> – <a href="/sheetmusicplayer/ja/privacy/" target="_blank" rel="noopener">プライバシーポリシー</a>と<a href="/sheetmusicplayer/ja/about/" target="_blank" rel="noopener">運営者情報</a>をご覧ください。</li></ul>
@@ -396,6 +448,13 @@
     <button type="button" role="menuitem" id="menuPrivacy" data-i18n="menu.privacy">プライバシー</button>
     <button type="button" role="menuitem" id="menuAbout" data-i18n="menu.about">このアプリについて</button>
     <a role="menuitem" id="menuApps" href="https://ktkwmr.com/ja/" target="_blank" rel="noopener" data-i18n="menu.apps" data-i18n-attr="href:home.url">ほかのアプリ</a>
+  </div>
+
+  <div class="menu" id="exportMenu" role="menu" aria-label="保存・共有" data-i18n-attr="aria-label:export" hidden>
+    <button type="button" role="menuitem" id="exShare" data-i18n="ex.share">共有…</button>
+    <button type="button" role="menuitem" id="exXml" data-i18n="ex.xml">MusicXML（楽譜）</button>
+    <button type="button" role="menuitem" id="exMidi" data-i18n="ex.midi">MIDI</button>
+    <button type="button" role="menuitem" id="exMp3" data-i18n="ex.mp3">MP3（音声）</button>
   </div>
 
   <dialog class="msg about" id="aboutDlg" tabindex="-1" aria-labelledby="aboutTitle">
@@ -423,20 +482,54 @@
           "first": "The first time, the app downloads its reading engine (about 130 MB). After that it starts right away, even offline.",
           "tips": "<li>Photograph the page straight on, in good light, with the whole page in the frame.</li>\n            <li>Printed music works best. Handwriting is not supported.</li>\n            <li>The result may contain mistakes. Check it while you listen.</li>",
           "play": "Play",
-          "stop": "Stop",
-          "rewind": "Back to the beginning",
+          "pause": "Pause",
+          "stop": "Stop (back to the beginning)",
+          "loop": "Loop",
+          "loop.pick1": "Tap the first measure",
+          "loop.pick2": "Tap the last measure",
+          "loop.one": "Loop: m. {a}",
+          "loop.range": "Loop: m. {a}–{b}",
+          "loop.hint": "Loop: tap the first and the last measure on the score. Tap “Loop” again to cancel.",
+          "metro": "Metronome",
+          "practice": "Practice mode",
+          "parts": "Parts",
+          "part.normal": "normal",
+          "part.solo": "louder",
+          "part.mute": "muted",
+          "part.aria": "{name}: {state}. Tap to change (normal, louder, muted)",
+          "transpose": "Transpose",
+          "tr.down": "Down a semitone",
+          "tr.up": "Up a semitone",
+          "tr.val": "{n}",
+          "countin": "Count-in",
+          "title.aria": "Title",
+          "title.hint": "Click to rename",
+          "title.default": "Score of {date}",
+          "hist": "Recent scores",
+          "hist.clear": "Clear history",
+          "hist.confirm": "Remove the recent scores from this browser? The score that is open now stays.",
+          "hist.sub": "{date} · {n} notes",
+          "export": "Save / share",
+          "ex.share": "Share…",
+          "ex.xml": "MusicXML (score)",
+          "ex.midi": "MIDI",
+          "ex.mp3": "MP3 (audio)",
+          "share.text": "Sheet music: {title}. Open the attached MusicXML file in Sheet Music Player to play it.",
+          "share.saved": "The MusicXML file was saved. Attach it to your message.",
+          "share.copied": "The MusicXML file was saved, and the app's link was copied.",
+          "st.mp3": "Making the MP3…",
+          "st.mp3.done": "Saved the MP3.",
+          "err.mp3": "The MP3 could not be made. ({msg})",
           "bpm": "Tempo (BPM)",
           "bpm.m5": "Tempo −5",
           "bpm.p5": "Tempo +5",
           "bpm.slider": "Tempo slider",
-          "save": "MusicXML",
           "clear": "Clear",
-          "clear.confirm": "Clear this score? It is also removed from this browser. Save it as MusicXML first if you want to keep it.",
+          "clear.confirm": "Clear this score? It is also removed from this browser and from the recent scores. Save it as MusicXML first if you want to keep it.",
           "file.xml": "MusicXML",
           "st.xml.open": "Opening the MusicXML file…",
           "st.xml.done": "Opened the MusicXML file.",
           "err.xml": "This MusicXML file cannot be opened. It may be damaged, or in a form this app does not support (only partwise MusicXML is supported).",
-          "save.aria": "Save as MusicXML",
           "mode": "View",
           "mode.score": "Score",
           "mode.edit": "Edit",
@@ -462,8 +555,8 @@
           "track.lower": "lower",
           "track.only": "Notes",
           "empty": "The score appears here. Click a note to move the cursor there.",
-          "keys": "<kbd>Space</kbd> play / stop　<kbd>Home</kbd> back to the beginning　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to move the cursor there",
-          "foot": "Your score is read on this device and is never uploaded. The last score is kept in this browser.",
+          "keys": "<kbd>Space</kbd> play / pause　<kbd>Home</kbd> stop (back to the beginning)　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to move the cursor there",
+          "foot": "Your score is read on this device and is never uploaded. Recent scores are kept in this browser.",
           "foot.fail": "This browser cannot keep your score (check private browsing or blocked site data).",
           "file.pages": "PDF · {n} pages",
           "file.page": "PDF · 1 page",
@@ -511,7 +604,7 @@
           "foot.guides": "<li><a href=\"/sheetmusicplayer/guide/\" target=\"_blank\" rel=\"noopener\">How to use Sheet Music Player</a></li>\n<li><a href=\"/sheetmusicplayer/faq/\" target=\"_blank\" rel=\"noopener\">FAQ</a></li>\n<li><a href=\"/sheetmusicplayer/photo-tips/\" target=\"_blank\" rel=\"noopener\">Photo tips for sheet music</a></li>\n<li><a href=\"/sheetmusicplayer/fix-errors/\" target=\"_blank\" rel=\"noopener\">Fixing reading mistakes</a></li>\n<li><a href=\"/sheetmusicplayer/tempo-markings/\" target=\"_blank\" rel=\"noopener\">Tempo markings and BPM</a></li>\n<li><a href=\"/sheetmusicplayer/musicxml/\" target=\"_blank\" rel=\"noopener\">What is MusicXML?</a></li>\n<li><a href=\"/sheetmusicplayer/what-is-omr/\" target=\"_blank\" rel=\"noopener\">How music recognition works</a></li>",
           "help.body": "<li><b>Open a score</b> – Choose an image or a PDF, take a photo, or drop a file on the left panel. Any file can be chosen; images and PDFs are read, and a MusicXML file (for example one saved from this app) opens as it is.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press Play. A blue cursor moves along the staff with the music. Click a note to move the cursor there; Play starts from it.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Save</b> – “MusicXML” saves the result. You can also open it in MuseScore and most notation apps.</li>",
           "help.more": "More: <a href=\"/sheetmusicplayer/guide/\" target=\"_blank\" rel=\"noopener\">guide with screenshots</a> · <a href=\"/sheetmusicplayer/photo-tips/\" target=\"_blank\" rel=\"noopener\">photo tips</a> · <a href=\"/sheetmusicplayer/fix-errors/\" target=\"_blank\" rel=\"noopener\">fixing mistakes</a> · <a href=\"/sheetmusicplayer/faq/\" target=\"_blank\" rel=\"noopener\">FAQ</a>",
-          "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – The last score (the notes the app read, as MusicXML), its file name, and the tempo are saved in your browser's storage so they are there next time. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">about this site</a>.</li>",
+          "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – Up to the last 10 scores you opened (the notes the app read, as MusicXML), with their titles, file names, tempo, and transposition, are saved in your browser's storage so you can open them again. “Clear history” removes them. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">about this site</a>.</li>",
           "about.license": "© 2026 ktkwmr · Licensed under the <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a> (the same as homr, the music recognition it uses) · <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">About this site</a>",
           "close": "Close",
           "loading": "Loading…"
@@ -528,20 +621,54 @@
           "first": "初回だけ、読み取りエンジン（約130MB）をダウンロードします。次からはすぐに始まり、オフラインでも使えます。",
           "tips": "<li>楽譜は正面から、明るい場所で、ページ全体が入るように撮ってください。</li>\n            <li>印刷された楽譜に対応しています。手書きの楽譜は読み取れません。</li>\n            <li>読み取り結果には間違いが含まれることがあります。聴きながら確かめてください。</li>",
           "play": "再生",
-          "stop": "停止",
-          "rewind": "最初に戻る",
+          "pause": "一時停止",
+          "stop": "停止（最初に戻る）",
+          "loop": "ループ",
+          "loop.pick1": "最初の小節をタップ",
+          "loop.pick2": "最後の小節をタップ",
+          "loop.one": "ループ：{a}小節",
+          "loop.range": "ループ：{a}〜{b}小節",
+          "loop.hint": "ループ：楽譜の上で、くり返す最初の小節と最後の小節をタップします。やめるときはもう一度「ループ」を押します。",
+          "metro": "メトロノーム",
+          "practice": "練習モード",
+          "parts": "パート",
+          "part.normal": "通常",
+          "part.solo": "強調",
+          "part.mute": "消音",
+          "part.aria": "{name}：{state}。タップで切り替え（通常・強調・消音）",
+          "transpose": "移調",
+          "tr.down": "半音下げる",
+          "tr.up": "半音上げる",
+          "tr.val": "{n}",
+          "countin": "カウントイン",
+          "title.aria": "タイトル",
+          "title.hint": "クリックで名前を変更",
+          "title.default": "{date} の楽譜",
+          "hist": "最近の楽譜",
+          "hist.clear": "履歴を消去",
+          "hist.confirm": "最近の楽譜をこのブラウザから削除しますか？今開いている楽譜は残ります。",
+          "hist.sub": "{date} · {n}音",
+          "export": "保存・共有",
+          "ex.share": "共有…",
+          "ex.xml": "MusicXML（楽譜）",
+          "ex.midi": "MIDI",
+          "ex.mp3": "MP3（音声）",
+          "share.text": "楽譜「{title}」です。添付の MusicXML ファイルを Sheet Music Player で開くと再生できます。",
+          "share.saved": "MusicXML ファイルを保存しました。メッセージに添付してください。",
+          "share.copied": "MusicXML ファイルを保存し、アプリのリンクをコピーしました。",
+          "st.mp3": "MP3 を作成中…",
+          "st.mp3.done": "MP3 を保存しました。",
+          "err.mp3": "MP3 を作成できませんでした。（{msg}）",
           "bpm": "テンポ（BPM）",
           "bpm.m5": "テンポを5下げる",
           "bpm.p5": "テンポを5上げる",
           "bpm.slider": "テンポのスライダー",
-          "save": "MusicXML",
           "clear": "クリア",
-          "clear.confirm": "この楽譜をクリアしますか？ このブラウザに保存した楽譜も消えます。残したいときは先に MusicXML で保存してください。",
+          "clear.confirm": "この楽譜をクリアしますか？ このブラウザ（最近の楽譜）からも消えます。残したいときは先に MusicXML で保存してください。",
           "file.xml": "MusicXML",
           "st.xml.open": "MusicXML を開いています…",
           "st.xml.done": "MusicXML を開きました。",
           "err.xml": "この MusicXML は開けません。ファイルが壊れているか、このアプリが対応していない形式です（partwise 形式の MusicXML に対応しています）。",
-          "save.aria": "MusicXMLで保存",
           "mode": "表示",
           "mode.score": "楽譜",
           "mode.edit": "編集",
@@ -567,8 +694,8 @@
           "track.lower": "下段",
           "track.only": "音符",
           "empty": "読み込んだ楽譜がここに表示されます。音符をクリックすると、そこにカーソルを移動します。",
-          "keys": "<kbd>Space</kbd> 再生/停止　<kbd>Home</kbd> 最初に戻る　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでカーソルを移動",
-          "foot": "楽譜はこの端末の中で読み取り、アップロードはしません。最後に開いた楽譜はこのブラウザに保存されます。",
+          "keys": "<kbd>Space</kbd> 再生/一時停止　<kbd>Home</kbd> 停止（最初に戻る）　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでカーソルを移動",
+          "foot": "楽譜はこの端末の中で読み取り、アップロードはしません。最近開いた楽譜はこのブラウザに保存されます。",
           "foot.fail": "このブラウザでは楽譜を保存できません（プライベートモードやサイトデータのブロックを確認してください）。",
           "file.pages": "PDF・{n}ページ",
           "file.page": "PDF・1ページ",
@@ -616,7 +743,7 @@
           "foot.guides": "<li><a href=\"/sheetmusicplayer/ja/guide/\" target=\"_blank\" rel=\"noopener\">使い方ガイド</a></li>\n<li><a href=\"/sheetmusicplayer/ja/faq/\" target=\"_blank\" rel=\"noopener\">よくある質問</a></li>\n<li><a href=\"/sheetmusicplayer/ja/photo-tips/\" target=\"_blank\" rel=\"noopener\">楽譜の撮り方のコツ</a></li>\n<li><a href=\"/sheetmusicplayer/ja/fix-errors/\" target=\"_blank\" rel=\"noopener\">読み取りミスの直し方</a></li>\n<li><a href=\"/sheetmusicplayer/ja/tempo-markings/\" target=\"_blank\" rel=\"noopener\">速度記号と BPM の一覧</a></li>\n<li><a href=\"/sheetmusicplayer/ja/musicxml/\" target=\"_blank\" rel=\"noopener\">MusicXML とは</a></li>\n<li><a href=\"/sheetmusicplayer/ja/what-is-omr/\" target=\"_blank\" rel=\"noopener\">楽譜を読み取る仕組み（OMR）</a></li>",
           "help.body": "<li><b>楽譜を開く</b> – 画像かPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップします。どのファイルも選べます。画像とPDFは読み取り、MusicXML（このアプリで保存したものなど）はそのまま開きます。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – 「再生」を押すと、青いカーソルが五線の上を進みます。音符をクリックするとカーソルがそこに移り、「再生」でそこから始まります。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>保存</b> – 「MusicXML」で結果を保存できます。MuseScore などの楽譜ソフトでも開けます。</li>",
           "help.more": "詳しくは：<a href=\"/sheetmusicplayer/ja/guide/\" target=\"_blank\" rel=\"noopener\">画面つきの使い方ガイド</a>・<a href=\"/sheetmusicplayer/ja/photo-tips/\" target=\"_blank\" rel=\"noopener\">撮り方のコツ</a>・<a href=\"/sheetmusicplayer/ja/fix-errors/\" target=\"_blank\" rel=\"noopener\">読み取りミスの直し方</a>・<a href=\"/sheetmusicplayer/ja/faq/\" target=\"_blank\" rel=\"noopener\">よくある質問</a>",
-          "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – 次に開いたときにも使えるよう、最後に開いた楽譜（読み取った音符のMusicXML）とファイル名、テンポをブラウザ内に保存します。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>をご覧ください。</li>",
+          "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – もう一度開けるよう、最近開いた楽譜（読み取った音符のMusicXML）を最大10曲まで、タイトル・ファイル名・テンポ・移調の設定と一緒にブラウザ内に保存します。「履歴を消去」で消せます。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>をご覧ください。</li>",
           "about.license": "© 2026 ktkwmr · <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>",
           "close": "閉じる",
           "loading": "読み込み中…"
@@ -658,6 +785,9 @@
       }
 
       const $ = (id) => document.getElementById(id);
+      // Dynamic imports with absolute URLs: Safari resolves import("./x.mjs") in this inline script against the
+      // page's own URL, not <base href> (ja/index.html), so it looked for /sheetmusicplayer/ja/x.mjs (404)
+      const importApp = (path) => import(new URL(path, document.baseURI).href);
       const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
       const DEFAULT_BPM = 120;
       const MAX_PDF_PAGES = 12;
@@ -668,20 +798,29 @@
       new ResizeObserver(function () { document.documentElement.style.setProperty("--topbar-h", topbar.offsetHeight + "px"); }).observe(topbar);
 
       // ---------- Saved state ----------
-      // The last score is saved, so it is still there next time. A new file resets the tempo to the one on its page.
+      // The open score is saved, so it is still there next time. A new file resets the tempo to the one on its page.
+      // The last MAX_HISTORY scores are also kept in IndexedDB (recent scores); localStorage has the open one.
       const STATE_KEY = "sheetmusicplayer-state";
-      let state = { xml: "", name: "", bpm: DEFAULT_BPM, scoreBpm: DEFAULT_BPM, tempoSource: "none", tempoTerm: "", notes: 0 };
-      try {
-        const s = JSON.parse(localStorage.getItem(STATE_KEY) || "null");
-        if (s && typeof s.xml === "string" && s.xml.length < 4e6 && /<score-partwise/.test(s.xml)) {
-          state = {
-            xml: s.xml, name: typeof s.name === "string" ? s.name.slice(0, 200) : "",
-            bpm: clamp(Math.round(+s.bpm || DEFAULT_BPM), 20, 300), scoreBpm: clamp(Math.round(+s.scoreBpm || DEFAULT_BPM), 20, 300),
-            tempoSource: ["ocr", "term", "none"].includes(s.tempoSource) ? s.tempoSource : "none",
-            tempoTerm: typeof s.tempoTerm === "string" ? s.tempoTerm.slice(0, 40) : "", notes: +s.notes || 0,
-          };
-        }
-      } catch (e) {}
+      const EMPTY = { id: "", title: "", xml: "", name: "", bpm: DEFAULT_BPM, scoreBpm: DEFAULT_BPM, tempoSource: "none", tempoTerm: "", notes: 0, transpose: 0, created: 0 };
+      const newScoreId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const fmtDate = (ms) => { try { return new Intl.DateTimeFormat(lang, { dateStyle: "medium", timeStyle: "short" }).format(new Date(ms)); } catch (e) { return new Date(ms).toLocaleString(); } };
+      const defaultTitle = (ms) => t("title.default", { date: fmtDate(ms || Date.now()) });
+      // A saved score (localStorage or IndexedDB) is checked before it is used; null when it is not usable
+      function validScore(s) {
+        if (!s || typeof s.xml !== "string" || s.xml.length >= 4e6 || !/<score-partwise/.test(s.xml)) return null;
+        const created = +s.created > 0 ? +s.created : Date.now();
+        return {
+          id: typeof s.id === "string" && /^[\w-]{1,40}$/.test(s.id) ? s.id : newScoreId(),
+          title: typeof s.title === "string" && s.title.trim() ? s.title.trim().slice(0, 200) : defaultTitle(created),
+          xml: s.xml, name: typeof s.name === "string" ? s.name.slice(0, 200) : "",
+          bpm: clamp(Math.round(+s.bpm || DEFAULT_BPM), 20, 300), scoreBpm: clamp(Math.round(+s.scoreBpm || DEFAULT_BPM), 20, 300),
+          tempoSource: ["ocr", "term", "none"].includes(s.tempoSource) ? s.tempoSource : "none",
+          tempoTerm: typeof s.tempoTerm === "string" ? s.tempoTerm.slice(0, 40) : "", notes: Math.max(0, Math.round(+s.notes || 0)),
+          transpose: clamp(Math.round(+s.transpose || 0), -12, 12), created: created,
+        };
+      }
+      let state = Object.assign({}, EMPTY);
+      try { state = validScore(JSON.parse(localStorage.getItem(STATE_KEY) || "null")) || state; } catch (e) {}
       function saveState() {
         try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); $("saveState").textContent = t("foot"); }
         catch (e) {
@@ -689,7 +828,82 @@
           try { localStorage.setItem(STATE_KEY, JSON.stringify(Object.assign({}, state, { xml: "" }))); } catch (e2) {}
           $("saveState").textContent = t("foot.fail");
         }
+        queueHistory();
       }
+
+      // ---------- Recent scores (IndexedDB) ----------
+      const MAX_HISTORY = 10;
+      let dbOpen = null;
+      function historyDb() {
+        dbOpen = dbOpen || new Promise(function (resolve, reject) {
+          const r = indexedDB.open("sheetmusicplayer-history", 1);
+          r.onupgradeneeded = () => r.result.createObjectStore("scores", { keyPath: "id" });
+          r.onsuccess = () => resolve(r.result);
+          r.onerror = () => reject(r.error);
+        });
+        return dbOpen;
+      }
+      function historyTx(mode, fn) {
+        return historyDb().then((d) => new Promise(function (resolve, reject) {
+          const tx = d.transaction("scores", mode), req = fn(tx.objectStore("scores"));
+          tx.oncomplete = () => resolve(req && req.result);
+          tx.onerror = tx.onabort = () => reject(tx.error);
+        }));
+      }
+      const historyAll = () => historyTx("readonly", (st) => st.getAll()).then((list) => (list || []).filter((e) => e && typeof e.id === "string"));
+      let historyTimer = null;
+      function queueHistory() {
+        clearTimeout(historyTimer);
+        historyTimer = setTimeout(putHistory, 300);
+      }
+      async function putHistory() {
+        try {
+          if (state.xml && state.id) await historyTx("readwrite", (st) => st.put(Object.assign({}, state, { opened: Date.now() })));
+          // Keep the newest MAX_HISTORY
+          const old = (await historyAll()).sort((a, b) => (b.opened || 0) - (a.opened || 0)).slice(MAX_HISTORY);
+          if (old.length) await historyTx("readwrite", (st) => { old.forEach((e) => st.delete(e.id)); });
+        } catch (e) { /* private browsing or blocked storage: no recent scores */ }
+        renderHistory();
+      }
+      async function renderHistory() {
+        let list = [];
+        try { list = (await historyAll()).filter((e) => e.id !== state.id).sort((a, b) => (b.opened || 0) - (a.opened || 0)); } catch (e) {}
+        const ul = $("histList");
+        ul.textContent = "";
+        list.forEach(function (e) {
+          const li = document.createElement("li"), b = document.createElement("button");
+          b.type = "button";
+          const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = String(e.title || e.name || "").slice(0, 200) || defaultTitle(e.created);
+          const sub = document.createElement("span"); sub.className = "sub";
+          sub.textContent = t("hist.sub", { date: fmtDate(+e.opened || +e.created || Date.now()), n: Math.max(0, Math.round(+e.notes || 0)) });
+          b.append(nm, sub);
+          b.onclick = () => openHistory(e.id);
+          li.appendChild(b); ul.appendChild(li);
+        });
+        $("history").hidden = !list.length;
+      }
+      async function openHistory(id) {
+        if (busy) return;
+        let e = null;
+        try { e = validScore(await historyTx("readonly", (st) => st.get(id))); } catch (err) {}
+        if (!e) { renderHistory(); return; }
+        stop(); resetEditor(); clearLoop(); partModes = {};
+        showError(""); hideStatus(); $("pageWarn").hidden = true;
+        const prev = state;
+        state = e;
+        try { await showCurrent(); }
+        catch (err) { state = prev; if (state.xml) await showCurrent().catch(() => {}); showError(t("err.render")); return; }
+        showFileCard();
+        saveState();
+      }
+      $("histClear").onclick = async function () {
+        if (!confirm(t("hist.confirm"))) return;
+        try {
+          const ids = (await historyAll()).map((e) => e.id).filter((id) => id !== state.id);
+          await historyTx("readwrite", (st) => { ids.forEach((id) => st.delete(id)); });
+        } catch (e) {}
+        renderHistory();
+      };
 
       // ---------- Status (left panel) ----------
       function showStatus(text, opts) {
@@ -788,7 +1002,7 @@
       let pdfjs = null;
       async function decodePdf(file) {
         if (!pdfjs) {
-          pdfjs = await import("./vendor/pdf.min.mjs");
+          pdfjs = await importApp("vendor/pdf.min.mjs");
           // document.baseURI, not location.href: ja/index.html has <base href="/sheetmusicplayer/">
           pdfjs.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", document.baseURI).href;
         }
@@ -875,7 +1089,7 @@
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("ocr timeout")), 40000));
         try {
           await Promise.race([timeout, (async function () {
-            const T = await import("./engine/v3/tesseract/tesseract.esm.min.js");
+            const T = await importApp("engine/v3/tesseract/tesseract.esm.min.js");
             const here = document.baseURI; // ja/index.html has <base href="/sheetmusicplayer/">
             ocr = await (T.default || T).createWorker("eng", 1, {
               workerPath: new URL("engine/v3/tesseract/worker.min.js", here).href,
@@ -991,20 +1205,23 @@
         return { xml: xml, bpm: bpm > 0 ? clamp(Math.round(bpm), 20, 300) : null };
       }
       async function openMusicXml(file, kind) {
-        busy = true; stop(); resetEditor();
+        busy = true; stop(); resetEditor(); clearLoop();
         $("score").classList.add("busy");
         showStatus(t("st.xml.open"), {});
         try {
           const r = await readMusicXml(file, kind);
-          SM = SM || await import("./score-model.mjs");
+          SM = SM || await importApp("score-model.mjs");
           const xml = SM.expandMultiRests(r.xml);
           await showScore(xml);
           $("fileCard").hidden = false; $("thumb").removeAttribute("src"); $("thumb").hidden = true;
           $("fileName").textContent = file.name || ""; $("fileSub").textContent = t("file.xml");
-          state.xml = xml; state.name = file.name || "";
-          state.scoreBpm = r.bpm || DEFAULT_BPM; state.bpm = state.scoreBpm;
-          state.tempoSource = r.bpm ? "ocr" : "none"; state.tempoTerm = "";
-          state.notes = timeline.notes;
+          const now = Date.now();
+          state = Object.assign({}, EMPTY, {
+            id: newScoreId(), created: now, title: SM.scoreTitle(xml) || defaultTitle(now),
+            xml: xml, name: file.name || "", scoreBpm: r.bpm || DEFAULT_BPM, bpm: r.bpm || DEFAULT_BPM,
+            tempoSource: r.bpm ? "ocr" : "none", notes: timeline.notes,
+          });
+          partModes = {}; renderTitle();
           saveState();
           showStatus(t("st.xml.done"), { bar: false });
         } catch (e) {
@@ -1012,7 +1229,7 @@
           console.error(e);
           showError(t(e && e.code === "render" ? "err.render" : "err.xml"));
           // The previous score (if any) stays
-          if (state.xml) await showScore(state.xml).catch(() => {});
+          if (state.xml) await showCurrent().catch(() => {});
           else if (osmd) { try { osmd.clear(); } catch (e2) {} $("score").innerHTML = ""; osmd = null; timeline = { steps: [], events: [], endQ: 0, notes: 0, tempoRatio: [] }; playSrc = timeline; $("playhead").hidden = true; $("empty").hidden = false; }
         } finally {
           busy = false;
@@ -1025,7 +1242,9 @@
       function clearScore() {
         if (busy || !state.xml) return;
         if (!confirm(t("clear.confirm"))) return;
-        stop(); resetEditor();
+        stop(); resetEditor(); clearLoop();
+        const id = state.id;
+        if (id) historyTx("readwrite", (st) => st.delete(id)).catch(() => {});
         if (osmd) { try { osmd.clear(); } catch (e) {} }
         $("score").innerHTML = ""; osmd = null;
         timeline = { steps: [], events: [], endQ: 0, notes: 0, tempoRatio: [] }; playSrc = timeline; posQ = 0;
@@ -1033,11 +1252,22 @@
         $("fileCard").hidden = true; $("thumb").removeAttribute("src");
         $("pageWarn").textContent = ""; $("pageWarn").hidden = true;
         hideStatus(); showError("");
-        state = { xml: "", name: "", bpm: DEFAULT_BPM, scoreBpm: DEFAULT_BPM, tempoSource: "none", tempoTerm: "", notes: 0 };
-        saveState();
+        state = Object.assign({}, EMPTY);
+        saveState(); renderTitle();
         renderPlayer();
       }
       $("clearBtn").onclick = clearScore;
+
+      // The last line of the error, and where it happened (the last Python frame, or the first JavaScript one),
+      // so a report from a browser we cannot test says where to look
+      function errorDetail(e) {
+        const lines = String((e && e.message) || e).split("\n").filter((l) => l.trim());
+        const msg = (lines.pop() || "").trim();
+        const py = lines.filter((l) => /^\s*File "/.test(l)).pop();
+        let where = py ? py.trim().replace(/^File "(?:[^"]*\/)?([^"]+)", line (\d+).*$/, "$1:$2") : (e && e.where) || "";
+        if (!where && e && e.stack) { const m = /([\w.-]+\.m?js):(\d+):\d+/.exec(String(e.stack)); if (m) where = m[1] + ":" + m[2]; }
+        return (msg.slice(0, 160) + (where ? " @ " + where.slice(0, 60) : "")).trim();
+      }
 
       // ---------- The whole flow: file -> pages -> engine -> score ----------
       let busy = false, cancelled = false;
@@ -1048,7 +1278,7 @@
         if (!kind) { showError(t("err.type")); return; }
         if (kind === "xml" || kind === "mxl") { await openMusicXml(file, kind); return; }
         if (!supported) { showError(t("err.unsupported")); return; }
-        busy = true; cancelled = false; stop(); resetEditor();
+        busy = true; cancelled = false; stop(); resetEditor(); clearLoop();
         $("fileCard").hidden = false;
         $("fileName").textContent = label || file.name || "";
         $("fileSub").textContent = "";
@@ -1108,17 +1338,20 @@
             if (cancelled) throw { code: "cancel" };
           }
           if (!xmls.length) throw { code: "no-staff" };
-          SM = SM || await import("./score-model.mjs");
+          SM = SM || await importApp("score-model.mjs");
           // The reader writes ties as slurs: turn them back into ties so held notes are not struck again.
           // It also reads some plain notes as tuplet notes: make them plain where that fills the measure,
           // and misses some <backup>s, which puts notes past the bar line: move them back.
           const xml = SM.slursToTies(SM.fixVoiceOverflow(SM.fixStrayTuplets(SM.expandMultiRests(xmls.length > 1 ? mergePages(xmls) : xmls[0]))));
           showStatus(t("st.render"), {});
-          state.xml = xml; state.name = $("fileName").textContent;
-          state.scoreBpm = tempo ? tempo.bpm : DEFAULT_BPM; state.bpm = state.scoreBpm;
-          state.tempoSource = tempo ? tempo.source : "none"; state.tempoTerm = tempo && tempo.term ? tempo.term : "";
-          await showScore(xml);
-          state.notes = timeline.notes;
+          const prev = state, now = Date.now();
+          state = Object.assign({}, EMPTY, {
+            id: newScoreId(), created: now, title: defaultTitle(now), xml: xml, name: $("fileName").textContent,
+            scoreBpm: tempo ? tempo.bpm : DEFAULT_BPM, bpm: tempo ? tempo.bpm : DEFAULT_BPM,
+            tempoSource: tempo ? tempo.source : "none", tempoTerm: tempo && tempo.term ? tempo.term : "",
+          });
+          try { await showScore(xml); } catch (e) { state = prev; throw e; }
+          state.notes = timeline.notes; partModes = {}; renderTitle();
           saveState();
           const secs = Math.round((performance.now() - t0) / 1000);
           showStatus(n > 1 ? t("st.done.pages", { n: xmls.length, s: secs }) : t("st.done", { s: secs }), { bar: false });
@@ -1135,7 +1368,7 @@
           // The last line of the engine's message (shown, so a report tells which error it really was)
           else if (code === "memory") { showError(t("err.memory", { msg: lastLine(e) })); console.error(e); }
           else if (code === "render") showError(t("err.render"));
-          else { showError(t("err.recognize", { msg: lastLine(e) })); console.error(e); }
+          else { showError(t("err.recognize", { msg: errorDetail(e) })); console.error(e); }
           if (!timeline.steps.length) $("fileCard").hidden = true;
         } finally {
           stopWorker();
@@ -1146,6 +1379,7 @@
       }
       const lastLine = (e) => String((e && e.message) || e).split("\n").filter(Boolean).pop().slice(0, 160);
       $("cancelBtn").onclick = function () {
+        if (exporting) { exportCancelled = true; hideStatus(); return; }
         cancelled = true;
         // Stop the engine right away; it starts again (from the cache) for the next file
         stopWorker();
@@ -1200,8 +1434,18 @@
         return osmdLoading;
       }
       // steps: one entry per cursor position: { q (quarter notes from the start), x, y, h (position on the page) }
-      // events: notes to play: [q, length in quarters, MIDI number]
-      let timeline = { steps: [], events: [], endQ: 0, notes: 0, tempoRatio: [] };
+      // events: notes to play: [q, length in quarters, MIDI number, track key ("part:staff")]
+      // measures: [{ q, len, beats, beatType }] · tracks: [{ key, name }], one per staff
+      const EMPTY_TIMELINE = () => ({ steps: [], events: [], endQ: 0, notes: 0, measures: [], tracks: [] });
+      let timeline = EMPTY_TIMELINE();
+      // The score as it is shown: the saved one, moved by the transposition
+      function shownXml() { return state.transpose && SM ? SM.transposeXml(state.xml, state.transpose) : state.xml; }
+      async function showCurrent() {
+        if (state.transpose) SM = SM || await importApp("score-model.mjs");
+        await showScore(shownXml());
+        staleScore = false;
+        renderTitle(); renderTranspose();
+      }
       async function showScore(xml) {
         await loadOsmd();
         const box = $("score");
@@ -1223,10 +1467,24 @@
         buildTimeline();
         if (!timeline.events.length) throw { code: "no-staff" };
         setPosition(0);
+        drawLoop(); renderParts();
         renderPlayer();
+      }
+      // Name of a staff: "Part 2 upper", "Soprano", "Notes" (only one staff) …
+      function staffName(p, staff, partCount, staves, name) {
+        if (partCount === 1 && staves === 1) return t("track.only");
+        const part = partCount > 1 ? (name && name.trim() ? name.trim().slice(0, 30) : t("track.part", { n: p + 1 })) : "";
+        const st = staves > 1 ? (staff === 1 ? t("track.upper") : staff === 2 ? t("track.lower") : String(staff)) : "";
+        return [part, st].filter(Boolean).join(" ") || t("track.part", { n: p + 1 });
       }
       function buildTimeline() {
         const steps = [], events = [], cur = osmd.cursor;
+        const sheet = osmd.Sheet, insts = sheet.Instruments || [];
+        const keyOf = function (n) {
+          const st = n.ParentStaffEntry && n.ParentStaffEntry.ParentStaff, inst = st && st.ParentInstrument;
+          const p = Math.max(0, insts.indexOf(inst)), s = inst ? inst.Staves.indexOf(st) + 1 : 1;
+          return p + ":" + Math.max(1, s);
+        };
         cur.show(); cur.reset();
         const it = cur.Iterator;
         const host = $("score").getBoundingClientRect();
@@ -1242,7 +1500,7 @@
               const tie = n.NoteTie;
               if (tie && tie.StartNote !== n) continue; // the tied note is held, not played again
               const len = tie ? tie.Notes.reduce((s, x) => s + x.Length.RealValue, 0) : n.Length.RealValue;
-              events.push([q, len * 4, n.halfTone + 12]);
+              events.push([q, len * 4, n.halfTone + 12, keyOf(n)]);
               notes++;
             }
           }
@@ -1251,12 +1509,21 @@
         cur.reset(); cur.hide();
         events.sort((a, b) => a[0] - b[0]);
         const endQ = events.reduce((m, e) => Math.max(m, e[0] + e[1]), 0);
-        timeline = { steps: steps, events: events, endQ: endQ, notes: notes };
+        let ts = { Numerator: 4, Denominator: 4 };
+        const measures = (sheet.SourceMeasures || []).map(function (m) {
+          ts = m.ActiveTimeSignature || ts;
+          return { q: m.AbsoluteTimestamp.RealValue * 4, len: m.Duration.RealValue * 4, beats: ts.Numerator || 4, beatType: ts.Denominator || 4 };
+        });
+        const tracks = [];
+        insts.forEach(function (inst, p) {
+          inst.Staves.forEach(function (st, i) { tracks.push({ key: p + ":" + (i + 1), name: staffName(p, i + 1, insts.length, inst.Staves.length, inst.Name) }); });
+        });
+        timeline = { steps: steps, events: events, endQ: endQ, notes: notes, measures: measures, tracks: tracks };
       }
       // Re-measure the cursor positions after the score is laid out again (window size changed)
       let resizeTimer = null, lastWidth = 0;
       window.addEventListener("resize", function () {
-        if (!osmd || !timeline.steps.length) return;
+        if (!osmd || !timeline.steps.length || mode === "edit") return;
         const w = $("score").clientWidth;
         if (Math.abs(w - lastWidth) < 8) return;
         clearTimeout(resizeTimer);
@@ -1265,7 +1532,7 @@
           const q = playing ? currentQ() : posQ, was = playing;
           if (was) stop();
           osmd.zoom = clamp(lastWidth / 820, 0.6, 1.25);
-          osmd.render(); buildTimeline(); setPosition(q);
+          osmd.render(); buildTimeline(); setPosition(q); drawLoop();
           if (was) start();
         }, 250);
       });
@@ -1298,7 +1565,8 @@
         const wrap = $("scoreWrap");
         if (a.x < wrap.scrollLeft + 20 || a.x > wrap.scrollLeft + wrap.clientWidth - 40) wrap.scrollLeft = a.x - 60;
       }
-      // Click a note (or anywhere on a line) to move the cursor there (playing carries on from there)
+      // Click a note (or anywhere on a line) to move the cursor there (playing carries on from there).
+      // While choosing a loop, the click picks a measure instead.
       $("score").addEventListener("click", function (e) {
         if (busy || !timeline.steps.length) return;
         const r = this.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
@@ -1310,9 +1578,85 @@
         });
         if (best < 0 || bestD > 400) return;
         const q = timeline.steps[best].q;
+        if (loopPick) { pickLoopMeasure(measureAt(timeline.measures, q)); return; }
         // Only move the cursor; while playing, carry on from there
         if (playing) { stop(); setPosition(q); start(); } else setPosition(q);
       });
+
+      // ---------- Loop (a range of measures, played over and over) ----------
+      // loop: { m1, m2 } first and last measure (0-based) · loopPick: choosing them on the score
+      let loop = null, loopPick = null;
+      function measureAt(ms, q) {
+        let lo = 0, hi = ms.length - 1;
+        if (hi < 0) return 0;
+        while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (ms[mid].q <= q + 1e-6) lo = mid; else hi = mid - 1; }
+        return lo;
+      }
+      // The loop in quarter notes, for the measures of what is played now
+      function loopRange() {
+        const ms = playSrc.measures || [];
+        if (!loop || !ms.length) return null;
+        const a = ms[Math.min(loop.m1, ms.length - 1)], b = ms[Math.min(loop.m2, ms.length - 1)];
+        return { a: a.q, b: Math.min(b.q + b.len, playSrc.endQ || b.q + b.len) };
+      }
+      function pickLoopMeasure(m) {
+        if (loopPick.first < 0) { loopPick.first = m; drawLoop(); renderLoop(); return; }
+        loop = { m1: Math.min(loopPick.first, m), m2: Math.max(loopPick.first, m) };
+        loopPick = null;
+        // Start the loop from its beginning (when playing, the loop takes over at its end)
+        if (!playing) setPosition(loop ? timeline.measures[loop.m1].q : 0);
+        drawLoop(); renderLoop();
+      }
+      function clearLoop() {
+        loop = null; loopPick = null; loopWrapped = false;
+        drawLoop(); renderLoop();
+      }
+      $("loopBtn").onclick = function () {
+        if (loop || loopPick) clearLoop();
+        else { loopPick = { first: -1 }; renderLoop(); }
+      };
+      function renderLoop() {
+        const b = $("loopBtn"), label = b.querySelector("span");
+        b.setAttribute("aria-pressed", !!loop);
+        b.classList.toggle("picking", !!loopPick);
+        label.textContent = loopPick ? t(loopPick.first < 0 ? "loop.pick1" : "loop.pick2")
+          : loop ? (loop.m1 === loop.m2 ? t("loop.one", { a: loop.m1 + 1 }) : t("loop.range", { a: loop.m1 + 1, b: loop.m2 + 1 })) : t("loop");
+        $("loopInfo").textContent = loopPick ? t("loop.hint") : "";
+      }
+      // Shade the measures of the loop on the score (OSMD's layout units are 10 px at zoom 1)
+      function drawLoop() {
+        const box = $("score");
+        box.querySelectorAll(".loop-box").forEach((el) => el.remove());
+        const range = loop ? [loop.m1, loop.m2] : loopPick && loopPick.first >= 0 ? [loopPick.first, loopPick.first] : null;
+        if (!range || !osmd || !osmd.GraphicSheet || mode === "edit") return;
+        const svg = box.querySelector("svg");
+        if (!svg) return;
+        const host = box.getBoundingClientRect(), sr = svg.getBoundingClientRect();
+        const unit = 10 * osmd.zoom, ox = sr.left - host.left, oy = sr.top - host.top;
+        const list = osmd.GraphicSheet.MeasureList || [];
+        const rows = [];
+        for (let m = range[0]; m <= range[1] && m < list.length; m++) {
+          let x1 = Infinity, x2 = -Infinity, y1 = Infinity, y2 = -Infinity;
+          (list[m] || []).forEach(function (gm) {
+            if (!gm || !gm.PositionAndShape) return;
+            const ps = gm.PositionAndShape, p = ps.AbsolutePosition;
+            x1 = Math.min(x1, p.x + ps.BorderLeft); x2 = Math.max(x2, p.x + ps.BorderRight);
+            y1 = Math.min(y1, p.y + ps.BorderTop); y2 = Math.max(y2, p.y + ps.BorderBottom);
+          });
+          if (!isFinite(x1)) continue;
+          // Measures on the same line make one box
+          const last = rows[rows.length - 1];
+          if (last && Math.abs(last.y1 - y1) < 1 && x1 <= last.x2 + 1) { last.x2 = Math.max(last.x2, x2); last.y2 = Math.max(last.y2, y2); }
+          else rows.push({ x1: x1, x2: x2, y1: y1, y2: y2 });
+        }
+        rows.forEach(function (r) {
+          const d = document.createElement("div");
+          d.className = "loop-box";
+          d.style.left = (ox + r.x1 * unit) + "px"; d.style.top = (oy + r.y1 * unit - 6) + "px";
+          d.style.width = ((r.x2 - r.x1) * unit) + "px"; d.style.height = ((r.y2 - r.y1) * unit + 12) + "px";
+          box.appendChild(d);
+        });
+      }
 
       // ---------- Sound (Web Audio API, a simple piano-like synthesizer) ----------
       // bus: one gain node per playback, so Stop can silence the notes already scheduled
@@ -1336,35 +1680,74 @@
         }
         if (ctx.state !== "running") { try { ctx.resume().catch(() => {}); } catch (e) {} }
       }
-      function playNote(midi, t0, dur) {
+      // One note on any audio context (also used to render the MP3)
+      function voice(ac, dest, midi, t0, dur, vol) {
         const f = 440 * Math.pow(2, (midi - 69) / 12);
-        const g = ctx.createGain(), lp = ctx.createBiquadFilter();
+        const g = ac.createGain(), lp = ac.createBiquadFilter();
         lp.type = "lowpass"; lp.frequency.setValueAtTime(Math.min(9000, f * 8), t0); lp.frequency.exponentialRampToValueAtTime(Math.max(400, f * 2), t0 + 0.6);
-        const peak = 0.22 * Math.pow(440 / Math.max(f, 110), 0.25); // keep low notes from sounding weak
+        const peak = 0.22 * Math.pow(440 / Math.max(f, 110), 0.25) * (vol == null ? 1 : vol); // keep low notes from sounding weak
         const end = t0 + Math.max(0.12, dur);
         g.gain.setValueAtTime(0.0001, t0);
         g.gain.exponentialRampToValueAtTime(peak, t0 + 0.008);
         g.gain.exponentialRampToValueAtTime(peak * 0.35, t0 + 0.35);
         g.gain.setTargetAtTime(peak * 0.2, t0 + 0.35, 0.8);
         g.gain.setTargetAtTime(0.0001, end, 0.08);
-        lp.connect(g); g.connect(bus || master);
+        lp.connect(g); g.connect(dest);
         [["triangle", 1, 1], ["sine", 2, 0.35], ["sine", 3, 0.12]].forEach(function (o) {
-          const osc = ctx.createOscillator(), og = ctx.createGain();
+          const osc = ac.createOscillator(), og = ac.createGain();
           osc.type = o[0]; osc.frequency.value = f * o[1]; og.gain.value = o[2];
           osc.connect(og); og.connect(lp); osc.start(t0); osc.stop(end + 0.6);
+        });
+      }
+      function playNote(midi, t0, dur, vol) { voice(ctx, bus || master, midi, t0, dur, vol); }
+      // Metronome click: higher on the first beat of the measure
+      function click(t0, accent) {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = "square"; osc.frequency.value = accent ? 1760 : 1175;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(accent ? 0.16 : 0.1, t0 + 0.002);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.05);
+        osc.connect(g); g.connect(bus || master); osc.start(t0); osc.stop(t0 + 0.06);
+      }
+
+      // ---------- Parts (louder / normal / muted, per staff) ----------
+      // partModes[key]: "solo" (the others are played softly), "mute", or normal (missing)
+      let partModes = {};
+      const PART_ORDER = ["normal", "solo", "mute"];
+      function gainOf(key) {
+        const m = partModes[key] || "normal";
+        if (m === "mute") return 0;
+        const anySolo = Object.keys(partModes).some((k) => partModes[k] === "solo");
+        return anySolo && m !== "solo" ? 0.22 : 1;
+      }
+      function renderParts() {
+        const list = $("partsList"), tracks = (mode === "edit" && model ? source() : timeline).tracks || [];
+        list.textContent = "";
+        $("partsGrp").hidden = tracks.length < 2;
+        tracks.forEach(function (tr) {
+          const m = partModes[tr.key] || "normal";
+          const b = document.createElement("button");
+          b.type = "button"; b.className = "chip part"; b.dataset.mode = m;
+          b.setAttribute("aria-label", t("part.aria", { name: tr.name, state: t("part." + m) }));
+          b.textContent = tr.name;
+          if (m !== "normal") { const st = document.createElement("span"); st.className = "st"; st.textContent = "· " + t("part." + m); b.appendChild(st); }
+          b.onclick = function () {
+            partModes[tr.key] = PART_ORDER[(PART_ORDER.indexOf(m) + 1) % PART_ORDER.length];
+            if (partModes[tr.key] === "normal") delete partModes[tr.key];
+            renderParts();
+          };
+          list.appendChild(b);
         });
       }
 
       // ---------- Edit mode (score-model.mjs + editor.mjs) ----------
       // The notes are edited as boxes on a piano roll. Going back to Score (or saving) turns them
-      // back into MusicXML and draws the score again.
-      let mode = "score", SM = null, model = null, modelXml = null, editor = null, dirty = false;
+      // back into MusicXML and draws the score again. The editor shows (and plays) the notes as
+      // written, before the transposition.
+      let mode = "score", SM = null, model = null, modelXml = null, editor = null, dirty = false, staleScore = false;
       function trackName(i) {
         const tr = model.tracks[i], part = model.parts[tr.part];
-        if (model.tracks.length === 1) return t("track.only");
-        const name = model.parts.length > 1 ? t("track.part", { n: tr.part + 1 }) : "";
-        const staff = part.staves > 1 ? (tr.staff === 1 ? t("track.upper") : tr.staff === 2 ? t("track.lower") : String(tr.staff)) : "";
-        return [name, staff].filter(Boolean).join(" ") || t("track.part", { n: tr.part + 1 });
+        return staffName(tr.part, tr.staff, model.parts.length, part.staves, "");
       }
       function preview(midi) { try { ensureCtx(); playNote(midi, ctx.currentTime + 0.01, 0.3); } catch (e) {} }
       function onModelChange() {
@@ -1373,18 +1756,20 @@
         // Playing while editing: play the edited notes from the current position on
         if (playing && mode === "edit") {
           const q = currentQ(); playSrc = source();
-          evIdx = playSrc.events.findIndex((e) => e[0] >= q - 1e-6); if (evIdx < 0) evIdx = playSrc.events.length;
+          evIdx = firstAt(playSrc.events, q); beatIdx = firstBeat(q);
         }
         renderPlayer();
       }
-      async function commitEdits() {
+      // render: false while the editor is shown (the score is drawn when going back to it)
+      async function commitEdits(render) {
         if (!dirty || !model) return;
         const xml = SM.buildXml(model, modelXml, state.tempoSource !== "none" ? state.scoreBpm : null);
         dirty = false;
         state.xml = xml; modelXml = xml;
         model.measures.forEach((m, i) => { m.src = i; });
         state.notes = model.notes.length; saveState();
-        await showScore(xml);
+        if (render === false) staleScore = true;
+        else await showCurrent();
       }
       function resetEditor() {
         if (editor) editor.destroy();
@@ -1400,24 +1785,25 @@
       }
       async function setMode(m) {
         if (m === mode || busy || !state.xml) return;
-        stop();
+        stop(); clearLoop();
         if (m === "edit") {
-          SM = SM || await import("./score-model.mjs");
+          SM = SM || await importApp("score-model.mjs");
           if (!model || modelXml !== state.xml) {
             if (editor) { editor.destroy(); editor = null; }
             modelXml = state.xml; model = SM.parseScore(state.xml); dirty = false;
           }
           showMode("edit");
           if (!editor) {
-            const E = await import("./editor.mjs");
+            const E = await importApp("editor.mjs");
             editor = E.createEditor($("editWrap"), { model: model, t: t, trackName: trackName, preview: preview, onChange: onModelChange });
           }
           editor.focus();
         } else {
           showMode("score");
-          try { await commitEdits(); } catch (e) { showError(t("err.render")); console.error(e); }
+          try { if (dirty) await commitEdits(); else if (staleScore) await showCurrent(); } catch (e) { showError(t("err.render")); console.error(e); }
           setPosition(0);
         }
+        renderParts();
       }
       $("modeScore").onclick = () => setMode("score");
       $("modeEdit").onclick = () => setMode("edit");
@@ -1425,16 +1811,41 @@
       // ---------- Player ----------
       // Notes are scheduled on the audio clock a little ahead, in quarter notes, so the tempo can change at any time
       let playing = false, posQ = 0, timer = null, raf = 0, wake = null;
-      let schedQ = 0, schedT = 0, evIdx = 0;
+      let schedQ = 0, schedT = 0, evIdx = 0, beatIdx = 0, startQ = 0, loopWrapped = false;
+      let metronome = false, countIn = false, beats = [], countBeats = [], countIdx = 0;
       // Watchdog: the audio clock at the last tick, and when it last moved (performance.now())
       let clockT = 0, clockMoved = 0;
       // What is played: the score's timeline, or (in Edit) the notes being edited
       let playSrc = timeline;
-      const source = () => (mode === "edit" && model ? { events: SM.modelEvents(model), endQ: SM.modelEnd(model) / SM.PPQ } : timeline);
+      function source() {
+        if (!(mode === "edit" && model)) return timeline;
+        const keys = model.tracks.map((tr) => tr.part + ":" + tr.staff);
+        return {
+          events: SM.modelEvents(model).map((e) => [e[0], e[1], e[2], keys[e[3]]]),
+          endQ: SM.modelEnd(model) / SM.PPQ,
+          measures: model.measures.map((m) => ({ q: m.start / SM.PPQ, len: m.len / SM.PPQ, beats: m.beats, beatType: m.beatType })),
+          tracks: model.tracks.map((tr, i) => ({ key: keys[i], name: trackName(i) })),
+        };
+      }
       const bpm = () => state.bpm;
+      const firstAt = (ev, q) => { const i = ev.findIndex((e) => e[0] >= q - 1e-6); return i < 0 ? ev.length : i; };
+      // The beat in quarter notes: the dotted quarter in 6/8, 9/8, 12/8, otherwise the bottom number of the time signature
+      const beatLen = (m) => (m.beatType === 8 && m.beats % 3 === 0 && m.beats > 3 ? 1.5 : 4 / (m.beatType || 4));
+      function buildBeats(ms) {
+        const out = [];
+        ms.forEach(function (m) {
+          const u = beatLen(m);
+          for (let k = 0; m.q + k * u < m.q + m.len - 1e-6; k++) out.push({ q: m.q + k * u, accent: k === 0 });
+        });
+        return out;
+      }
+      function firstBeat(q) { const i = beats.findIndex((b) => b.q >= q - 1e-6); return i < 0 ? beats.length : i; }
       function currentQ() {
         if (!playing) return posQ;
-        return schedQ - Math.max(0, schedT - ctx.currentTime) * bpm() / 60;
+        let q = schedQ - Math.max(0, schedT - ctx.currentTime) * bpm() / 60;
+        const lr = loopRange();
+        if (lr && loopWrapped && q < lr.a) q += lr.b - lr.a;   // the clock has already gone round the loop
+        return Math.max(q, loopWrapped ? -Infinity : startQ); // during the count-in, stay on the first note
       }
       function tick() {
         if (!playing) return;
@@ -1444,16 +1855,29 @@
         if (ctx.currentTime !== clockT) { clockT = ctx.currentTime; clockMoved = now; }
         else if (now - clockMoved > 2000) { ctxStale = true; stop(); return; }
         const ev = playSrc.events, horizon = ctx.currentTime + 0.15;
-        while (schedT < horizon && schedQ < playSrc.endQ + 0.01) {
-          const b = bpm(), nextQ = schedQ + Math.max(0.01, Math.min(0.25, (horizon - schedT) * b / 60));
+        let guard = 0;
+        while (schedT < horizon && guard++ < 1000) {
+          const lr = loopRange(), endQ = lr ? lr.b : playSrc.endQ + 0.01;
+          if (schedQ >= endQ - 1e-9) {
+            if (!lr) break;
+            // Round the loop
+            schedQ = lr.a; posQ = lr.a; loopWrapped = true;
+            evIdx = firstAt(ev, lr.a); beatIdx = firstBeat(lr.a);
+            continue;
+          }
+          const b = bpm(), nextQ = Math.min(endQ, schedQ + Math.max(0.01, Math.min(0.25, (horizon - schedT) * b / 60)));
+          const at = (q) => schedT + (q - schedQ) * 60 / b;
+          while (countIdx < countBeats.length && countBeats[countIdx].q < nextQ) { const c = countBeats[countIdx++]; if (c.q >= schedQ - 1e-6) click(at(c.q), c.accent); }
+          while (beatIdx < beats.length && beats[beatIdx].q < nextQ) { const c = beats[beatIdx++]; if (metronome && c.q >= posQ - 1e-6) click(at(c.q), c.accent); }
           while (evIdx < ev.length && ev[evIdx][0] < nextQ) {
-            const e = ev[evIdx];
-            if (e[0] >= posQ - 1e-6) playNote(e[2], schedT + (e[0] - schedQ) * 60 / b, e[1] * 60 / b * 0.96);
+            const e = ev[evIdx], g = gainOf(e[3]);
+            const len = lr ? Math.min(e[1], lr.b - e[0]) : e[1];
+            if (e[0] >= posQ - 1e-6 && g > 0) playNote(e[2], at(e[0]), len * 60 / b * 0.96, g);
             evIdx++;
           }
           schedT += (nextQ - schedQ) * 60 / b; schedQ = nextQ;
         }
-        if (schedQ >= playSrc.endQ + 0.01 && ctx.currentTime > schedT) { stop(); setPosition(0); }
+        if (!loopRange() && schedQ >= playSrc.endQ + 0.01 && ctx.currentTime > schedT) { stop(); setPosition(0); }
       }
       function frame() {
         if (!playing) return;
@@ -1466,16 +1890,26 @@
         ensureCtx();
         if (mode === "edit" && editor && editor.positionQ() != null) posQ = editor.positionQ();
         if (posQ >= playSrc.endQ - 1e-6) posQ = 0;
-        playing = true;
+        const lr = loopRange();
+        if (lr && (posQ < lr.a - 1e-6 || posQ >= lr.b - 1e-6)) posQ = lr.a;
+        playing = true; loopWrapped = false; startQ = posQ;
         bus = ctx.createGain(); bus.connect(master);
-        schedQ = posQ; schedT = ctx.currentTime + 0.06;
+        beats = buildBeats(playSrc.measures || []); beatIdx = firstBeat(posQ);
+        // Count-in: one measure of clicks (in the time signature where playing starts) before the first note
+        countBeats = []; countIdx = 0;
+        if (countIn && playSrc.measures && playSrc.measures.length) {
+          const m = playSrc.measures[measureAt(playSrc.measures, posQ)], u = beatLen(m), n = Math.max(1, Math.round(m.len / u));
+          for (let k = n; k >= 1; k--) countBeats.push({ q: posQ - k * u, accent: k === n });
+        }
+        schedQ = countBeats.length ? countBeats[0].q : posQ; schedT = ctx.currentTime + 0.06;
         clockT = ctx.currentTime; clockMoved = performance.now();
-        evIdx = playSrc.events.findIndex((e) => e[0] >= posQ - 1e-6); if (evIdx < 0) evIdx = playSrc.events.length;
+        evIdx = firstAt(playSrc.events, posQ);
         tick(); timer = setInterval(tick, 25);
         raf = requestAnimationFrame(frame);
         try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then((w) => { wake = w; }).catch(() => {}); } catch (e) {}
         renderPlayer();
       }
+      // Pause: stops the sound and keeps the position (Play carries on from there)
       function stop() {
         if (!playing) return;
         posQ = currentQ();
@@ -1489,22 +1923,38 @@
         else { const s = timeline.steps[stepAt(posQ)]; if (s) { posQ = s.q; drawHead(posQ); } }
         renderPlayer();
       }
+      // Stop (■): stops and goes back to the beginning (of the loop, when there is one)
+      function stopToStart() {
+        stop();
+        const lr = loopRange();
+        setPosition(lr ? lr.a : 0);
+        if (mode === "edit" && editor && !lr) editor.setPlayhead(null);
+        renderPlayer();
+      }
       function setPosition(q) {
         posQ = clamp(q, 0, source().endQ); headStep = -1;
         if (mode === "edit") { if (editor) editor.setPlayhead(posQ ? posQ : null); } else drawHead(posQ);
       }
 
       // ---------- Player UI ----------
+      const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6l9.8-5.8z" fill="currentColor"></path></svg>';
+      const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="3.6" height="11" rx="1" fill="currentColor"></rect><rect x="9.4" y="2.5" width="3.6" height="11" rx="1" fill="currentColor"></rect></svg>';
       function renderPlayer() {
         const ready = mode === "edit" ? !!(model && model.notes.length) : timeline.events.length > 0;
-        $("playBtn").disabled = !ready || busy; $("rewindBtn").disabled = !ready || busy; $("saveBtn").disabled = !state.xml; $("clearBtn").disabled = !state.xml || busy;
+        $("playBtn").disabled = !ready || busy; $("stopBtn").disabled = !ready || busy;
+        $("clearBtn").disabled = !state.xml || busy;
+        $("exportBtn").disabled = !state.xml || busy || exporting;
+        $("practiceBtn").disabled = !state.xml;
+        $("loopBtn").disabled = !ready || busy || mode === "edit";
         $("modeEdit").disabled = !state.xml || busy || !timeline.events.length;
         $("modeScore").setAttribute("aria-pressed", mode === "score"); $("modeEdit").setAttribute("aria-pressed", mode === "edit");
-        $("saveBtn").setAttribute("aria-label", t("save.aria"));
-        $("playBtn").innerHTML = (playing
-          ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="1.5" fill="currentColor"></rect></svg>'
-          : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6l9.8-5.8z" fill="currentColor"></path></svg>') + "<span>" + t(playing ? "stop" : "play") + "</span>";
-        $("playBtn").setAttribute("aria-pressed", playing);
+        $("playBtn").innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+        $("playBtn").setAttribute("aria-label", t(playing ? "pause" : "play"));
+        $("playBtn").title = t(playing ? "pause" : "play");
+        $("stopBtn").title = t("stop");
+        $("metroBtn").setAttribute("aria-pressed", metronome);
+        $("countBtn").setAttribute("aria-pressed", countIn);
+        $("trDown").disabled = $("trUp").disabled = !state.xml || busy;
         renderTempo();
       }
       function renderTempo() {
@@ -1514,24 +1964,181 @@
       function setBpm(v) {
         state.bpm = clamp(Math.round(v), 20, 300);
         // While playing, keep the cursor where it is: re-anchor the clock at the current position
-        if (playing) { const q = currentQ(); schedQ = q; schedT = ctx.currentTime; evIdx = playSrc.events.findIndex((e) => e[0] >= q - 1e-6); if (evIdx < 0) evIdx = playSrc.events.length; posQ = Math.min(posQ, q); }
+        if (playing) {
+          const q = currentQ(); schedQ = q; schedT = ctx.currentTime;
+          evIdx = firstAt(playSrc.events, q); beatIdx = firstBeat(q); countIdx = countBeats.length;
+          posQ = Math.min(posQ, q);
+        }
         renderTempo(); saveState();
       }
       $("playBtn").onclick = () => (playing ? stop() : start());
-      $("rewindBtn").onclick = () => { const was = playing; if (was) stop(); setPosition(0); if (was) start(); };
+      $("stopBtn").onclick = stopToStart;
+      $("metroBtn").onclick = () => { metronome = !metronome; renderPlayer(); };
+      $("countBtn").onclick = () => { countIn = !countIn; renderPlayer(); };
+      $("practiceBtn").onclick = function () {
+        const open = $("practice").hidden;
+        $("practice").hidden = !open; this.setAttribute("aria-pressed", open);
+      };
       document.querySelectorAll("[data-bpm]").forEach((b) => { b.onclick = () => setBpm(state.bpm + +b.dataset.bpm); });
       $("bpmSlider").oninput = (e) => setBpm(+e.target.value);
       $("bpmInput").onchange = (e) => { const v = +e.target.value; if (v) setBpm(v); else renderTempo(); };
       $("bpmInput").onblur = () => renderTempo();
       $("bpmInput").onkeydown = (e) => { if (e.key === "Enter") e.target.blur(); };
-      $("saveBtn").onclick = async function () {
-        if (!state.xml) return;
-        await commitEdits();
-        const base = (state.name || "score").replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|]+/g, "_").slice(0, 80) || "score";
+
+      // ---------- Title ----------
+      function renderTitle() {
+        $("titleRow").hidden = !state.xml;
+        if (document.activeElement !== $("titleInput")) $("titleInput").value = state.title || "";
+      }
+      $("titleInput").onchange = function () {
+        state.title = this.value.trim().slice(0, 200) || defaultTitle(state.created);
+        this.value = state.title;
+        saveState();
+      };
+      $("titleInput").onkeydown = (e) => { if (e.key === "Enter") e.target.blur(); else if (e.key === "Escape") { e.target.value = state.title; e.target.blur(); } };
+
+      // ---------- Transposition ----------
+      function renderTranspose() {
+        const n = state.transpose || 0;
+        $("trVal").textContent = t("tr.val", { n: (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n) });
+      }
+      async function setTranspose(n) {
+        n = clamp(Math.round(n), -12, 12);
+        if (busy || !state.xml || n === state.transpose) return;
+        const was = playing, q = playing ? currentQ() : posQ;
+        stop();
+        state.transpose = n; saveState(); renderTranspose();
+        if (mode === "edit") { staleScore = true; return; }
+        busy = true;
+        try { await showCurrent(); setPosition(q); }
+        catch (e) { showError(t("err.render")); console.error(e); }
+        finally { busy = false; renderPlayer(); }
+        if (was) start();
+      }
+      $("trDown").onclick = () => setTranspose(state.transpose - 1);
+      $("trUp").onclick = () => setTranspose(state.transpose + 1);
+
+      // ---------- Save / share (MusicXML, MIDI, MP3) ----------
+      let exporting = false, exportCancelled = false;
+      const exportMenu = $("exportMenu"), exportBtn = $("exportBtn");
+      function closeExport(returnFocus) {
+        if (exportMenu.hidden) return;
+        exportMenu.hidden = true; exportBtn.setAttribute("aria-expanded", "false");
+        if (returnFocus) exportBtn.focus();
+      }
+      exportBtn.addEventListener("click", function () {
+        if (!exportMenu.hidden) { closeExport(true); return; }
+        const r = exportBtn.getBoundingClientRect();
+        exportMenu.style.top = r.bottom + 6 + "px";
+        exportMenu.style.right = Math.max(8, document.documentElement.clientWidth - r.right) + "px";
+        exportMenu.hidden = false; exportBtn.setAttribute("aria-expanded", "true");
+        exportMenu.querySelector('[role="menuitem"]:not([hidden])').focus();
+      });
+      document.addEventListener("click", function (e) {
+        if (!exportMenu.hidden && !exportMenu.contains(e.target) && !exportBtn.contains(e.target)) closeExport(false);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (exportMenu.hidden) return;
+        if (e.key === "Escape") { closeExport(true); return; }
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          const items = Array.prototype.slice.call(exportMenu.querySelectorAll('[role="menuitem"]:not([hidden])'));
+          const i = items.indexOf(document.activeElement);
+          items[e.key === "ArrowDown" ? (i + 1) % items.length : (i - 1 + items.length) % items.length].focus();
+        }
+      }, true);
+      window.addEventListener("resize", function () { closeExport(false); });
+
+      const fileBase = () => (state.title || state.name || "score").replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|]+/g, "_").trim().slice(0, 80) || "score";
+      function download(blob, name) {
         const a = document.createElement("a");
-        a.href = URL.createObjectURL(new Blob([state.xml], { type: "application/vnd.recordare.musicxml+xml" }));
-        a.download = base + ".musicxml"; document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        a.href = URL.createObjectURL(blob);
+        a.download = name; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      }
+      // The score as shown (transposed), with its title, as a MusicXML file
+      async function exportXml() {
+        await commitEdits(mode !== "edit");
+        SM = SM || await importApp("score-model.mjs");
+        return SM.withTitle(shownXml(), state.title);
+      }
+      // The notes as they are heard: the score (transposed), or in Edit the edited notes moved by the transposition
+      async function exportNotes() {
+        if (mode === "edit" && model) {
+          const s = source();
+          s.events = s.events.map((e) => [e[0], e[1], e[2] + (state.transpose || 0), e[3]]);
+          return s;
+        }
+        if (staleScore) await showCurrent();
+        return timeline;
+      }
+      $("exXml").onclick = async function () {
+        closeExport(false);
+        if (!state.xml) return;
+        download(new Blob([await exportXml()], { type: "application/vnd.recordare.musicxml+xml" }), fileBase() + ".musicxml");
+      };
+      $("exMidi").onclick = async function () {
+        closeExport(false);
+        if (!state.xml) return;
+        const X = await importApp("export.mjs");
+        const s = await exportNotes(), m0 = s.measures && s.measures[0];
+        const bytes = X.midiFile({ events: s.events, tracks: s.tracks, bpm: state.bpm, timeSig: m0 ? [m0.beats, m0.beatType] : null, title: state.title });
+        download(new Blob([bytes], { type: "audio/midi" }), fileBase() + ".mid");
+      };
+      let lameLoading = null;
+      function loadLame() {
+        if (window.lamejs) return Promise.resolve(window.lamejs);
+        lameLoading = lameLoading || new Promise(function (resolve, reject) {
+          const s = document.createElement("script"); s.src = "vendor/lame.min.js";
+          s.onload = () => resolve(window.lamejs); s.onerror = () => { lameLoading = null; reject(new Error("lame.min.js")); };
+          document.head.appendChild(s);
+        });
+        return lameLoading;
+      }
+      $("exMp3").onclick = async function () {
+        closeExport(false);
+        if (!state.xml || exporting || busy) return;
+        exporting = true; exportCancelled = false; renderPlayer();
+        showError("");
+        showStatus(t("st.mp3"), { ratio: 0, num: "0%", cancel: true });
+        try {
+          const [X, lame] = await Promise.all([importApp("export.mjs"), loadLame()]);
+          const s = await exportNotes();
+          const blob = await X.renderMp3({
+            events: s.events, endQ: s.endQ, bpm: state.bpm, gainOf: gainOf, voice: voice, lame: lame,
+            onProgress: (r) => { if (!exportCancelled) showStatus(t("st.mp3"), { ratio: r, num: Math.floor(r * 100) + "%", cancel: true }); },
+            isCancelled: () => exportCancelled,
+          });
+          if (blob) { download(blob, fileBase() + ".mp3"); showStatus(t("st.mp3.done"), { bar: false }); }
+          else hideStatus();
+        } catch (e) {
+          hideStatus(); console.error(e);
+          showError(t("err.mp3", { msg: String((e && e.message) || e).slice(0, 120) }));
+        } finally { exporting = false; renderPlayer(); }
+      };
+      // Share: the app's link and the MusicXML file (when the browser can attach it); otherwise the file is
+      // saved and the link is shared (or copied) on its own
+      const appUrl = () => new URL(lang === "ja" ? "ja/" : "./", document.baseURI).href;
+      $("exShare").onclick = async function () {
+        closeExport(false);
+        if (!state.xml) return;
+        const xml = await exportXml(), name = fileBase() + ".musicxml", url = appUrl();
+        const text = t("share.text", { title: state.title });
+        let file = null;
+        if (navigator.canShare) {
+          for (const type of ["application/vnd.recordare.musicxml+xml", "application/xml", "text/xml"]) {
+            const f = new File([xml], name, { type: type });
+            try { if (navigator.canShare({ files: [f] })) { file = f; break; } } catch (e) {}
+          }
+        }
+        try {
+          if (file) { await navigator.share({ title: state.title, text: text, url: url, files: [file] }); return; }
+          download(new Blob([xml], { type: "application/vnd.recordare.musicxml+xml" }), name);
+          if (navigator.share) { showStatus(t("share.saved"), { bar: false }); await navigator.share({ title: state.title, text: text, url: url }); }
+          else { await navigator.clipboard.writeText(text + "\n" + url); showStatus(t("share.copied"), { bar: false }); }
+        } catch (e) {
+          if (!e || e.name !== "AbortError") { console.error(e); showStatus(t("share.saved"), { bar: false }); }
+        }
       };
 
       // Tap feedback: buttons that don't stay on get .is-pressed for at least 150 ms
@@ -1552,11 +2159,11 @@
       document.addEventListener("keydown", function (e) {
         const el = e.target, tag = el && el.tagName;
         if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
-        if (!$("settingsMenu").hidden || document.querySelector("dialog[open]")) return;
+        if (!$("settingsMenu").hidden || !exportMenu.hidden || document.querySelector("dialog[open]")) return;
         if ((tag === "INPUT" && el.type !== "range") || tag === "SELECT" || tag === "TEXTAREA") return;
         if (e.key === " ") { if (tag === "BUTTON") return; e.preventDefault(); if (playing) stop(); else start(); }
         else if (tag === "INPUT") return;
-        else if (e.key === "Home") { e.preventDefault(); $("rewindBtn").click(); }
+        else if (e.key === "Home") { e.preventDefault(); if (!$("stopBtn").disabled) stopToStart(); }
         else if (e.key === "ArrowUp") { e.preventDefault(); setBpm(state.bpm + (e.shiftKey ? 5 : 1)); }
         else if (e.key === "ArrowDown") { e.preventDefault(); setBpm(state.bpm - (e.shiftKey ? 5 : 1)); }
       });
@@ -1630,11 +2237,16 @@
       if (!supported) { $("firstNote").hidden = true; showError(t("err.unsupported")); }
       // The engine is already downloaded: the first-time note is not needed
       if (self.caches) caches.has("sheetmusicplayer-engine-v3").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
-      if (state.xml) {
-        $("fileCard").hidden = false; $("fileName").textContent = state.name; $("fileSub").textContent = t("file.saved", { n: state.notes });
-        $("thumb").hidden = true;
-        showScore(state.xml).catch(function () { state.xml = ""; saveState(); $("fileCard").hidden = true; $("empty").hidden = false; renderPlayer(); });
+      function showFileCard() {
+        $("fileCard").hidden = !state.xml; $("fileName").textContent = state.name || state.title; $("fileSub").textContent = t("file.saved", { n: state.notes });
+        $("thumb").removeAttribute("src"); $("thumb").hidden = true;
       }
+      renderTitle(); renderTranspose(); renderLoop();
+      if (state.xml) {
+        showFileCard();
+        showCurrent().catch(function () { state = Object.assign({}, EMPTY); saveState(); renderTitle(); $("fileCard").hidden = true; $("empty").hidden = false; renderPlayer(); });
+        saveState(); // a score saved before the recent scores existed is added to them
+      } else renderHistory();
       $("thumb").addEventListener("load", function () { this.hidden = false; });
     })();
   </script>

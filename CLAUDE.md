@@ -22,7 +22,7 @@
 - 対応環境: 動作確認は PC の Chrome・Edge 137 以降、iPhone の Safari（iOS 27.2、読み取り → 再生まで。COEP `credentialless` の下でも動いた）、Android の Chrome。エンジンに JSPI が必要で、ないブラウザでは案内を出す（`supported` は `WebAssembly.Suspending` の有無で判定）。JSPI は Firefox 153・Mac／iPad の Safari 27 にも入ったが、これらでは未確認。動作を確かめたら README・記事（`guide`・`faq`）・アプリの文言（`err.unsupported`、JSON-LD の `browserRequirements`）を一緒に直す。
 
 ## ルール
-- 手で編集するのは `public/sheetmusicplayer/index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`sw.js`、`engine/python/`、`scripts/`。
+- 手で編集するのは `public/sheetmusicplayer/index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`export.mjs`・`sw.js`、`engine/python/`、`scripts/`。
   生成ファイルは編集しない:
   - `public/sheetmusicplayer/ja/index.html`、記事と情報ページ（`guide/` など・`about/`・`privacy/` とその `ja/`）、`sitemap.xml` → `node scripts/build-ja.mjs`・`node scripts/build-pages.mjs`（`--check` で確認）
   - `public/sheetmusicplayer/guide/img/`、`scripts/pages/data/photo-results.json` → `node scripts/render-guide-images.mjs`（`npx wrangler dev` を起動してから。10〜20 分）
@@ -40,9 +40,12 @@
 - homr の認識モデルにはタイの記号がなく、タイはスラーとして出力される。読み取り結果は `slursToTies`（`score-model.mjs`）で「同じ譜表で隣り合う同じ高さの 2 音を結ぶスラー」をタイに直してから表示・再生する（直さないとタイの先の音符も鳴る）。MusicXML ファイルを開いたときは変換しない。
 - homr はふつうの音符を 3 連符の音符（`<time-modification>` 3:2）として読むことがある（16分音符が 3 連の 16分音符になり、短く鳴る）。homr は 3 連符がそろったときだけ括弧（`<tuplet>`）を付けるので、読み取り結果は `fixStrayTuplets`（`score-model.mjs`）で「足りない小節の、括弧のない連符の音符」を元の長さに戻す。戻して小節がちょうど埋まるときだけ直す。MusicXML ファイルには使わない。
 - homr は大譜表で、もう一方の譜表に戻るときの `<backup>` を書き落とすことがある（低音部の 4分音符の途中から始まる高音部の 8分音符が、その 4分音符のあとに回され、小節線を越えて遅れて鳴る）。1 小節で何か所も落とすことがある。読み取り結果は `fixVoiceOverflow`（`score-model.mjs`）で、声部が小節線を越える小節だけ、「音の長さの合計が小節の長さとちょうど同じ声部」の音符を書かれた順に頭から並べ直し、その小節を時刻順に書き直す（合計が合わない声部は読み違いなのでそのまま）。MusicXML ファイルには使わない。
-- `ja/index.html` には `<base href="/sheetmusicplayer/">` がある。JS で URL を組み立てるときは `location.href` ではなく `document.baseURI` を基準にする（`location.href` だと `/ja/` の下を指して 404 になる）。
+- `ja/index.html` には `<base href="/sheetmusicplayer/">` がある。JS で URL を組み立てるときは `location.href` ではなく `document.baseURI` を基準にする（`location.href` だと `/ja/` の下を指して 404 になる）。動的 `import()` も `importApp("x.mjs")`（`document.baseURI` 基準の絶対 URL）を使う。Safari はインラインスクリプトの `import("./x.mjs")` を `<base>` ではなくページの URL から解決するので、日本語ページで 404 になる。
 - Service Worker がエンジンのキャッシュからワーカーのスクリプト（Tesseract.js）を返すときは COEP ヘッダーを付ける（`sw.js` の `withWorkerHeaders`）。付けないと cross-origin isolation のページではワーカーが起動せず、テンポを読めない。
-- 最後の楽譜は `localStorage` の `sheetmusicplayer-state` に保存する。読み込んだ値は検証してから使う。新しいファイルを開いたらテンポは楽譜の値に戻す。
+- 開いている楽譜は `localStorage` の `sheetmusicplayer-state`、最近の楽譜（最大 10 曲）は IndexedDB の `sheetmusicplayer-history` に保存する。どちらも読み込んだ値は `validScore` で検証してから使う。新しいファイルを開いたらテンポは楽譜の値に、移調は 0 に戻す。タイトルは MusicXML の `work-title`／`movement-title`、なければ読み込んだ日時（タイトルの OCR はしない）。
+- 再生ボタンは共通ルール（ベースライン）どおり、▶／❚❚ のアイコンだけで切り替える一時停止と、■（停止して最初に戻る。ループ中はループの最初）。
+- 移調: `state.xml` は移調前のまま持ち、表示・再生・書き出しは `transposeXml` を通す。編集画面は移調前の音を表示・再生する。
+- 書き出し（`export.mjs`）: MIDI と MP3。MP3 は聞こえているとおり（テンポ・パートの強調／消音・移調）に、アプリの音源を OfflineAudioContext で 20 秒ずつ作って lamejs（`vendor/lame.min.js`、LGPL-3.0、`build-engine.py` が配置）で変換する。共有は Web Share で URL と MusicXML を送り、ファイルを添付できないブラウザでは保存してから URL だけ共有（またはコピー）する。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。
 - トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（`ktkwmr/ktkwmr.com` の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`。`public/robots.txt` の `Sitemap:` 行も）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ktkwmr.com` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。
 - アプリの下のフッター（`index.html` の `foot.guides`、英日）に記事の一覧を手で書いている（このアプリはアプリの下の説明に記事の一覧がないため。ベースライン §9-14）。記事を追加・改名・削除したら、ここも直す。
