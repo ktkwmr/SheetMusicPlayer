@@ -735,7 +735,9 @@
         const g = c.getContext("2d", { willReadFrequently: true });
         g.fillStyle = "#fff"; g.fillRect(0, 0, cw, ch); // transparent PNGs: white paper
         g.drawImage(source, 0, 0, cw, ch);
-        return { width: cw, height: ch, rgba: g.getImageData(0, 0, cw, ch).data.buffer, canvas: c };
+        // The pixels are taken from the canvas only when the page is read (see recognizePage):
+        // holding a copy of every page at once costs about 30 MB a page
+        return { width: cw, height: ch, canvas: c };
       }
       async function decodeImage(file) {
         let bmp;
@@ -840,7 +842,8 @@
         const id = ++jobSeq;
         return new Promise(function (resolve, reject) {
           pending.set(id, { resolve: resolve, reject: reject });
-          getWorker().postMessage({ type: "page", id: id, rgba: page.rgba, width: page.width, height: page.height, tempo: tempo }, [page.rgba]);
+          const rgba = page.canvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, page.width, page.height).data.buffer;
+          getWorker().postMessage({ type: "page", id: id, rgba: rgba, width: page.width, height: page.height, tempo: tempo }, [rgba]);
         });
       }
       const supported = typeof WebAssembly === "object" && typeof WebAssembly.Suspending === "function";
@@ -1075,12 +1078,22 @@
           if (cancelled) throw { code: "cancel" };
           const xmls = [], skipped = [];
           for (pageIndex = 0; pageIndex < n; pageIndex++) {
+            const page = input.pages[pageIndex];
             try {
-              const r = await recognizePage(input.pages[pageIndex], tempo ? tempo.bpm : null);
+              let r;
+              try { r = await recognizePage(page, tempo ? tempo.bpm : null); }
+              catch (e) {
+                // Out of memory: the engine has been stopped. Try once more with a fresh one,
+                // which starts with far less memory in use than one that has read a few pages
+                if (!e || e.code !== "memory" || cancelled) throw e;
+                r = await recognizePage(page, tempo ? tempo.bpm : null);
+              }
               xmls.push(r.xml);
             } catch (e) {
               if (e && e.code === "no-staff" && n > 1) { skipped.push(pageIndex + 1); continue; }
               throw e;
+            } finally {
+              page.canvas.width = page.canvas.height = 0; // done with this page: free it
             }
             if (cancelled) throw { code: "cancel" };
           }
