@@ -748,6 +748,9 @@
       }
 
       const $ = (id) => document.getElementById(id);
+      // Dynamic imports with absolute URLs: Safari resolves import("./x.mjs") in this inline script against the
+      // page's own URL, not <base href> (ja/index.html), so it looked for /sheetmusicplayer/ja/x.mjs (404)
+      const importApp = (path) => import(new URL(path, document.baseURI).href);
       const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
       const DEFAULT_BPM = 120;
       const MAX_PDF_PAGES = 12;
@@ -960,7 +963,7 @@
       let pdfjs = null;
       async function decodePdf(file) {
         if (!pdfjs) {
-          pdfjs = await import("./vendor/pdf.min.mjs");
+          pdfjs = await importApp("vendor/pdf.min.mjs");
           // document.baseURI, not location.href: ja/index.html has <base href="/sheetmusicplayer/">
           pdfjs.GlobalWorkerOptions.workerSrc = new URL("vendor/pdf.worker.min.mjs", document.baseURI).href;
         }
@@ -1040,7 +1043,7 @@
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("ocr timeout")), 40000));
         try {
           await Promise.race([timeout, (async function () {
-            const T = await import("./engine/v3/tesseract/tesseract.esm.min.js");
+            const T = await importApp("engine/v3/tesseract/tesseract.esm.min.js");
             const here = document.baseURI; // ja/index.html has <base href="/sheetmusicplayer/">
             ocr = await (T.default || T).createWorker("eng", 1, {
               workerPath: new URL("engine/v3/tesseract/worker.min.js", here).href,
@@ -1161,7 +1164,7 @@
         showStatus(t("st.xml.open"), {});
         try {
           const r = await readMusicXml(file, kind);
-          SM = SM || await import("./score-model.mjs");
+          SM = SM || await importApp("score-model.mjs");
           const xml = SM.expandMultiRests(r.xml);
           await showScore(xml);
           $("fileCard").hidden = false; $("thumb").removeAttribute("src"); $("thumb").hidden = true;
@@ -1275,7 +1278,7 @@
             if (cancelled) throw { code: "cancel" };
           }
           if (!xmls.length) throw { code: "no-staff" };
-          SM = SM || await import("./score-model.mjs");
+          SM = SM || await importApp("score-model.mjs");
           const xml = SM.expandMultiRests(xmls.length > 1 ? mergePages(xmls) : xmls[0]);
           showStatus(t("st.render"), {});
           const prev = state, now = Date.now();
@@ -1372,7 +1375,7 @@
       // The score as it is shown: the saved one, moved by the transposition
       function shownXml() { return state.transpose && SM ? SM.transposeXml(state.xml, state.transpose) : state.xml; }
       async function showCurrent() {
-        if (state.transpose) SM = SM || await import("./score-model.mjs");
+        if (state.transpose) SM = SM || await importApp("score-model.mjs");
         await showScore(shownXml());
         staleScore = false;
         renderTitle(); renderTranspose();
@@ -1708,14 +1711,14 @@
         if (m === mode || busy || !state.xml) return;
         stop(); clearLoop();
         if (m === "edit") {
-          SM = SM || await import("./score-model.mjs");
+          SM = SM || await importApp("score-model.mjs");
           if (!model || modelXml !== state.xml) {
             if (editor) { editor.destroy(); editor = null; }
             modelXml = state.xml; model = SM.parseScore(state.xml); dirty = false;
           }
           showMode("edit");
           if (!editor) {
-            const E = await import("./editor.mjs");
+            const E = await importApp("editor.mjs");
             editor = E.createEditor($("editWrap"), { model: model, t: t, trackName: trackName, preview: preview, onChange: onModelChange });
           }
           editor.focus();
@@ -1972,7 +1975,7 @@
       // The score as shown (transposed), with its title, as a MusicXML file
       async function exportXml() {
         await commitEdits(mode !== "edit");
-        SM = SM || await import("./score-model.mjs");
+        SM = SM || await importApp("score-model.mjs");
         return SM.withTitle(shownXml(), state.title);
       }
       // The notes as they are heard: the score (transposed), or in Edit the edited notes moved by the transposition
@@ -1993,7 +1996,7 @@
       $("exMidi").onclick = async function () {
         closeExport(false);
         if (!state.xml) return;
-        const X = await import("./export.mjs");
+        const X = await importApp("export.mjs");
         const s = await exportNotes(), m0 = s.measures && s.measures[0];
         const bytes = X.midiFile({ events: s.events, tracks: s.tracks, bpm: state.bpm, timeSig: m0 ? [m0.beats, m0.beatType] : null, title: state.title });
         download(new Blob([bytes], { type: "audio/midi" }), fileBase() + ".mid");
@@ -2015,7 +2018,7 @@
         showError("");
         showStatus(t("st.mp3"), { ratio: 0, num: "0%", cancel: true });
         try {
-          const [X, lame] = await Promise.all([import("./export.mjs"), loadLame()]);
+          const [X, lame] = await Promise.all([importApp("export.mjs"), loadLame()]);
           const s = await exportNotes();
           const blob = await X.renderMp3({
             events: s.events, endQ: s.endQ, bpm: state.bpm, gainOf: gainOf, voice: voice, lame: lame,
