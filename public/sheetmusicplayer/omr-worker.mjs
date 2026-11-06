@@ -150,7 +150,21 @@ async function start() {
   // is called from Python through JSPI (onnxruntime-web on its own works with threads). Investigating.
   ort.env.wasm.numThreads = 1;
   const { loadPyodide } = await import(ENGINE + "pyodide/pyodide.mjs");
-  py = await loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} });
+  // On iPhone / iPad, CPython (getPyEMTrampolinePtr in pyodide.asm.mjs) calls Python functions through a
+  // JavaScript trampoline instead of its WebAssembly one. Those JavaScript frames sit between
+  // WebAssembly.promising and WebAssembly.Suspending, so Safari refuses to suspend ("JavaScript frames
+  // found between WebAssembly.Suspending and WebAssembly.promising") and every page fails. The check
+  // reads navigator.userAgent once, while Pyodide starts: hide "iPhone" / "iPad" from it for that moment.
+  const ua = self.navigator && self.navigator.userAgent;
+  const hideIOS = ua && /iPad|iPhone|iPod/.test(ua);
+  if (hideIOS) {
+    try { Object.defineProperty(self.navigator, "userAgent", { value: ua.replace(/iPad|iPhone|iPod/g, "Mobile"), configurable: true }); } catch (e) {}
+  }
+  try {
+    py = await loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} });
+  } finally {
+    if (hideIOS) { try { delete self.navigator.userAgent; } catch (e) {} }
+  }
   await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions",
     ENGINE + "pyodide/" + wheel("verysimpletree"), ENGINE + "pyodide/" + wheel("musicxml")], { messageCallback: () => {} });
   const zip = await (await engineFetch(ENGINE + "homr.zip")).arrayBuffer();

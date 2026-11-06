@@ -36,6 +36,7 @@
 - 編集機能: `score-model.mjs` が MusicXML ⇄ 音符のリスト（24 tick/4分音符、小節は拍子から決める）を変換し、`editor.mjs` がピアノロールを描く。「楽譜」に戻るか保存するときに `buildXml` で MusicXML を作り直す（ヘッダー・パート・各小節の繰り返し記号と改行は元の XML から引き継ぎ、歌詞・スラー等は消える）。`score-model.mjs` を変えたら `npm test`（`tests/score-model.test.mjs`。「読み込み → 書き出し → 読み込み」で音符が一致するか等）を通し、OSMD で描けることも確かめる。直した不具合や新しい機能にはテストを足す。
 - homr は複数小節休符をふつうの 1 小節として読むことがある。`expandMultiRests` は `<multiple-rest>` が付いたときだけ小節を増やす。それ以外は編集画面の「小節を追加」で直してもらう。
 - `ja/index.html` には `<base href="/sheetmusicplayer/">` がある。JS で URL を組み立てるときは `location.href` ではなく `document.baseURI` を基準にする（`location.href` だと `/ja/` の下を指して 404 になる）。
+- iPhone・iPad では CPython（Pyodide の `getPyEMTrampolinePtr`）が JavaScript 経由の関数呼び出しに切り替わり、JSPI が止まれずに読み取りが必ず失敗する（Safari: "JavaScript frames found between WebAssembly.Suspending and WebAssembly.promising"）。`omr-worker.mjs` で Pyodide の起動中だけ `navigator.userAgent` から iPhone／iPad を隠している。Pyodide を更新したらこの判定が残っているか確かめ、Chromium に iPhone の User-Agent を設定して読み取りを試す。
 - Service Worker がエンジンのキャッシュからワーカーのスクリプト（Tesseract.js）を返すときは COEP ヘッダーを付ける（`sw.js` の `withWorkerHeaders`）。付けないと cross-origin isolation のページではワーカーが起動せず、テンポを読めない。
 - 開いている楽譜は `localStorage` の `sheetmusicplayer-state`、最近の楽譜（最大 10 曲）は IndexedDB の `sheetmusicplayer-history` に保存する。どちらも読み込んだ値は `validScore` で検証してから使う。新しいファイルを開いたらテンポは楽譜の値に、移調は 0 に戻す。タイトルは MusicXML の `work-title`／`movement-title`、なければ読み込んだ日時（タイトルの OCR はしない）。
 - 再生ボタンは共通ルール（ベースライン）どおり、▶／❚❚ のアイコンだけで切り替える一時停止と、■（停止して最初に戻る。ループ中はループの最初）。
