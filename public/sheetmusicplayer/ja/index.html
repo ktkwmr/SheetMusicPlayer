@@ -491,7 +491,7 @@
           "err.nostaff.page": "No staves were found on page {i}, so it was skipped.",
           "err.unsupported": "This browser cannot run the reading engine. Use the latest Chrome or Edge on a computer, the latest Chrome on Android, or Safari on an iPhone updated to iOS 27.2 or later. (Firefox may work once updated to the latest version.)",
           "err.download": "The reading engine could not be downloaded. Check your connection and try again.",
-          "err.memory": "The browser ran out of memory. Close other tabs, or try a smaller image or fewer pages.",
+          "err.memory": "The browser ran out of memory. Close other tabs, or try a smaller image or fewer pages. ({msg})",
           "err.recognize": "Reading failed. Try another photo or file. ({msg})",
           "err.render": "The score could not be drawn. The reading may have gone wrong; try a clearer photo or scan.",
           "err.camera": "The camera cannot be used. Allow camera access for this site, or choose a file instead.",
@@ -596,7 +596,7 @@
           "err.nostaff.page": "{i}ページ目には五線が見つからなかったので、飛ばしました。",
           "err.unsupported": "このブラウザでは読み取りエンジンを動かせません。PCの最新のChromeかEdge、Androidの最新のChrome、またはiOS 27.2以降に更新したiPhoneのSafariでお試しください。（Firefoxは、最新版に更新すると動く場合があります）",
           "err.download": "読み取りエンジンをダウンロードできませんでした。接続を確認して、もう一度お試しください。",
-          "err.memory": "ブラウザのメモリが足りなくなりました。ほかのタブを閉じるか、小さい画像やページ数の少ないファイルでお試しください。",
+          "err.memory": "ブラウザのメモリが足りなくなりました。ほかのタブを閉じるか、小さい画像やページ数の少ないファイルでお試しください。（{msg}）",
           "err.recognize": "読み取りに失敗しました。別の写真やファイルでお試しください。（{msg}）",
           "err.render": "楽譜を表示できませんでした。読み取りがうまくいかなかった可能性があります。もっとはっきりした写真やスキャンでお試しください。",
           "err.camera": "カメラを使えません。このサイトにカメラの使用を許可するか、ファイルを選んでください。",
@@ -1092,6 +1092,10 @@
                 // Out of memory: the engine has been stopped. Try once more with a fresh one,
                 // which starts with far less memory in use than one that has read a few pages
                 if (!e || e.code !== "memory" || cancelled) throw e;
+                // Give the browser a moment to free the stopped engine's memory first (Safari may not
+                // free it at once, and the new engine would then run out of memory as well)
+                await new Promise((ok) => setTimeout(ok, 1500));
+                if (cancelled) throw { code: "cancel" };
                 r = await recognizePage(page, tempo ? tempo.bpm : null);
               }
               xmls.push(r.xml);
@@ -1128,9 +1132,10 @@
           else if (code === "no-staff") showError(t("err.nostaff"));
           else if (code === "unsupported") showError(t("err.unsupported"));
           else if (code === "download") showError(t("err.download"));
-          else if (code === "memory") showError(t("err.memory"));
+          // The last line of the engine's message (shown, so a report tells which error it really was)
+          else if (code === "memory") { showError(t("err.memory", { msg: lastLine(e) })); console.error(e); }
           else if (code === "render") showError(t("err.render"));
-          else { showError(t("err.recognize", { msg: String((e && e.message) || e).split("\n").filter(Boolean).pop().slice(0, 160) })); console.error(e); }
+          else { showError(t("err.recognize", { msg: lastLine(e) })); console.error(e); }
           if (!timeline.steps.length) $("fileCard").hidden = true;
         } finally {
           stopWorker();
@@ -1139,6 +1144,7 @@
           renderPlayer();
         }
       }
+      const lastLine = (e) => String((e && e.message) || e).split("\n").filter(Boolean).pop().slice(0, 160);
       $("cancelBtn").onclick = function () {
         cancelled = true;
         // Stop the engine right away; it starts again (from the cache) for the next file
