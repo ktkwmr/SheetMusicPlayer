@@ -1311,15 +1311,25 @@
 
       // ---------- Sound (Web Audio API, a simple piano-like synthesizer) ----------
       // bus: one gain node per playback, so Stop can silence the notes already scheduled
-      let ctx = null, master = null, bus = null;
+      let ctx = null, master = null, bus = null, ctxStale = false;
+      // The cursor follows the audio clock (ctx.currentTime), so a stopped context freezes both the
+      // sound and the cursor. Safari on iPhone / iPad puts the context in "interrupted" when another
+      // app takes the audio (e.g. the camera opened to photograph the next score), and it may not
+      // come back with resume(): make a new one then (this runs from a tap, so it is allowed to start).
       function ensureCtx() {
+        if (ctx && (ctxStale || ctx.state === "interrupted" || ctx.state === "closed")) {
+          const old = ctx; ctx = null; master = null; bus = null; ctxStale = false;
+          try { old.close().catch(() => {}); } catch (e) {}
+        }
         if (!ctx) {
-          ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const c = ctx = new (window.AudioContext || window.webkitAudioContext)();
           const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 6;
           master = ctx.createGain(); master.gain.value = 0.7;
           master.connect(comp); comp.connect(ctx.destination);
+          // Interrupted while playing (a call, another app): stop, so Play starts again with a working clock
+          c.onstatechange = function () { if (c === ctx && playing && c.state === "interrupted") stop(); };
         }
-        if (ctx.state === "suspended") ctx.resume();
+        if (ctx.state !== "running") { try { ctx.resume().catch(() => {}); } catch (e) {} }
       }
       function playNote(midi, t0, dur) {
         const f = 440 * Math.pow(2, (midi - 69) / 12);
@@ -1411,6 +1421,8 @@
       // Notes are scheduled on the audio clock a little ahead, in quarter notes, so the tempo can change at any time
       let playing = false, posQ = 0, timer = null, raf = 0, wake = null;
       let schedQ = 0, schedT = 0, evIdx = 0;
+      // Watchdog: the audio clock at the last tick, and when it last moved (performance.now())
+      let clockT = 0, clockMoved = 0;
       // What is played: the score's timeline, or (in Edit) the notes being edited
       let playSrc = timeline;
       const source = () => (mode === "edit" && model ? { events: SM.modelEvents(model), endQ: SM.modelEnd(model) / SM.PPQ } : timeline);
@@ -1421,6 +1433,11 @@
       }
       function tick() {
         if (!playing) return;
+        // The audio clock has not moved for 2 s (the context never really started): stop, and use a
+        // new context on the next Play
+        const now = performance.now();
+        if (ctx.currentTime !== clockT) { clockT = ctx.currentTime; clockMoved = now; }
+        else if (now - clockMoved > 2000) { ctxStale = true; stop(); return; }
         const ev = playSrc.events, horizon = ctx.currentTime + 0.15;
         while (schedT < horizon && schedQ < playSrc.endQ + 0.01) {
           const b = bpm(), nextQ = schedQ + Math.max(0.01, Math.min(0.25, (horizon - schedT) * b / 60));
@@ -1447,6 +1464,7 @@
         playing = true;
         bus = ctx.createGain(); bus.connect(master);
         schedQ = posQ; schedT = ctx.currentTime + 0.06;
+        clockT = ctx.currentTime; clockMoved = performance.now();
         evIdx = playSrc.events.findIndex((e) => e[0] >= posQ - 1e-6); if (evIdx < 0) evIdx = playSrc.events.length;
         tick(); timer = setInterval(tick, 25);
         raf = requestAnimationFrame(frame);
