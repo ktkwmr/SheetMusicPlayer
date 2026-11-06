@@ -98,6 +98,24 @@ async function prefetchAll() {
 }
 
 // ---------- onnxruntime-web layer (called from engine/python/onnxruntime/__init__.py) ----------
+// onnxruntime-web (its threaded build, used here with one thread) makes a shared WebAssembly.Memory
+// with a 4 GB maximum. A shared memory cannot move, so Safari reserves the whole maximum up front,
+// and on iPhone that sometimes fails ("no available backend found. ERR: [wasm] RangeError: Out of
+// memory"; seen in the Home Screen app right after it was started again). It uses about 200 MB for a
+// photo, so cap shared memories at 1 GB. A module may import a memory with a smaller maximum than it
+// declares, and onnxruntime treats a failed grow as out of memory. Pyodide's memory is not shared.
+const SHARED_MEMORY_MAX_PAGES = 16384; // 1 GB (64 KiB pages)
+{
+  const Memory = WebAssembly.Memory;
+  const Capped = function Memory_(desc) {
+    if (desc && desc.shared && !(desc.maximum <= SHARED_MEMORY_MAX_PAGES)) {
+      desc = { ...desc, maximum: Math.max(SHARED_MEMORY_MAX_PAGES, desc.initial || 0) };
+    }
+    return new Memory(desc);
+  };
+  Capped.prototype = Memory.prototype;
+  WebAssembly.Memory = Capped;
+}
 let ort = null;
 const sessions = [], sessionOf = {};
 const SEGNET_BATCH = 2;
