@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="/sheetmusicplayer/icons/icon.svg" />
   <link rel="apple-touch-icon" href="/sheetmusicplayer/icons/apple-touch-icon.png" />
   <title>How to Play Sheet Music from a Photo or PDF (Guide) | Sheet Music Player</title>
-  <meta name="description" content="Step-by-step guide to Sheet Music Player: open a photo, image, or PDF of sheet music, let the app read the notes in your browser, play it with a moving cursor, change the tempo, fix mistakes, and save MusicXML." />
+  <meta name="description" content="Step-by-step guide to Sheet Music Player: open a photo, image, or PDF of sheet music, let the app read the notes in your browser, play it with a moving cursor, practise with a loop, metronome, and transposition, fix mistakes, and save MusicXML, MIDI, or MP3." />
   <link rel="canonical" href="https://ktkwmr.com/sheetmusicplayer/guide/" />
   <link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/guide/" />
   <link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/guide/" />
@@ -16,7 +16,7 @@
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Sheet Music Player" />
   <meta property="og:title" content="How to Play Sheet Music from a Photo or PDF (Guide)" />
-  <meta property="og:description" content="Step-by-step guide to Sheet Music Player: open a photo, image, or PDF of sheet music, let the app read the notes in your browser, play it with a moving cursor, change the tempo, fix mistakes, and save MusicXML." />
+  <meta property="og:description" content="Step-by-step guide to Sheet Music Player: open a photo, image, or PDF of sheet music, let the app read the notes in your browser, play it with a moving cursor, practise with a loop, metronome, and transposition, fix mistakes, and save MusicXML, MIDI, or MP3." />
   <meta property="og:locale" content="en_US" />
   <meta property="og:locale:alternate" content="ja_JP" />
   <meta property="og:url" content="https://ktkwmr.com/sheetmusicplayer/guide/" />
@@ -29,7 +29,7 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "How to play sheet music from a photo or PDF",
-    "description": "Step-by-step guide to Sheet Music Player: open a photo, image, or PDF of sheet music, let the app read the notes in your browser, play it with a moving cursor, change the tempo, fix mistakes, and save MusicXML.",
+    "description": "Step-by-step guide to Sheet Music Player: open a photo, image, or PDF of sheet music, let the app read the notes in your browser, play it with a moving cursor, practise with a loop, metronome, and transposition, fix mistakes, and save MusicXML, MIDI, or MP3.",
     "url": "https://ktkwmr.com/sheetmusicplayer/guide/",
     "inLanguage": "en",
     "datePublished": "2026-10-24",
@@ -196,8 +196,10 @@
   <li><a href="#read">Wait for the reading</a></li>
   <li><a href="#play">Play and follow the cursor</a></li>
   <li><a href="#tempo">Change the tempo</a></li>
+  <li><a href="#practice">Practise: loop, metronome, parts, transpose</a></li>
   <li><a href="#edit">Fix mistakes</a></li>
-  <li><a href="#save">Save the result</a></li>
+  <li><a href="#save">Save and share</a></li>
+  <li><a href="#recent">Recent scores</a></li>
   <li><a href="#trouble">When it does not work</a></li>
 </ol></nav>
 
@@ -236,10 +238,10 @@
   <a href="/sheetmusicplayer/guide/img/app-playing-en.webp"><img src="/sheetmusicplayer/guide/img/app-playing-en.webp" width="1280" height="800" alt="The score read from the photo, playing: a blue cursor is on the second measure" loading="lazy" decoding="async"></a>
   <figcaption>The score the app read from the photo, playing. The blue cursor follows the music.</figcaption>
 </figure>
-<p>When the reading is done, the score is drawn again from the notes the app read. Press <b>Play</b> to start; a blue cursor moves along the staff with the sound. Press <b>Stop</b> to stop where you are, and the <b>back to the beginning</b> button (⏮) to go to the start.</p>
+<p>When the reading is done, the score is drawn again from the notes the app read. Press the play button (▶) to start; a blue cursor moves along the staff with the sound. While it plays, the same button shows ❚❚: press it to pause, and press ▶ again to carry on from there. The stop button (■) stops and goes back to the beginning.</p>
 <ul>
-  <li>Click a note to move the cursor there. Play then starts from that note, which is handy for repeating a difficult passage.</li>
-  <li>Keyboard: <kbd>Space</kbd> play / stop, <kbd>Home</kbd> back to the beginning, <kbd>↑</kbd> <kbd>↓</kbd> tempo ±1 (with <kbd>Shift</kbd>, ±5).</li>
+  <li>Click a note to move the cursor there. Play then starts from that note.</li>
+  <li>Keyboard: <kbd>Space</kbd> play / pause, <kbd>Home</kbd> stop (back to the beginning), <kbd>↑</kbd> <kbd>↓</kbd> tempo ±1 (with <kbd>Shift</kbd>, ±5).</li>
 </ul>
 <p>Compare what you hear with the printed page. The reading can contain mistakes, and listening is the quickest way to find them.</p>
 
@@ -247,7 +249,21 @@
 <p>The tempo starts at the metronome mark found on the page (for example ♩ = 108). If there is only a word such as <i lang="it">Andante</i>, the usual tempo for that word is used, and if there is nothing, ♩ = 120. Change it with <b>−5</b> / <b>+5</b>, by typing a number, or with the slider (20–300), even while it plays.</p>
 <p>The number means quarter notes per minute, and the whole piece plays at one tempo. For a dotted-quarter beat in 6/8, or for tempo changes in the middle of a piece, see <a href="/sheetmusicplayer/tempo-markings/">tempo markings and BPM</a>.</p>
 
-<h2 id="edit">5. Fix mistakes</h2>
+<h2 id="practice">5. Practise: loop, metronome, parts, transpose</h2>
+<figure class="shot">
+  <a href="/sheetmusicplayer/guide/img/app-practice-en.webp"><img src="/sheetmusicplayer/guide/img/app-practice-en.webp" width="1280" height="800" alt="Practice mode: Loop: m. 1–4 and Metronome are on, measures 1 to 4 are shaded blue, and the cursor is in measure 2" loading="lazy" decoding="async"></a>
+  <figcaption>Practice mode, playing measures 1–4 over and over with the metronome.</figcaption>
+</figure>
+<p>Press <b>Practice mode</b> to show the practice tools under the player:</p>
+<ul>
+  <li><b>Loop</b>: press it, then tap the first and the last measure on the score. Those measures are shaded and play over and over. Press <b>Loop</b> again to stop looping. While a loop is set, the stop button goes back to the start of the loop.</li>
+  <li><b>Metronome</b>: a click on every beat, higher on the first beat of each measure. In 6/8, 9/8, and 12/8 it clicks on each dotted quarter.</li>
+  <li><b>Count-in</b>: one measure of clicks before the music starts, so you can come in on time.</li>
+  <li><b>Parts</b> (for scores with more than one staff, such as piano or choir): tap a part to change it from normal to <b>louder</b> (the other parts are played softly) to <b>muted</b>, and back. Use it to hear your own part clearly, or to play or sing it yourself while the app plays the others.</li>
+  <li><b>Transpose</b>: − and + move the music down or up a semitone at a time, up to an octave either way. The key signature changes with it, and the notes are spelled to suit the new key. The editor still shows the notes as written.</li>
+</ul>
+
+<h2 id="edit">6. Fix mistakes</h2>
 <figure class="shot">
   <a href="/sheetmusicplayer/guide/img/app-edit-en.webp"><img src="/sheetmusicplayer/guide/img/app-edit-en.webp" width="1280" height="800" alt="The editor: a piano roll with the notes of the upper staff as black boxes and measure 4 highlighted with an exclamation mark" loading="lazy" decoding="async"></a>
   <figcaption>The editor. Measures whose beats did not add up are marked with “!” (here, measure 4 is missing a note).</figcaption>
@@ -255,9 +271,21 @@
 <p>Switch to <b>Edit</b> to see the notes as boxes on a piano roll: up and down is the pitch, left to right is time. Drag a box to move it, drag its right edge to change its length, click an empty spot to add a note, and right-click (or press <kbd>Delete</kbd>) to remove one. Click a measure number to add or delete measures. Measures marked <b>!</b> had too many or too few beats when they were read, so start with those.</p>
 <p>Switch back to <b>Score</b> to redraw the staff with your changes. For the common mistakes and how to fix each one, see <a href="/sheetmusicplayer/fix-errors/">how to fix reading mistakes</a>.</p>
 
-<h2 id="save">6. Save the result</h2>
-<p>The <b>MusicXML</b> button saves the notes as a <code>.musicxml</code> file. You can open it again in this app, or in MuseScore and most other notation programs to print it, transpose it, or export audio. See <a href="/sheetmusicplayer/musicxml/">what MusicXML is and how to use it</a>.</p>
-<p>The last score and its tempo are also kept in the browser, so they are still there the next time you open the app. <b>Clear</b> removes the score from the screen and from the browser.</p>
+<h2 id="save">7. Save and share</h2>
+<figure class="shot">
+  <a href="/sheetmusicplayer/guide/img/app-export-en.webp"><img src="/sheetmusicplayer/guide/img/app-export-en.webp" width="1280" height="800" alt="The Save / share menu: Share…, MusicXML (score), MIDI, MP3 (audio)" loading="lazy" decoding="async"></a>
+  <figcaption>The Save / share menu.</figcaption>
+</figure>
+<p><b>Save / share</b> has four choices. The files are named after the title of the score.</p>
+<ul>
+  <li><b>MusicXML (score)</b>: the notes as a <code>.musicxml</code> file, transposed if you transposed them. Open it again in this app, or in MuseScore and most other notation programs to print it or edit it further. See <a href="/sheetmusicplayer/musicxml/">what MusicXML is and how to use it</a>.</li>
+  <li><b>MIDI</b>: a <code>.mid</code> file with one track per staff, at the current tempo, for music software and digital pianos.</li>
+  <li><b>MP3 (audio)</b>: a recording of what you hear: the current tempo, the louder and muted parts, and the transposition (without the metronome). It is made on your device and takes a few seconds; a practice track for each part of a choir, for example, is one MP3 per part.</li>
+  <li><b>Share…</b>: sends the app's link and the MusicXML file through your device's share menu (messages, mail, …), so others can open the score in this app. If the browser cannot attach the file, the file is saved and only the link is shared (or copied); attach the file yourself.</li>
+</ul>
+
+<h2 id="recent">8. Recent scores</h2>
+<p>The title of the score is shown above it: the title written in a MusicXML file, or the date and time it was read. Click the title to rename it. The last 10 scores you opened are kept in the browser, with their tempo and transposition, and are listed under <b>Recent scores</b> in the left panel; tap one to open it again. <b>Clear history</b> removes them (the open score stays), and <b>Clear</b> removes the open score from the screen and from the browser.</p>
 
 <h2 id="trouble">When it does not work</h2>
 <div class="table-wrap">
@@ -269,6 +297,7 @@
 <tr><th scope="row">“The browser ran out of memory”</th><td>Close other tabs, or read fewer pages at a time.</td></tr>
 <tr><th scope="row">“The reading engine could not be downloaded”</th><td>Check the connection and try again. This is needed only the first time.</td></tr>
 <tr><th scope="row">The notes or the tempo are wrong</th><td>Fix them in Edit, or set the tempo by hand. A better photo often helps more.</td></tr>
+<tr><th scope="row">“Share…” does not attach the file</th><td>Some browsers can share only the link. The MusicXML file is saved to your downloads; attach it to the message yourself.</td></tr>
 </tbody>
 </table>
 </div>

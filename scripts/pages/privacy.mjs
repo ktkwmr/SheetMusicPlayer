@@ -70,7 +70,7 @@ export default {
 
 <h2 id="changes">9. Changes to this policy</h2>
 <p>We may update this policy when the site changes, for example when we add or remove a service. The updated policy applies from the time it is posted on this page.</p>
-<p>Effective: October 22, 2026 (last updated: October 22, 2026)</p>
+<p>Effective: October 22, 2026 (last updated: November 6, 2026)</p>
 `,
   },
   ja: {
@@ -135,7 +135,7 @@ export default {
 
 <h2 id="changes">9. 改定</h2>
 <p>サービスの追加・終了など本サイトの変更に合わせて、本ポリシーを改定することがあります。改定後のポリシーは、このページに掲載した時点から適用されます。</p>
-<p>制定日：2026 年 10 月 22 日（最終改定日：2026 年 10 月 22 日）</p>
+<p>制定日：2026 年 10 月 22 日（最終改定日：2026 年 11 月 6 日）</p>
 `,
   },
 };
