@@ -175,7 +175,7 @@
     .chip.part[data-mode="solo"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
     .chip.part[data-mode="mute"] { color: var(--subtle); text-decoration: line-through; border-style: dashed; }
     .chip.part .st { font-weight: 400; font-size: 11px; }
-    .tr-val { min-width: 6.5em; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 13px; }
+    .tr-val { min-width: 2.6em; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 13px; }
     .loop-info { font-size: 12px; color: var(--muted); }
     .title-row { padding: 12px 16px 0; }
     .title-input { width: 100%; border: 1px solid transparent; border-radius: var(--radius); padding: 4px 8px; margin-left: -8px; font: inherit; font-size: 18px; font-weight: 700; color: var(--ink); background: transparent; text-overflow: ellipsis; }
@@ -336,23 +336,24 @@
             <input id="bpmSlider" type="range" min="20" max="300" step="1" aria-label="テンポのスライダー" data-i18n-attr="aria-label:bpm.slider">
           </div>
           <div class="end">
-            <button type="button" class="chip toggle" id="loopBtn" aria-pressed="false" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V6a2 2 0 0 1 2-2h7.5M10.5 2 12.5 4l-2 2M13 9v1a2 2 0 0 1-2 2H3.5M5.5 14l-2-2 2-2"></path></svg><span data-i18n="loop">ループ</span></button>
-            <button type="button" class="chip toggle" id="metroBtn" aria-pressed="false" aria-label="メトロノーム" data-i18n-attr="aria-label:metro;title:metro" title="メトロノーム"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1.8h4l3 12.4H3z"></path><path d="M8 11 12 3.5"></path><path d="M4.2 10.5h7.6"></path></svg></button>
-            <button type="button" class="chip toggle" id="practiceBtn" aria-pressed="false" aria-controls="practice" disabled data-i18n="practice">練習</button>
+            <button type="button" class="chip toggle" id="practiceBtn" aria-pressed="false" aria-controls="practice" disabled data-i18n="practice">練習モード</button>
             <button type="button" class="chip" id="exportBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"></path></svg><span data-i18n="export">保存・共有</span></button>
             <button type="button" class="chip" id="clearBtn" disabled data-i18n="clear">クリア</button>
           </div>
         </div>
         <div class="practice" id="practice" hidden>
+          <div class="grp">
+            <button type="button" class="chip toggle" id="loopBtn" aria-pressed="false" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V6a2 2 0 0 1 2-2h7.5M10.5 2 12.5 4l-2 2M13 9v1a2 2 0 0 1-2 2H3.5M5.5 14l-2-2 2-2"></path></svg><span data-i18n="loop">ループ</span></button>
+            <button type="button" class="chip toggle" id="metroBtn" aria-pressed="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1.8h4l3 12.4H3z"></path><path d="M8 11 12 3.5"></path><path d="M4.2 10.5h7.6"></path></svg><span data-i18n="metro">メトロノーム</span></button>
+            <button type="button" class="chip toggle" id="countBtn" aria-pressed="false" data-i18n="countin">カウントイン</button>
+          </div>
+          <div class="grp"><span class="loop-info" id="loopInfo"></span></div>
           <div class="grp" id="partsGrp"><span class="lbl" data-i18n="parts">パート</span><span id="partsList" class="grp"></span></div>
           <div class="grp"><span class="lbl" data-i18n="transpose">移調</span>
             <button type="button" class="chip mono" id="trDown" aria-label="半音下げる" data-i18n-attr="aria-label:tr.down">−</button>
             <span class="tr-val" id="trVal" aria-live="polite"></span>
             <button type="button" class="chip mono" id="trUp" aria-label="半音上げる" data-i18n-attr="aria-label:tr.up">+</button>
-            <button type="button" class="chip" id="trReset" data-i18n="tr.reset">元に戻す</button>
           </div>
-          <div class="grp"><button type="button" class="chip toggle" id="countBtn" aria-pressed="false" data-i18n="countin">カウントイン</button></div>
-          <div class="grp"><span class="loop-info" id="loopInfo"></span></div>
         </div>
         <div class="warn" id="pageWarn" hidden></div>
         <div class="title-row" id="titleRow" hidden><input id="titleInput" class="title-input" type="text" maxlength="200" aria-label="タイトル" data-i18n-attr="aria-label:title.aria;title:title.hint" title="クリックで名前を変更" enterkeyhint="done" autocomplete="off"></div>
@@ -459,7 +460,7 @@
           "loop.range": "Loop: m. {a}–{b}",
           "loop.hint": "Loop: tap the first and the last measure on the score. Tap “Loop” again to cancel.",
           "metro": "Metronome",
-          "practice": "Practice",
+          "practice": "Practice mode",
           "parts": "Parts",
           "part.normal": "normal",
           "part.solo": "louder",
@@ -468,8 +469,7 @@
           "transpose": "Transpose",
           "tr.down": "Down a semitone",
           "tr.up": "Up a semitone",
-          "tr.reset": "Reset",
-          "tr.val": "{n} semitones",
+          "tr.val": "{n}",
           "countin": "Count-in",
           "title.aria": "Title",
           "title.hint": "Click to rename",
@@ -594,7 +594,7 @@
           "loop.range": "ループ：{a}〜{b}小節",
           "loop.hint": "ループ：楽譜の上で、くり返す最初の小節と最後の小節をタップします。やめるときはもう一度「ループ」を押します。",
           "metro": "メトロノーム",
-          "practice": "練習",
+          "practice": "練習モード",
           "parts": "パート",
           "part.normal": "通常",
           "part.solo": "強調",
@@ -603,8 +603,7 @@
           "transpose": "移調",
           "tr.down": "半音下げる",
           "tr.up": "半音上げる",
-          "tr.reset": "元に戻す",
-          "tr.val": "{n} 半音",
+          "tr.val": "{n}",
           "countin": "カウントイン",
           "title.aria": "タイトル",
           "title.hint": "クリックで名前を変更",
@@ -1206,6 +1205,17 @@
       }
       $("clearBtn").onclick = clearScore;
 
+      // The last line of the error, and where it happened (the last Python frame, or the first JavaScript one),
+      // so a report from a browser we cannot test says where to look
+      function errorDetail(e) {
+        const lines = String((e && e.message) || e).split("\n").filter((l) => l.trim());
+        const msg = (lines.pop() || "").trim();
+        const py = lines.filter((l) => /^\s*File "/.test(l)).pop();
+        let where = py ? py.trim().replace(/^File "(?:[^"]*\/)?([^"]+)", line (\d+).*$/, "$1:$2") : (e && e.where) || "";
+        if (!where && e && e.stack) { const m = /([\w.-]+\.m?js):(\d+):\d+/.exec(String(e.stack)); if (m) where = m[1] + ":" + m[2]; }
+        return (msg.slice(0, 160) + (where ? " @ " + where.slice(0, 60) : "")).trim();
+      }
+
       // ---------- The whole flow: file -> pages -> engine -> score ----------
       let busy = false, cancelled = false;
       async function openFile(file, label) {
@@ -1287,7 +1297,7 @@
           else if (code === "download") showError(t("err.download"));
           else if (code === "memory") showError(t("err.memory"));
           else if (code === "render") showError(t("err.render"));
-          else { showError(t("err.recognize", { msg: String((e && e.message) || e).split("\n").filter(Boolean).pop().slice(0, 160) })); console.error(e); }
+          else { showError(t("err.recognize", { msg: errorDetail(e) })); console.error(e); }
           if (!timeline.steps.length) $("fileCard").hidden = true;
         } finally {
           busy = false; onProgress = null;
@@ -1853,7 +1863,7 @@
         $("stopBtn").title = t("stop");
         $("metroBtn").setAttribute("aria-pressed", metronome);
         $("countBtn").setAttribute("aria-pressed", countIn);
-        $("trDown").disabled = $("trUp").disabled = $("trReset").disabled = !state.xml || busy;
+        $("trDown").disabled = $("trUp").disabled = !state.xml || busy;
         renderTempo();
       }
       function renderTempo() {
@@ -1916,7 +1926,6 @@
       }
       $("trDown").onclick = () => setTranspose(state.transpose - 1);
       $("trUp").onclick = () => setTranspose(state.transpose + 1);
-      $("trReset").onclick = () => setTranspose(0);
 
       // ---------- Save / share (MusicXML, MIDI, MP3) ----------
       let exporting = false, exportCancelled = false;

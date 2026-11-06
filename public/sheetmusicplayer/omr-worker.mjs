@@ -189,5 +189,7 @@ function errorInfo(e) {
   let code = (e && e.code) || "recognize";
   if (/no-staff/.test(message)) code = "no-staff";
   else if (/memory|Out of bounds|RangeError: Array buffer allocation/i.test(message)) code = "memory";
-  return { code, message: message.slice(-2000) };
+  // Where a JavaScript error happened (Safari's messages do not say), e.g. "ort.min.mjs:6"
+  const m = /([\w.-]+\.m?js):(\d+):\d+/.exec(String((e && e.stack) || ""));
+  return { code, message: message.slice(-2000), where: m ? m[1] + ":" + m[2] : "" };
 }
