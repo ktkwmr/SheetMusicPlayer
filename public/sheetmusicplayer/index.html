@@ -254,6 +254,8 @@
     .ed-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
     .ed-label { font-size: 12px; color: var(--subtle); margin-right: 2px; }
     .ed-bar .chip { height: 30px; padding: 0 10px; }
+    .ed-bar .chip:has(svg.note-ic) { padding: 0 7px; min-width: 34px; }
+    .ed-bar .chip svg.note-ic { width: auto; height: 18px; }
     .ed-bar .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
     .ed-count { width: 3.6em; height: 30px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-family: var(--mono); text-align: center; }
     .ed-count:disabled { opacity: .4; }

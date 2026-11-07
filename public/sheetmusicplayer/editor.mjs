@@ -11,7 +11,12 @@ const ROW = 12;     // pixels per semitone
 const LOW = 21, HIGH = 108; // A0..C8
 const ROWS = HIGH - LOW + 1;
 const BLACK = new Set([1, 3, 6, 8, 10]);
-const GRIDS = [[24, "♩"], [12, "♪"], [6, "𝅘𝅥𝅯"], [8, "♪³"]];
+// Grid icons drawn as SVG: the sixteenth-note character (U+1D161) is missing from most phone fonts and fell back
+// to an eighth note, and the font's ♩ ♪ came out at different sizes
+const NOTE_HEAD = '<ellipse cx="6.2" cy="15" rx="3.1" ry="2.2" transform="rotate(-20 6.2 15)" fill="currentColor"/><path d="M9 14.4V2.5" stroke="currentColor" stroke-width="1.3"/>';
+const FLAG = (y) => '<path d="M9 ' + y + 'c.4 2.4 3.6 3 3.4 6.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>';
+const noteIcon = (body, w = 16) => '<svg class="note-ic" viewBox="0 0 ' + w + ' 18" width="' + w + '" height="18" aria-hidden="true">' + NOTE_HEAD + body + '</svg>';
+const GRIDS = [[24, noteIcon("")], [12, noteIcon(FLAG(2.5))], [6, noteIcon(FLAG(2.5) + FLAG(5.8))], [8, noteIcon(FLAG(2.5) + '<text x="13.5" y="7" font-size="7.5" font-weight="700" fill="currentColor" font-family="inherit">3</text>', 19)]];
 const ZOOMS = [0.75, 1, 1.5, 2, 3, 4]; // pixels per tick
 
 function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
@@ -49,7 +54,8 @@ export function createEditor(host, opts) {
 
   function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
   function chip(label, onClick, attrs = {}) {
-    const b = el("button", "chip"); b.type = "button"; b.textContent = label; b.onclick = onClick;
+    const b = el("button", "chip"); b.type = "button"; b.onclick = onClick;
+    if (label.startsWith("<svg")) b.innerHTML = label; else b.textContent = label; // (only our own icons are HTML)
     for (const [k, v] of Object.entries(attrs)) b.setAttribute(k, v);
     return b;
   }
