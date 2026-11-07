@@ -1,7 +1,7 @@
 // How to photograph / scan sheet music. The comparison table comes from scripts/pages/data/photo-results.json,
 // written by scripts/render-guide-images.mjs (the same page made tilted, blurred, … and read by the app).
 import { readFileSync } from "node:fs";
-import { image, link, DEFAULT_BPM, MAX_PDF_PAGES } from "./parts.mjs";
+import { image, link, DEFAULT_BPM } from "./parts.mjs";
 
 const DATA = JSON.parse(readFileSync(new URL("./data/photo-results.json", import.meta.url), "utf8"));
 const R = DATA.results;
@@ -97,7 +97,7 @@ ${resultTable("en")}
 <p>The app reads printed music. Handwritten scores, tablature, and very small notes (such as a pocket score) are not read reliably.</p>
 
 <h2 id="scan">Scans and PDFs</h2>
-<p>A flat scan avoids almost every problem above, so use one when you can. 300 dpi in grayscale or black and white is plenty. A PDF from a scanner app on a phone (which straightens and crops the page) also works well. If you have a PDF made by a notation program, open it directly: it is sharper than any photo. Up to the first ${MAX_PDF_PAGES} pages of a PDF are read.</p>
+<p>A flat scan avoids almost every problem above, so use one when you can. 300 dpi in grayscale or black and white is plenty. A PDF from a scanner app on a phone (which straightens and crops the page) also works well. If you have a PDF made by a notation program, open it directly: it is sharper than any photo.</p>
 
 <h2 id="after">After reading</h2>
 <p>Play the result while you follow the page. If a few notes are wrong, fix them in the editor (see ${link("en", "fix-errors", "how to fix reading mistakes")}); if many are wrong, a new photo is usually faster. If the tempo was missed, set it by hand (see ${link("en", "tempo-markings", "tempo markings and BPM")}).</p>
@@ -144,7 +144,7 @@ ${resultTable("ja")}
 <p>読み取れるのは印刷された楽譜です。手書きの楽譜、タブ譜、ポケットスコアのような音符がとても小さい楽譜はうまく読めません。</p>
 
 <h2 id="scan">スキャンと PDF</h2>
-<p>平らに置いてスキャンすれば、上の失敗はほとんど起きないので、できればスキャンを使ってください。グレースケールか白黒で 300dpi あれば十分です。スマホのスキャンアプリ（ページをまっすぐに直して切り抜いてくれるもの）で作った PDF もよく読めます。楽譜ソフトで作った PDF があれば、どんな写真よりくっきりしているので、そのまま開いてください。PDF は最初の ${MAX_PDF_PAGES} ページまで読み取ります。</p>
+<p>平らに置いてスキャンすれば、上の失敗はほとんど起きないので、できればスキャンを使ってください。グレースケールか白黒で 300dpi あれば十分です。スマホのスキャンアプリ（ページをまっすぐに直して切り抜いてくれるもの）で作った PDF もよく読めます。楽譜ソフトで作った PDF があれば、どんな写真よりくっきりしているので、そのまま開いてください。</p>
 
 <h2 id="after">読み取ったあとで</h2>
 <p>元の楽譜を目で追いながら再生してください。間違いが少しなら編集画面で直し（${link("ja", "fix-errors", "読み取りミスの直し方")}）、たくさんあるなら撮り直すほうがたいてい早く済みます。テンポを見落としたときは手で設定してください（${link("ja", "tempo-markings", "速度記号と BPM の一覧")}）。</p>

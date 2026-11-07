@@ -134,14 +134,17 @@
     /* Files waiting to be read: numbered, in reading order, with a handle to move them */
     .queue { display: flex; flex-direction: column; gap: 10px; }
     .q-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 700; }
-    .q-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-    .q-item { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 4px 6px 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+    /* The numbers stay in place in their own column, outside the cards: only the cards move */
+    .q-rows { display: flex; gap: 6px; min-width: 0; }
+    .q-nums { flex: none; display: flex; flex-direction: column; gap: 6px; }
+    .q-num { width: 20px; height: 62px; line-height: 62px; text-align: center; font-family: var(--mono); font-weight: 700; color: var(--muted); }
+    .q-list { flex: 1 1 auto; min-width: 0; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .q-item { display: flex; align-items: center; gap: 8px; min-width: 0; height: 62px; padding: 0 4px 0 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
     .q-item.dragging { position: relative; z-index: 2; border-color: var(--ink); box-shadow: var(--shadow); }
-    .q-num { flex: none; width: 22px; text-align: center; font-family: var(--mono); font-weight: 700; }
     .q-thumb { appearance: none; flex: none; width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--hover-fill); cursor: zoom-in; overflow: hidden; }
     .q-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .q-meta { flex: 1 1 auto; min-width: 0; }
-    .q-meta .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .q-meta .nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .q-meta .sub { color: var(--subtle); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .q-btn { appearance: none; flex: none; width: 36px; height: 40px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
     .q-btn svg { width: 18px; height: 18px; }
@@ -327,7 +330,7 @@
 
           <div class="queue" id="queue" hidden>
             <div class="q-head"><span id="queueCount"></span><button type="button" class="linkish" id="queueClear" data-i18n="q.clear">Remove all</button></div>
-            <ol class="q-list" id="queueList" aria-labelledby="queueCount"></ol>
+            <div class="q-rows"><div class="q-nums" id="queueNums" aria-hidden="true"></div><ol class="q-list" id="queueList" aria-labelledby="queueCount"></ol></div>
             <p class="hint" id="queueHint" data-i18n="q.hint">Tap a picture to see it larger. Drag the handle to change the order.</p>
             <p class="q-warn" id="queueWarn" role="note" hidden></p>
             <button type="button" class="big" id="readBtn"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6 3.8v12.4L16 10z"></path></svg><span data-i18n="q.read">Read the score</span></button>
@@ -636,14 +639,14 @@
           "err.render": "The score could not be drawn. The reading may have gone wrong; try a clearer photo or scan.",
           "err.camera": "The camera cannot be used. Allow camera access for this site, or choose a file instead.",
           "err.license": "Could not load the license information. Check your connection and try again.",
-          "warn.pages": "Only the first {max} pages are read.",
+          "err.memory.pages": "Several pages were being read at once. Delete some files from the list to read fewer pages, and try again.",
           "pick.more": "Add a file",
           "q.count": "Files to read · {n} / {max}",
-          "q.clear": "Remove all",
+          "q.clear": "Delete all",
           "q.hint": "Tap a picture to see it larger. Drag the handle to change the order.",
           "q.read": "Read the score",
           "q.move": "Move {name} (arrow keys)",
-          "q.remove": "Remove {name}",
+          "q.remove": "Delete {name}",
           "q.preview": "Show {name} larger",
           "q.warn": "Reading several pages takes about a minute per page and may fail, for example when the browser runs out of memory (more likely on a phone). If it fails, read fewer pages at a time.",
           "q.full": "Up to {max} files can be read at once. The rest were not added.",
@@ -788,14 +791,14 @@
           "err.render": "楽譜を表示できませんでした。読み取りがうまくいかなかった可能性があります。もっとはっきりした写真やスキャンでお試しください。",
           "err.camera": "カメラを使えません。このサイトにカメラの使用を許可するか、ファイルを選んでください。",
           "err.license": "ライセンス情報を読み込めませんでした。接続を確認して、もう一度お試しください。",
-          "warn.pages": "最初の{max}ページだけを読み取ります。",
+          "err.memory.pages": "複数のページを一度に読み取っていました。一覧からファイルを削除してページを減らし、もう一度読み取ってください。",
           "pick.more": "ファイルを追加",
           "q.count": "読み取るファイル・{n} / {max}",
-          "q.clear": "すべて外す",
+          "q.clear": "すべて削除",
           "q.hint": "画像をタップすると大きく表示します。ハンドルをドラッグすると順番を変えられます。",
           "q.read": "楽譜を読み取る",
           "q.move": "{name}を移動（矢印キー）",
-          "q.remove": "{name}を外す",
+          "q.remove": "{name}を削除",
           "q.preview": "{name}を大きく表示",
           "q.warn": "複数ページの読み取りには1ページにつき1分ほどかかり、エラーになることがあります（特にスマートフォンでは、メモリ不足で止まりやすくなります）。うまくいかないときは、ページを減らして読み取ってください。",
           "q.full": "一度に読み取れるファイルは{max}個までです。それ以上は追加していません。",
@@ -863,7 +866,7 @@
       const importApp = (path) => import(new URL(path, document.baseURI).href);
       const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
       const DEFAULT_BPM = 120;
-      const MAX_PDF_PAGES = 12;
+      const MAX_FILES = 12; // files in the list to read (any number of pages)
       const MAX_SIDE = 3200; // the engine works at 1920 px wide; larger photos only cost memory
 
       // The player sticks just under the sticky top bar, whose height changes with wrapping and the status bar
@@ -1111,7 +1114,6 @@
       // ---------- Files to read (chosen first, read together as one score) ----------
       // Choosing a file only adds it to the list; "Read the score" reads the list in order. After a score
       // is read the list is emptied, so files chosen next make a new score.
-      const MAX_FILES = 12;
       const PREVIEW_SIDE = 1000; // the preview is only for checking the order: small and rough
       let queue = [], queueSeq = 0, addChain = Promise.resolve();
       function canvasUrl(c) {
@@ -1200,7 +1202,6 @@
         list.textContent = "";
         queue.forEach(function (item, i) {
           const li = document.createElement("li"); li.className = "q-item"; li.dataset.id = item.id;
-          const num = document.createElement("span"); num.className = "q-num"; num.textContent = i + 1;
           const thumb = document.createElement("button"); thumb.type = "button"; thumb.className = "q-thumb";
           thumb.setAttribute("aria-label", t("q.preview", { name: item.name }));
           const img = document.createElement("img"); img.alt = ""; if (item.url) img.src = item.url; thumb.appendChild(img);
@@ -1215,20 +1216,19 @@
           const handle = document.createElement("button"); handle.type = "button"; handle.className = "q-btn q-handle";
           handle.setAttribute("aria-label", t("q.move", { name: item.name })); handle.innerHTML = ICON_HANDLE;
           dragHandle(handle, li);
-          li.append(num, thumb, meta, rm, handle);
+          li.append(thumb, meta, rm, handle);
           list.appendChild(li);
         });
+        $("queueNums").textContent = "";
+        queue.forEach(function (item, i) { const num = document.createElement("div"); num.className = "q-num"; num.textContent = i + 1; $("queueNums").appendChild(num); });
         $("queue").hidden = !queue.length;
         $("queueCount").textContent = t("q.count", { n: queue.length, max: MAX_FILES });
         $("pickLabel").textContent = t(queue.length ? "pick.more" : "pick");
         const full = queue.length >= MAX_FILES;
         $("fileBtn").disabled = full; $("camBtn").disabled = full;
         const pages = queuePages();
-        const warn = pages > 1 ? t("q.warn") + (pages > MAX_PDF_PAGES ? " " + t("warn.pages", { max: MAX_PDF_PAGES }) : "") : "";
+        const warn = pages > 1 ? t("q.warn") : "";
         $("queueWarn").textContent = warn; $("queueWarn").hidden = !warn;
-      }
-      function renumber() {
-        Array.from($("queueList").children).forEach((li, i) => { li.querySelector(".q-num").textContent = i + 1; });
       }
       // The list's order (from the DOM, after dragging) becomes the reading order
       function syncOrder() {
@@ -1253,14 +1253,14 @@
           // Past the middle of the neighbour: swap with it, and keep the item under the pointer
           if (next && dy > next.offsetHeight / 2) list.insertBefore(next, li);
           else if (prev && dy < -prev.offsetHeight / 2) list.insertBefore(li, prev);
-          if (li.offsetTop !== top) { drag.y0 += li.offsetTop - top; renumber(); }
+          if (li.offsetTop !== top) drag.y0 += li.offsetTop - top;
           li.style.transform = "translateY(" + (e.clientY - drag.y0) + "px)";
         });
         const end = function () {
           if (!drag) return;
           drag = null;
           li.classList.remove("dragging"); li.style.transform = "";
-          syncOrder(); renumber();
+          syncOrder();
         };
         handle.addEventListener("pointerup", end);
         handle.addEventListener("pointercancel", end);
@@ -1272,7 +1272,7 @@
           else if (e.key === "ArrowDown" && li.nextElementSibling) list.insertBefore(li.nextElementSibling, li);
           else return;
           handle.focus();
-          syncOrder(); renumber();
+          syncOrder();
         });
       }
       function showPreview(id) {
@@ -1537,13 +1537,12 @@
         showError(""); $("pageWarn").hidden = true;
         $("queue").hidden = true; $("fileBtn").disabled = $("camBtn").disabled = true;
         const total = items.reduce((a, q) => a + q.pages, 0);
-        let n = Math.min(total, MAX_PDF_PAGES);
+        let n = total;
         $("fileCard").hidden = false;
         $("fileName").textContent = items.length > 1 ? t("file.multi", { n: items.length }) : items[0].name;
         $("fileSub").textContent = items.length > 1 ? t("file.pageCount", { n: total }) : items[0].sub;
         $("thumb").hidden = false; $("thumb").removeAttribute("src");
         $("score").classList.add("busy");
-        if (total > MAX_PDF_PAGES) { $("pageWarn").textContent = t("warn.pages", { max: MAX_PDF_PAGES }); $("pageWarn").hidden = false; }
         const t0 = performance.now();
         let done = false;
         try {
@@ -1567,9 +1566,8 @@
           let tempo = null;
           const xmls = [], skipped = [];
           // Pages are decoded one at a time, just before they are read, so only one is held at a time
-          files: for (const item of items) {
+          for (const item of items) {
             for await (const page of pagesOf(item)) {
-              if (pageIndex >= MAX_PDF_PAGES) break files;
               if (cancelled) throw { code: "cancel" };
               n = Math.max(n, pageIndex + 1);
               if (pageIndex === 0) {
@@ -1635,7 +1633,8 @@
           else if (code === "unsupported") showError(t("err.unsupported"));
           else if (code === "download") showError(t("err.download"));
           // The last line of the engine's message (shown, so a report tells which error it really was)
-          else if (code === "memory") { showError(t("err.memory", { msg: lastLine(e) })); console.error(e); }
+          // Several pages: suggest reading fewer (the list stays, so files can be deleted from it)
+          else if (code === "memory") { showError(t("err.memory", { msg: lastLine(e) }) + (total > 1 ? " " + t("err.memory.pages") : "")); console.error(e); }
           else if (code === "render") showError(t("err.render"));
           else { showError(t("err.recognize", { msg: errorDetail(e) })); console.error(e); }
           if (!timeline.steps.length) $("fileCard").hidden = true;
