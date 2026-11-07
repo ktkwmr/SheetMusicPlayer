@@ -254,6 +254,8 @@
     .ed-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
     .ed-label { font-size: 12px; color: var(--subtle); margin-right: 2px; }
     .ed-bar .chip { height: 30px; padding: 0 10px; }
+    .ed-bar .chip:has(svg.note-ic) { padding: 0 7px; min-width: 34px; }
+    .ed-bar .chip svg.note-ic { width: auto; height: 18px; }
     .ed-bar .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
     .ed-count { width: 3.6em; height: 30px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-family: var(--mono); text-align: center; }
     .ed-count:disabled { opacity: .4; }
@@ -261,6 +263,7 @@
     .ed-scroll:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
     .ed-canvas { position: sticky; top: 0; left: 0; display: block; touch-action: none; }
     .ed-space { pointer-events: none; }
+    .ed-tr { font-size: 12px; font-weight: 600; color: var(--cursor); }
     .ed-hint { margin: 0; font-size: 12px; color: var(--subtle); }
     .ed-hint b { color: var(--muted); font-weight: 600; }
 
@@ -602,15 +605,14 @@
           "mode.score": "Score",
           "mode.edit": "Edit",
           "ed.area": "Note editor. Drag a note to move it, drag its right edge to change its length.",
-          "ed.hint": "<b>Drag</b> a note to move it (up/down: pitch, left/right: timing) · drag its <b>right edge</b> to change the length · <b>click</b> an empty spot to add a note · <b>right-click</b> or <b>Delete</b> to remove · <b>drag</b> on empty space to select several · <b>↑↓</b> pitch (Shift: octave) · <b>←→</b> move · <b>Ctrl+Z</b> undo. Click a measure number to add or delete measures. Measures marked <b>!</b> did not add up when read; check them first.",
+          "ed.hint": "<b>Drag</b> a note to move it (up/down: pitch, left/right: timing) · drag its <b>right edge</b> to change the length · <b>click</b> an empty spot to add a note · <b>right-click</b> or <b>Delete</b> to remove · <b>drag</b> on empty space to select several · <b>↑↓</b> pitch (Shift: octave) · <b>←→</b> move · <b>Ctrl+Z</b> undo · <b>wheel</b> scroll (Shift: sideways), <b>Ctrl+wheel</b> or <b>+ −</b> zoom. On a touch screen: <b>drag</b> an empty spot to scroll, <b>pinch</b> to zoom, <b>hold</b> then drag to select several. Tap a measure number to add or delete measures (tap anywhere else to deselect it). Measures marked <b>!</b> did not add up when read; check them first.",
           "ed.track": "Staff",
           "ed.grid": "Grid",
           "ed.grid.24": "Quarter notes",
           "ed.grid.12": "Eighth notes",
           "ed.grid.6": "Sixteenth notes",
           "ed.grid.8": "Eighth-note triplets",
-          "ed.zoomIn": "Zoom in",
-          "ed.zoomOut": "Zoom out",
+          "ed.transposed": "Shown transposed ({n})",
           "ed.undo": "Undo",
           "ed.redo": "Redo",
           "ed.measPick": "Measures: click a number above",
@@ -754,15 +756,14 @@
           "mode.score": "楽譜",
           "mode.edit": "編集",
           "ed.area": "音符の編集。音符をドラッグで移動、右端をドラッグで長さを変更。",
-          "ed.hint": "音符を<b>ドラッグ</b>で移動（上下で音の高さ、左右でタイミング）・<b>右端をドラッグ</b>で長さ・空いている所を<b>クリック</b>で追加・<b>右クリック</b>か <b>Delete</b> で削除・空いている所を<b>ドラッグ</b>でまとめて選択・<b>↑↓</b> 音の高さ（Shift でオクターブ）・<b>←→</b> 移動・<b>Ctrl+Z</b> 元に戻す。上の小節番号をクリックすると、小節の追加・削除ができます。<b>!</b> の付いた小節は、読み取ったときに拍の合計が合わなかった小節です。先に確かめてください。",
+          "ed.hint": "音符を<b>ドラッグ</b>で移動（上下で音の高さ、左右でタイミング）・<b>右端をドラッグ</b>で長さ・空いている所を<b>クリック</b>で追加・<b>右クリック</b>か <b>Delete</b> で削除・空いている所を<b>ドラッグ</b>でまとめて選択・<b>↑↓</b> 音の高さ（Shift でオクターブ）・<b>←→</b> 移動・<b>Ctrl+Z</b> 元に戻す・<b>ホイール</b>でスクロール（Shift で横）、<b>Ctrl+ホイール</b>か <b>+ −</b> で拡大・縮小。タッチ操作では、空いている所を<b>ドラッグ</b>でスクロール、<b>ピンチ</b>で拡大・縮小、<b>長押し</b>してからドラッグでまとめて選択。上の小節番号をタップすると、小節の追加・削除ができます（ほかの所をタップすると選択を外します）。<b>!</b> の付いた小節は、読み取ったときに拍の合計が合わなかった小節です。先に確かめてください。",
           "ed.track": "段",
           "ed.grid": "マス目",
           "ed.grid.24": "4分音符",
           "ed.grid.12": "8分音符",
           "ed.grid.6": "16分音符",
           "ed.grid.8": "3連8分音符",
-          "ed.zoomIn": "拡大",
-          "ed.zoomOut": "縮小",
+          "ed.transposed": "移調（{n}）して表示中",
           "ed.undo": "元に戻す",
           "ed.redo": "やり直す",
           "ed.measPick": "小節：上の番号をクリック",
@@ -2120,8 +2121,10 @@
           showMode("edit");
           if (!editor) {
             const E = await importApp("editor.mjs");
-            editor = E.createEditor($("editWrap"), { model: model, t: t, trackName: trackName, preview: preview, onChange: onModelChange });
-          }
+            // The editor shows and plays the notes transposed (the model keeps them as written).
+            // Taps on the player keep a selected measure (Play starts from it)
+            editor = E.createEditor($("editWrap"), { model: model, t: t, trackName: trackName, preview: preview, onChange: onModelChange, transpose: state.transpose || 0, keepSelectionIn: "#playerBar, #practice" });
+          } else editor.setTranspose(state.transpose || 0);
           editor.focus();
         } else {
           showMode("score");
@@ -2140,13 +2143,13 @@
       let metronome = false, countIn = false, beats = [], countBeats = [], countIdx = 0;
       // Watchdog: the audio clock at the last tick, and when it last moved (performance.now())
       let clockT = 0, clockMoved = 0;
-      // What is played: the score's timeline, or (in Edit) the notes being edited
+      // What is played: the score's timeline, or (in Edit) the notes being edited, moved by the transposition
       let playSrc = timeline;
       function source() {
         if (!(mode === "edit" && model)) return timeline;
-        const keys = model.tracks.map((tr) => tr.part + ":" + tr.staff);
+        const keys = model.tracks.map((tr) => tr.part + ":" + tr.staff), tr = state.transpose || 0;
         return {
-          events: SM.modelEvents(model).map((e) => [e[0], e[1], e[2], keys[e[3]]]),
+          events: SM.modelEvents(model).map((e) => [e[0], e[1], e[2] + tr, keys[e[3]]]),
           endQ: SM.modelEnd(model) / SM.PPQ,
           measures: model.measures.map((m) => ({ q: m.start / SM.PPQ, len: m.len / SM.PPQ, beats: m.beats, beatType: m.beatType })),
           tracks: model.tracks.map((tr, i) => ({ key: keys[i], name: trackName(i) })),
@@ -2333,7 +2336,13 @@
         const was = playing, q = playing ? currentQ() : posQ;
         stop();
         state.transpose = n; saveState(); renderTranspose();
-        if (mode === "edit") { staleScore = true; return; }
+        if (mode === "edit") {
+          staleScore = true;
+          if (editor) editor.setTranspose(n);
+          playSrc = source();
+          if (was) { posQ = q; start(); }
+          return;
+        }
         busy = true;
         try { await showCurrent(); setPosition(q); }
         catch (e) { showError(t("err.render")); console.error(e); }
@@ -2387,13 +2396,9 @@
         SM = SM || await importApp("score-model.mjs");
         return SM.withTitle(shownXml(), state.title);
       }
-      // The notes as they are heard: the score (transposed), or in Edit the edited notes moved by the transposition
+      // The notes as they are heard: the score (transposed), or in Edit the edited notes (source() transposes them)
       async function exportNotes() {
-        if (mode === "edit" && model) {
-          const s = source();
-          s.events = s.events.map((e) => [e[0], e[1], e[2] + (state.transpose || 0), e[3]]);
-          return s;
-        }
+        if (mode === "edit" && model) return source();
         if (staleScore) await showCurrent();
         return timeline;
       }

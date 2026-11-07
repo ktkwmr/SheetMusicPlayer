@@ -71,7 +71,7 @@ ${shot("en", "app-practice", "Practice mode: Loop: m. 1–4 and Metronome are on
   <li><b>Metronome</b>: a click on every beat, higher on the first beat of each measure. In 6/8, 9/8, and 12/8 it clicks on each dotted quarter.</li>
   <li><b>Count-in</b>: one measure of clicks before the music starts, so you can come in on time.</li>
   <li><b>Parts</b> (for scores with more than one staff, such as piano or choir): tap a part to change it from normal to <b>louder</b> (the other parts are played softly) to <b>muted</b>, and back. Use it to hear your own part clearly, or to play or sing it yourself while the app plays the others.</li>
-  <li><b>Transpose</b>: − and + move the music down or up a semitone at a time, up to an octave either way. The key signature changes with it, and the notes are spelled to suit the new key. The editor still shows the notes as written.</li>
+  <li><b>Transpose</b>: − and + move the music down or up a semitone at a time, up to an octave either way. The key signature changes with it, and the notes are spelled to suit the new key. The editor shows and plays the notes transposed too; set it back to ±0 to compare them with the paper.</li>
 </ul>
 
 <h2 id="edit">6. Fix mistakes</h2>
@@ -176,7 +176,7 @@ ${shot("ja", "app-practice", "練習モードの画面。「ループ：1〜4小
   <li><b>メトロノーム</b>：拍ごとにクリック音を鳴らします。小節の 1 拍目は高い音です。6/8・9/8・12/8 拍子では付点4分音符ごとに鳴ります。</li>
   <li><b>カウントイン</b>：再生の前に 1 小節ぶんクリック音を鳴らすので、タイミングを合わせて入れます。</li>
   <li><b>パート</b>（ピアノや合唱など、段が 2 つ以上ある楽譜）：パートをタップするたびに、通常 → <b>強調</b>（ほかのパートを小さく）→ <b>消音</b> → 通常 と切り替わります。自分のパートをはっきり聴いたり、ほかのパートだけ鳴らして自分のパートを弾いたり歌ったりするのに使えます。</li>
-  <li><b>移調</b>：−／+ で半音ずつ、上下 1 オクターブまで移調できます。調号も変わり、♯・♭ の付け方も新しい調に合わせます。編集画面には移調する前の音で表示します。</li>
+  <li><b>移調</b>：−／+ で半音ずつ、上下 1 オクターブまで移調できます。調号も変わり、♯・♭ の付け方も新しい調に合わせます。編集画面も移調した高さで表示・再生します。紙の楽譜と見比べるときは ±0 に戻してください。</li>
 </ul>
 
 <h2 id="edit">6. 間違いを直す</h2>
