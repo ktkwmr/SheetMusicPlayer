@@ -47,7 +47,8 @@ ${shot("en", "app-edit", "The editor with measure 4 highlighted and marked with 
 <tr><th scope="row">Delete a note</th><td>Right-click it, or select it and press <kbd>Delete</kbd></td></tr>
 <tr><th scope="row">Select several</th><td>Drag across an empty area, then move or delete them together</td></tr>
 <tr><th scope="row">Snap to</th><td>Grid: quarter, eighth, sixteenth notes, or eighth-note triplets</td></tr>
-<tr><th scope="row">Add or delete measures</th><td>Click a measure number at the top, then “Add after” (with the number of measures) or “Delete”</td></tr>
+<tr><th scope="row">Add or delete measures</th><td>Click a measure number at the top, then “Add after” (with the number of measures) or “Delete”. Click anywhere else to deselect the measure</td></tr>
+<tr><th scope="row">Scroll and zoom</th><td>Mouse: the wheel scrolls (<kbd>Shift</kbd>: sideways), <kbd>Ctrl</kbd> + wheel zooms in time. Touch screen: drag an empty spot to scroll, pinch to zoom, and hold a moment before dragging to select several</td></tr>
 <tr><th scope="row">Undo / redo</th><td>The arrow buttons, or <kbd>Ctrl</kbd>+<kbd>Z</kbd></td></tr>
 </tbody>
 </table>
@@ -121,7 +122,8 @@ ${shot("ja", "app-edit", "4 小節目の音符が 1 つ抜けているため、4
 <tr><th scope="row">音符を削除する</th><td>右クリック。または選んで <kbd>Delete</kbd></td></tr>
 <tr><th scope="row">まとめて選ぶ</th><td>空いている所をドラッグして囲み、まとめて移動・削除</td></tr>
 <tr><th scope="row">マス目</th><td>4分音符・8分音符・16分音符・3連8分音符から選ぶ</td></tr>
-<tr><th scope="row">小節を追加・削除する</th><td>上の小節番号をクリックし、数を入れて「後ろに追加」、または「削除」</td></tr>
+<tr><th scope="row">小節を追加・削除する</th><td>上の小節番号をクリックし、数を入れて「後ろに追加」、または「削除」。ほかの所をクリックすると小節の選択が外れる</td></tr>
+<tr><th scope="row">スクロール・拡大縮小</th><td>マウス：ホイールでスクロール（<kbd>Shift</kbd> で横）、<kbd>Ctrl</kbd>＋ホイールで横方向に拡大・縮小。タッチ操作：空いている所をドラッグでスクロール、ピンチで拡大・縮小。まとめて選ぶときは少し長押ししてからドラッグ</td></tr>
 <tr><th scope="row">元に戻す・やり直す</th><td>矢印のボタン。または <kbd>Ctrl</kbd>+<kbd>Z</kbd></td></tr>
 </tbody>
 </table>

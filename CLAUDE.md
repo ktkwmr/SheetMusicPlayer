@@ -44,7 +44,7 @@
 - Service Worker がエンジンのキャッシュからワーカーのスクリプト（Tesseract.js）を返すときは COEP ヘッダーを付ける（`sw.js` の `withWorkerHeaders`）。付けないと cross-origin isolation のページではワーカーが起動せず、テンポを読めない。
 - 開いている楽譜は `localStorage` の `sheetmusicplayer-state`、最近の楽譜（最大 10 曲）は IndexedDB の `sheetmusicplayer-history` に保存する。どちらも読み込んだ値は `validScore` で検証してから使う。新しいファイルを開いたらテンポは楽譜の値に、移調は 0 に戻す。タイトルは MusicXML の `work-title`／`movement-title`、なければ読み込んだ日時（タイトルの OCR はしない）。
 - 再生ボタンは共通ルール（ベースライン）どおり、▶／❚❚ のアイコンだけで切り替える一時停止と、■（停止して最初に戻る。ループ中はループの最初）。
-- 移調: `state.xml` は移調前のまま持ち、表示・再生・書き出しは `transposeXml` を通す。編集画面は移調前の音を表示・再生する。
+- 移調: `state.xml` は移調前のまま持ち、表示・再生・書き出しは `transposeXml` を通す。編集画面は移調した高さで表示・再生する（`model` は移調前のまま。`editor.mjs` は「表示の高さ＝model の高さ＋移調」で描き、入力は移調分を引いて model に書く。再生は `source()` が移調を足す）。
 - 書き出し（`export.mjs`）: MIDI と MP3。MP3 は聞こえているとおり（テンポ・パートの強調／消音・移調）に、アプリの音源を OfflineAudioContext で 20 秒ずつ作って lamejs（`vendor/lame.min.js`、LGPL-3.0、`build-engine.py` が配置）で変換する。共有は Web Share で URL と MusicXML を送り、ファイルを添付できないブラウザでは保存してから URL だけ共有（またはコピー）する。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。
 - トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（`ktkwmr/ktkwmr.com` の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`。`public/robots.txt` の `Sitemap:` 行も）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ktkwmr.com` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。
