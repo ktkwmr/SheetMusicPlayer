@@ -11,8 +11,8 @@ Take a photo of sheet music, or open an image or PDF, and hear it. The app reads
 
 ## Features / 機能
 
-- **Open a score**: choose any file (images — JPEG, PNG, WebP, GIF, BMP, … — and PDF up to 12 pages are read; a MusicXML file — .musicxml / .xml / .mxl, e.g. one saved from this app — opens as it is), take a photo (phone camera app, or the webcam on a computer), or drop a file. **Clear** removes the score
-  ファイルを選ぶ（どのファイルも選べ、画像〈JPEG・PNG・WebP・GIF・BMPなど〉と PDF〈12ページまで〉を読み取る。MusicXML〈.musicxml・.xml・.mxl。このアプリで保存したものなど〉はそのまま開く）、写真を撮る（スマホはカメラアプリ、PC は Web カメラ）、ドロップ。「クリア」で楽譜を消す
+- **Open a score**: choose files (images — JPEG, PNG, WebP, GIF, BMP, … — and PDFs are read; a MusicXML file — .musicxml / .xml / .mxl, e.g. one saved from this app — opens as it is), take photos (phone camera app, or the webcam on a computer), or drop files. Images and PDFs are added to a numbered list (up to 12 files, first chosen first; tap a picture for a rough preview, drag the handle to reorder) and **Read the score** reads them in that order as one score. After a score is read, the list is emptied and the next files make a new score. When reading several pages runs out of memory, the error suggests deleting files to read fewer pages. **Clear** removes the score
+  ファイルを選ぶ（どのファイルも選べ、画像〈JPEG・PNG・WebP・GIF・BMPなど〉と PDF を読み取る。MusicXML〈.musicxml・.xml・.mxl。このアプリで保存したものなど〉はそのまま開く）、写真を撮る（スマホはカメラアプリ、PC は Web カメラ）、ドロップ。画像と PDF は番号付きの一覧に追加され（12 ファイルまで、先に選んだものが先頭。画像をタップすると粗いプレビュー、ハンドルのドラッグで並べ替え）、「楽譜を読み取る」で並んだ順に 1 つの楽譜として読み取る。読み取れたら一覧は空になり、次に選ぶファイルは新しい楽譜になる。複数ページでメモリが足りなくなったときは、ファイルを削除してページを減らすよう案内する。「クリア」で楽譜を消す
 - **Reading in the browser**: homr's Python code runs in Pyodide and its models in onnxruntime-web, so the score is never uploaded. The engine (~127 MB) is downloaded once and cached, so later visits start right away and work offline
   homr の Python コードを Pyodide で、モデルを onnxruntime-web で動かすので、楽譜はアップロードされない。エンジン（約127MB）は初回だけダウンロードしてキャッシュし、次回からはすぐに起動・オフラインでも動作
 - **Tempo from the page**: Tesseract.js reads the metronome marking (♩ = 100) or a tempo word (Allegro …) at the top of the first page. ♩ = 120 when there is none
@@ -200,7 +200,7 @@ node scripts/render-guide-images.mjs  # article screenshots and the photo-tips m
 | `musicxml` | What MusicXML is / MusicXML とは |
 | `what-is-omr` | How optical music recognition works / 楽譜を読み取る仕組み |
 
-Values that the app also uses (the tempo table, the default tempo, the PDF page limit) are read from `index.html` by `scripts/pages/parts.mjs`, so the articles follow the app. Article changes go through a pull request and are read on the preview URL before merging (`docs/article-review.md`).
+Values that the app also uses (the tempo table, the default tempo, the number of files read at once) are read from `index.html` by `scripts/pages/parts.mjs`, so the articles follow the app. Article changes go through a pull request and are read on the preview URL before merging (`docs/article-review.md`).
 アプリと共通の値（速度記号の表・既定のテンポ・PDF のページ数の上限）は `index.html` から読み込みます。記事の変更は PR のプレビューで人が読んでからマージします（`docs/article-review.md`）。
 
 ## License / ライセンス

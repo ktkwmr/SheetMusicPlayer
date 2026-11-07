@@ -175,6 +175,8 @@ async function readInApp(page, name, buffer, mimeType, onStatus) {
   // Forget the message of the previous file, so its "Read in … s" is not taken for this one
   await page.evaluate(() => { document.getElementById("statusText").textContent = ""; document.getElementById("error").hidden = true; });
   await page.setInputFiles("#fileInput", { name, mimeType, buffer });
+  // Images and PDFs are added to the list first, then read with "Read the score"
+  if (!/xml/.test(mimeType)) { await page.waitForSelector("#readBtn", { state: "visible" }); await page.click("#readBtn"); }
   const deadline = Date.now() + 15 * 60 * 1000;
   let shot = false;
   for (;;) {
@@ -217,6 +219,17 @@ async function shots(lang) {
   await webp(app, await app.screenshot(), `app-start-${lang}.webp`, { width: 1280 });
 
   const photo = await makeVariant(page, sheet, "clean");
+  // The list of files to read: two photos added, numbered in the order chosen
+  const base = lang === "ja" ? "歓喜の歌" : "ode-to-joy";
+  await app.setInputFiles("#fileInput", [
+    { name: base + "-1.jpg", mimeType: "image/jpeg", buffer: photo },
+    { name: base + "-2.jpg", mimeType: "image/jpeg", buffer: await makeVariant(page, sheet, "tilt") },
+  ]);
+  await app.waitForFunction(() => document.querySelectorAll("#queueList li").length === 2);
+  await app.mouse.move(0, 0);
+  await webp(app, await app.screenshot(), `app-list-${lang}.webp`, { width: 1280 });
+  await app.click("#queueClear");
+
   const r = await readInApp(app, lang === "ja" ? "歓喜の歌.jpg" : "ode-to-joy.jpg", photo, "image/jpeg", async () => {
     await webp(app, await app.screenshot(), `app-reading-${lang}.webp`, { width: 1280 });
   });

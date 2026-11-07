@@ -10,7 +10,7 @@ function appConst(name) {
   return +m[1];
 }
 export const DEFAULT_BPM = appConst("DEFAULT_BPM");
-export const MAX_PDF_PAGES = appConst("MAX_PDF_PAGES");
+export const MAX_FILES = appConst("MAX_FILES");
 // The tempo used for each tempo word found on the page: { grave: 40, … } in the app's order
 export const TEMPO_TERMS = (() => {
   const m = APP.match(/const TEMPO_TERMS = \{([^}]+)\}/);
