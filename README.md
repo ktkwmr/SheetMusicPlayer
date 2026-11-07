@@ -200,7 +200,7 @@ node scripts/render-guide-images.mjs  # article screenshots and the photo-tips m
 | `musicxml` | What MusicXML is / MusicXML とは |
 | `what-is-omr` | How optical music recognition works / 楽譜を読み取る仕組み |
 
-Values that the app also uses (the tempo table, the default tempo, the PDF page limit) are read from `index.html` by `scripts/pages/parts.mjs`, so the articles follow the app. Article changes go through a pull request and are read on the preview URL before merging (`docs/article-review.md`).
+Values that the app also uses (the tempo table, the default tempo, the number of files read at once) are read from `index.html` by `scripts/pages/parts.mjs`, so the articles follow the app. Article changes go through a pull request and are read on the preview URL before merging (`docs/article-review.md`).
 アプリと共通の値（速度記号の表・既定のテンポ・PDF のページ数の上限）は `index.html` から読み込みます。記事の変更は PR のプレビューで人が読んでからマージします（`docs/article-review.md`）。
 
 ## License / ライセンス
