@@ -1535,7 +1535,7 @@
         const items = queue.slice();
         busy = true; cancelled = false; stop(); resetEditor(); clearLoop();
         showError(""); $("pageWarn").hidden = true;
-        $("queue").hidden = true; $("fileBtn").disabled = $("camBtn").disabled = true;
+        $("queue").hidden = true; $("fileBtn").disabled = $("camBtn").disabled = true; $("pickLabel").textContent = t("pick");
         const total = items.reduce((a, q) => a + q.pages, 0);
         let n = total;
         $("fileCard").hidden = false;

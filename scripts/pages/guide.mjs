@@ -43,6 +43,7 @@ ${shot("en", "app-start", "The app before a score is opened: the Open a score pa
   <li><b>Drop a file</b> on the panel.</li>
 </ul>
 <p>The files are added to a list (up to ${MAX_FILES}), numbered in the order you chose them. Tap a picture to see it larger, drag the handle to change the order, then press <b>Read the score</b>: the files are read in that order and joined into one score. A photo of an open book with two pages side by side is split and read as two pages, left page first. Reading several pages takes about a minute per page and may fail when the browser runs out of memory (more likely on a phone); then read fewer pages at a time. A MusicXML file (<code>.musicxml</code>, <code>.mxl</code>, <code>.xml</code>), for example one saved from this app or from MuseScore, opens immediately without reading.</p>
+${shot("en", "app-list", "The list of files to read: two photos numbered 1 and 2, each with a delete button and a handle, a note that reading several pages may fail, and the Read the score button", "The files to read, in order. Drag the handle (≡) to change the order.")}
 <p>How you take the photo makes a difference. See ${link("en", "photo-tips", "how to photograph sheet music for better results")}.</p>
 
 <h2 id="read">2. Wait for the reading</h2>
@@ -147,6 +148,7 @@ ${shot("ja", "app-start", "楽譜を開く前の画面。左に「ファイル�
   <li>パネルにファイルを<b>ドロップ</b>する。</li>
 </ul>
 <p>選んだファイルは一覧に（${MAX_FILES} 個まで）、選んだ順に番号が付いて並びます。画像をタップすると大きく表示し、ハンドルをドラッグすると順番を変えられます。「<b>楽譜を読み取る</b>」を押すと、並んだ順に読み取って 1 つの楽譜につなげます。本を開いて見開き 2 ページを 1 枚に撮った写真は、左右に分けて左のページから順に読み取ります。複数ページの読み取りには 1 ページにつき 1 分ほどかかり、メモリが足りなくなるとエラーになることがあります（特にスマートフォン）。そのときはページを減らして読み取ってください。MusicXML のファイル（<code>.musicxml</code>・<code>.mxl</code>・<code>.xml</code>。このアプリや MuseScore で保存したものなど）は、読み取りなしですぐに開きます。</p>
+${shot("ja", "app-list", "読み取るファイルの一覧。1・2 の番号が付いた 2 枚の写真に、それぞれ削除ボタンとハンドルがあり、その下に複数ページの読み取りについての注意と「楽譜を読み取る」ボタンがある", "読み取るファイルが順番に並びます。ハンドル（≡）をドラッグすると順番を変えられます。")}
 <p>写真の撮り方で結果が変わります。${link("ja", "photo-tips", "楽譜をきれいに読み取る撮り方のコツ")}もご覧ください。</p>
 
 <h2 id="read">2. 読み取りを待つ</h2>
