@@ -175,6 +175,8 @@ async function readInApp(page, name, buffer, mimeType, onStatus) {
   // Forget the message of the previous file, so its "Read in … s" is not taken for this one
   await page.evaluate(() => { document.getElementById("statusText").textContent = ""; document.getElementById("error").hidden = true; });
   await page.setInputFiles("#fileInput", { name, mimeType, buffer });
+  // Images and PDFs are added to the list first, then read with "Read the score"
+  if (!/xml/.test(mimeType)) { await page.waitForSelector("#readBtn", { state: "visible" }); await page.click("#readBtn"); }
   const deadline = Date.now() + 15 * 60 * 1000;
   let shot = false;
   for (;;) {
