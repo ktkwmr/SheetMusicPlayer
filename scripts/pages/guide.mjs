@@ -88,6 +88,7 @@ ${shot("en", "app-export", "The Save / share menu: Share…, MusicXML (score), M
   <li><b>MP3 (audio)</b>: a recording of what you hear: the current tempo, the louder and muted parts, and the transposition (without the metronome). It is made on your device and takes a few seconds; a practice track for each part of a choir, for example, is one MP3 per part.</li>
   <li><b>Share…</b>: sends the app's link and the MusicXML file through your device's share menu (messages, mail, …), so others can open the score in this app. If the browser cannot attach the file, the file is saved and only the link is shared (or copied); attach the file yourself.</li>
 </ul>
+<p>The last item, <b>Print with note names (Note Namer)</b>, opens <a href="https://ktkwmr.com/notenamer/">Note Namer</a>, another free app on this site that writes the name of every note (C D E, Do Re Mi, …) under it, ready to print. Open the same photo or the saved MusicXML file there.</p>
 
 <h2 id="recent">8. Recent scores</h2>
 <p>The title of the score is shown above it: the title written in a MusicXML file, or the date and time it was read. Click the title to rename it. The last 10 scores you opened are kept in the browser, with their tempo and transposition, and are listed under <b>Recent scores</b> in the left panel; tap one to open it again. <b>Clear history</b> removes them (the open score stays), and <b>Clear</b> removes the open score from the screen and from the browser.</p>
@@ -193,6 +194,7 @@ ${shot("ja", "app-export", "「保存・共有」のメニュー。共有…、M
   <li><b>MP3（音声）</b>：聞こえているとおりの音（今のテンポ、パートの強調・消音、移調。メトロノームは入りません）を録音したファイルです。端末の中で数秒かけて作ります。合唱のパートごとに練習用の音源を作る、といった使い方ができます。</li>
   <li><b>共有…</b>：アプリのリンクと MusicXML のファイルを、端末の共有メニュー（メッセージ・メールなど）で送ります。受け取った人はこのアプリで楽譜を開けます。ブラウザがファイルを添付できないときは、ファイルを保存してからリンクだけを共有（またはコピー）するので、ファイルは手で添付してください。</li>
 </ul>
+<p>いちばん下の<b>ドレミ付きで印刷（Note Namer）</b>は、このサイトの別のアプリ <a href="https://ktkwmr.com/notenamer/ja/">Note Namer</a> を開きます。すべての音符の下にドレミなどの音名を書いて印刷できる無料のアプリです。同じ写真か、保存した MusicXML をそちらで開いてください。</p>
 
 <h2 id="recent">8. 最近の楽譜</h2>
 <p>楽譜の上には、タイトルを表示します。MusicXML のファイルに書かれたタイトルか、なければ読み取った日時です。タイトルをクリックすると名前を変えられます。最近開いた 10 曲は、テンポや移調の設定と一緒にブラウザに保存され、左のパネルの<b>最近の楽譜</b>から開き直せます。<b>履歴を消去</b>で一覧を消し（開いている楽譜は残ります）、<b>クリア</b>で開いている楽譜を画面とブラウザから消します。</p>
