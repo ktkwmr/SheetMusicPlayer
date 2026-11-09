@@ -86,6 +86,7 @@
 
     /* Settings menu */
     .menu { position: fixed; z-index: 1000; min-width: 168px; padding: 4px; border: 1px solid var(--ink); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow); }
+    .menu .ex-link { border-top: 1px solid var(--line); border-radius: 0 0 6px 6px; margin-top: 4px; line-height: 40px; text-decoration: none; }
     .menu button, .menu a { display: block; width: 100%; height: 40px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
     .menu a { line-height: 40px; text-decoration: none; white-space: nowrap; }
     .menu button:active, .menu a:active { background: var(--line); }
@@ -518,6 +519,8 @@
     <button type="button" role="menuitem" id="exXml" data-i18n="ex.xml">MusicXML（楽譜）</button>
     <button type="button" role="menuitem" id="exMidi" data-i18n="ex.midi">MIDI</button>
     <button type="button" role="menuitem" id="exMp3" data-i18n="ex.mp3">MP3（音声）</button>
+    <!-- Another app on ktkwmr.com that writes the note names under every note (a link only; nothing is passed to it) -->
+    <a role="menuitem" id="exNames" class="ex-link" href="https://ktkwmr.com/notenamer/ja/" target="_blank" rel="noopener" data-i18n="ex.names" data-i18n-attr="href:names.url">ドレミ付きで印刷（Note Namer）↗</a>
   </div>
 
   <dialog class="msg about" id="aboutDlg" tabindex="-1" aria-labelledby="aboutTitle">
@@ -577,6 +580,8 @@
           "ex.xml": "MusicXML (score)",
           "ex.midi": "MIDI",
           "ex.mp3": "MP3 (audio)",
+          "ex.names": "Print with note names (Note Namer) ↗",
+          "names.url": "https://ktkwmr.com/notenamer/",
           "share.text": "Sheet music: {title}. Open the attached MusicXML file in Sheet Music Player to play it.",
           "share.saved": "The MusicXML file was saved. Attach it to your message.",
           "share.copied": "The MusicXML file was saved, and the app's link was copied.",
@@ -728,6 +733,8 @@
           "ex.xml": "MusicXML（楽譜）",
           "ex.midi": "MIDI",
           "ex.mp3": "MP3（音声）",
+          "ex.names": "ドレミ付きで印刷（Note Namer）↗",
+          "names.url": "https://ktkwmr.com/notenamer/ja/",
           "share.text": "楽譜「{title}」です。添付の MusicXML ファイルを Sheet Music Player で開くと再生できます。",
           "share.saved": "MusicXML ファイルを保存しました。メッセージに添付してください。",
           "share.copied": "MusicXML ファイルを保存し、アプリのリンクをコピーしました。",
@@ -2399,6 +2406,7 @@
         if (!state.xml) return;
         download(new Blob([await exportXml()], { type: "application/vnd.recordare.musicxml+xml" }), fileBase() + ".musicxml");
       };
+      $("exNames").addEventListener("click", () => closeExport(false));
       $("exMidi").onclick = async function () {
         closeExport(false);
         if (!state.xml) return;
