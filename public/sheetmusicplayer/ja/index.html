@@ -186,6 +186,11 @@
     @media (max-width: 900px), (max-height: 520px) {
       body::before { content: ""; display: block; position: sticky; top: 0; z-index: 950; height: env(safe-area-inset-top, 0px); background: var(--paper); }
       .topbar { position: relative; padding-top: 10px; }
+      /* Home-screen app (html.standalone): the top bar stays at the top too. There env(safe-area-inset-top) can
+         be 0, so the strip above has no height and the page blurred under the status bar on the iPhone */
+      html.standalone body::before { display: none; }
+      html.standalone .topbar { position: sticky; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+      html.standalone .player { top: var(--topbar-h, 0px); }
       .player-bar { display: contents; }
       .player { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 8px 12px; background: var(--paper); border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
       .player-sub { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 10px 12px; border-bottom: 1px solid var(--line); }
@@ -895,6 +900,7 @@
 
       // The player sticks just under the sticky top bar, whose height changes with wrapping and the status bar
       const topbar = document.querySelector(".topbar");
+      if (matchMedia("(display-mode: standalone)").matches || navigator.standalone) document.documentElement.classList.add("standalone");
       new ResizeObserver(function () { document.documentElement.style.setProperty("--topbar-h", topbar.offsetHeight + "px"); }).observe(topbar);
 
       // ---------- Saved state ----------
