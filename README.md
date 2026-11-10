@@ -19,12 +19,12 @@ Take a photo of sheet music, or open an image or PDF, and hear it. The app reads
   1ページ目の上部から、メトロノーム記号（♩ = 100）や速度用語（Allegro など）を Tesseract.js で読み取る。見つからなければ ♩ = 120
 - **Score and playback**: OpenSheetMusicDisplay draws the score; a blue cursor glides along the staff with the sound (Web Audio API). ▶ / ❚❚ plays and pauses, ■ stops and goes back to the beginning. Click a note to move the cursor there (playing starts from it). Change the tempo with −5 / +5, the number, or the slider, even while playing
   OpenSheetMusicDisplay で楽譜を表示し、音（Web Audio API）に合わせて青いカーソルが五線の上を進む。▶／❚❚ で再生・一時停止、■ で止めて最初に戻る。音符をクリックでカーソルを移動（そこから再生）。テンポは −5／+5・数字・スライダーで、再生中でも変更可
-- **Practice mode**: loop the measures you tap on the score, metronome and one-measure count-in, each staff normal / louder (the others soft) / muted, transpose by semitones (±12; key signature and spelling follow)
-  練習モード：楽譜でタップした小節のループ、メトロノームと 1 小節のカウントイン、段ごとに通常・強調（ほかを小さく）・消音、半音ずつの移調（±12。調号と ♯・♭ の付け方も合わせる）
+- **Practice** (the buttons under the tempo): loop the measures you tap on the score, metronome and one-measure count-in, each staff normal / louder (the others soft) / muted, transpose by semitones (±12; key signature and spelling follow)
+  練習（テンポの下のボタン）：楽譜でタップした小節のループ、メトロノームと 1 小節のカウントイン、段ごとに通常・強調（ほかを小さく）・消音、半音ずつの移調（±12。調号と ♯・♭ の付け方も合わせる）
 - **Fix mistakes in a piano-roll editor** (“Edit”): each note is a box — drag to change its pitch and timing, drag its right edge for the length, click to add, right-click or Delete to remove, select several by dragging, add or delete measures, undo / redo. Measures whose beats did not add up when read are marked. Going back to “Score” rebuilds the MusicXML and redraws the staff (lyrics, slurs, and articulations are not kept after an edit)
   ピアノロールの編集画面（「編集」）で間違いを直せる。音符を四角で表し、ドラッグで音の高さとタイミング、右端で長さ、クリックで追加、右クリックか Delete で削除、ドラッグでまとめて選択、小節の追加・削除、元に戻す／やり直し。読み取り時に拍が合わなかった小節には印を付ける。「楽譜」に戻ると MusicXML を作り直して五線譜を描き直す（編集すると歌詞・スラー・アーティキュレーションは消える）
-- **Save / share**: MusicXML (with the title; transposed as shown) to open in MuseScore or other notation apps, MIDI (one track per staff), MP3 of what you hear (rendered on the device, lamejs), and Web Share of the app's link with the MusicXML file
-  保存・共有：MusicXML（タイトル入り。移調したとおり。MuseScore などで開ける）、MIDI（段ごとに 1 トラック）、聞こえているとおりの MP3（端末内で作成、lamejs）、Web Share でアプリのリンクと MusicXML を共有
+- **Save / share** (the buttons under the score): MusicXML (with the title; transposed as shown) to open in MuseScore or other notation apps, MIDI (one track per staff), MP3 of what you hear (rendered on the device, lamejs), and Web Share of the app's link with the MusicXML file
+  保存・共有（楽譜の下のボタン）：MusicXML（タイトル入り。移調したとおり。MuseScore などで開ける）、MIDI（段ごとに 1 トラック）、聞こえているとおりの MP3（端末内で作成、lamejs）、Web Share でアプリのリンクと MusicXML を共有
 - **Recent scores**: the last 10 scores are kept in the browser (IndexedDB) with their title (from the MusicXML, or the date and time; click to rename), tempo, and transposition. Installable PWA. English / Japanese UI (`/sheetmusicplayer/ja/` is always Japanese; `?lang=en` / `?lang=ja` override)
   最近の楽譜：最近開いた 10 曲を、タイトル（MusicXML から、なければ日時。クリックで変更）・テンポ・移調と一緒にブラウザ（IndexedDB）に保存。ホーム画面に追加可能。英語・日本語の表示（`/sheetmusicplayer/ja/` は常に日本語、`?lang=en` / `?lang=ja` で切り替え）
 

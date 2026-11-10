@@ -243,8 +243,7 @@ async function shots(lang) {
   await app.click("#playBtn");
   await app.click("#stopBtn");
 
-  // Practice mode: loop over measures 1–4 with the metronome, playing
-  await app.click("#practiceBtn");
+  // The buttons under the tempo: loop over measures 1–4 with the metronome, playing
   await app.click("#loopBtn");
   for (const m of ["1", "4"]) {
     const box = await app.locator(`#score .vf-measure[id="${m}"]`).first().boundingBox();
@@ -256,16 +255,14 @@ async function shots(lang) {
   await app.mouse.move(0, 0);
   await webp(app, await app.screenshot(), `app-practice-${lang}.webp`, { width: 1280 });
   await app.click("#stopBtn");
-  await app.click("#metroBtn"); await app.click("#loopBtn"); await app.click("#practiceBtn");
+  await app.click("#metroBtn"); await app.click("#loopBtn");
 
-  // The Save / share menu
-  await app.click("#exportBtn");
+  // Save / share: the buttons under the score
+  await app.locator("#actions").scrollIntoViewIfNeeded();
   await app.waitForTimeout(200);
-  const menu = await app.locator("#exportMenu").boundingBox(), btn = await app.locator("#exportBtn").boundingBox();
-  const x = Math.max(0, Math.min(btn.x, menu.x) - 16), y = Math.max(0, btn.y - 16);
-  const right = Math.min(1280, Math.max(btn.x + btn.width, menu.x + menu.width) + 16);
-  await webp(app, await app.screenshot({ clip: { x, y, width: right - x, height: menu.y + menu.height + 16 - y } }), `app-export-${lang}.webp`);
-  await app.keyboard.press("Escape");
+  const act = await app.locator("#actions").boundingBox();
+  await webp(app, await app.screenshot({ clip: { x: act.x, y: Math.max(0, act.y - 8), width: act.width, height: act.height + 16 } }), `app-export-${lang}.webp`);
+  await app.evaluate(() => window.scrollTo(0, 0));
 
   // The settings menu
   await app.click("#settingsBtn");

@@ -64,8 +64,8 @@ ${shot("en", "app-playing", "The score read from the photo, playing: a blue curs
 <p>The number means quarter notes per minute, and the whole piece plays at one tempo. For a dotted-quarter beat in 6/8, or for tempo changes in the middle of a piece, see ${link("en", "tempo-markings", "tempo markings and BPM")}.</p>
 
 <h2 id="practice">5. Practise: loop, metronome, parts, transpose</h2>
-${shot("en", "app-practice", "Practice mode: Loop: m. 1–4 and Metronome are on, measures 1 to 4 are shaded blue, and the cursor is in measure 2", "Practice mode, playing measures 1–4 over and over with the metronome.")}
-<p>Press <b>Practice mode</b> to show the practice tools under the player:</p>
+${shot("en", "app-practice", "Loop: m. 1–4 and Metronome are on, measures 1 to 4 are shaded blue, and the cursor is in measure 2", "Playing measures 1–4 over and over with the metronome.")}
+<p>The buttons under the tempo are for practice:</p>
 <ul>
   <li><b>Loop</b>: press it, then tap the first and the last measure on the score. Those measures are shaded and play over and over. Press <b>Loop</b> again to stop looping. While a loop is set, the stop button goes back to the start of the loop.</li>
   <li><b>Metronome</b>: a click on every beat, higher on the first beat of each measure. In 6/8, 9/8, and 12/8 it clicks on each dotted quarter.</li>
@@ -80,15 +80,15 @@ ${shot("en", "app-edit", "The editor: a piano roll with the notes of the upper s
 <p>Switch back to <b>Score</b> to redraw the staff with your changes. For the common mistakes and how to fix each one, see ${link("en", "fix-errors", "how to fix reading mistakes")}.</p>
 
 <h2 id="save">7. Save and share</h2>
-${shot("en", "app-export", "The Save / share menu: Share…, MusicXML (score), MIDI, MP3 (audio)", "The Save / share menu.")}
-<p><b>Save / share</b> has four choices. The files are named after the title of the score.</p>
+${shot("en", "app-export", "The buttons under the score: Share, Save MP3 (audio), and Save MIDI, and under them Save as MusicXML (score) and Print with note names (Note Namer)", "Under the score: Share, Save MP3, Save MIDI.")}
+<p>The buttons under the score save or share it. The files are named after the title of the score.</p>
 <ul>
-  <li><b>MusicXML (score)</b>: the notes as a <code>.musicxml</code> file, transposed if you transposed them. Open it again in this app, or in MuseScore and most other notation programs to print it or edit it further. See ${link("en", "musicxml", "what MusicXML is and how to use it")}.</li>
-  <li><b>MIDI</b>: a <code>.mid</code> file with one track per staff, at the current tempo, for music software and digital pianos.</li>
-  <li><b>MP3 (audio)</b>: a recording of what you hear: the current tempo, the louder and muted parts, and the transposition (without the metronome). It is made on your device and takes a few seconds; a practice track for each part of a choir, for example, is one MP3 per part.</li>
-  <li><b>Share…</b>: sends the app's link and the MusicXML file through your device's share menu (messages, mail, …), so others can open the score in this app. If the browser cannot attach the file, the file is saved and only the link is shared (or copied); attach the file yourself.</li>
+  <li><b>Save as MusicXML (score)</b>: the notes as a <code>.musicxml</code> file, transposed if you transposed them. Open it again in this app, or in MuseScore and most other notation programs to print it or edit it further. See ${link("en", "musicxml", "what MusicXML is and how to use it")}.</li>
+  <li><b>Save MIDI</b>: a <code>.mid</code> file with one track per staff, at the current tempo, for music software and digital pianos.</li>
+  <li><b>Save MP3 (audio)</b>: a recording of what you hear: the current tempo, the louder and muted parts, and the transposition (without the metronome). It is made on your device and takes a few seconds; a practice track for each part of a choir, for example, is one MP3 per part.</li>
+  <li><b>Share</b>: sends the app's link and the MusicXML file through your device's share menu (messages, mail, …), so others can open the score in this app. If the browser cannot attach the file, the file is saved and only the link is shared (or copied); attach the file yourself.</li>
 </ul>
-<p>The last item, <b>Print with note names (Note Namer)</b>, opens <a href="https://ktkwmr.com/notenamer/">Note Namer</a>, another free app on this site that writes the name of every note (C D E, Do Re Mi, …) under it, ready to print. Open the same photo or the saved MusicXML file there.</p>
+<p>The link next to it, <b>Print with note names (Note Namer)</b>, opens <a href="https://ktkwmr.com/notenamer/">Note Namer</a>, another free app on this site that writes the name of every note (C D E, Do Re Mi, …) under it, ready to print. Open the same photo or the saved MusicXML file there.</p>
 
 <h2 id="recent">8. Recent scores</h2>
 <p>The title of the score is shown above it: the title written in a MusicXML file, or the date and time it was read. Click the title to rename it. The last 10 scores you opened are kept in the browser, with their tempo and transposition, and are listed under <b>Recent scores</b> in the left panel; tap one to open it again. <b>Clear history</b> removes them (the open score stays), and <b>Clear</b> removes the open score from the screen and from the browser.</p>
@@ -170,8 +170,8 @@ ${shot("ja", "app-playing", "写真から読み取った楽譜を再生してい
 <p>数字は「4分音符が 1 分間にいくつ」で、曲全体を 1 つのテンポで再生します。6/8 拍子の付点4分音符の指定や、曲の途中のテンポの変化については、${link("ja", "tempo-markings", "速度記号と BPM の一覧")}をご覧ください。</p>
 
 <h2 id="practice">5. 練習する（ループ・メトロノーム・パート・移調）</h2>
-${shot("ja", "app-practice", "練習モードの画面。「ループ：1〜4小節」と「メトロノーム」がオンで、1〜4 小節が青く塗られ、カーソルは 2 小節目にある", "練習モードで、1〜4 小節をメトロノームつきでくり返し再生しているところ。")}
-<p><b>練習モード</b>を押すと、再生ボタンの下に練習用の機能が出ます。</p>
+${shot("ja", "app-practice", "「ループ：1〜4小節」と「メトロノーム」がオンで、1〜4 小節が青く塗られ、カーソルは 2 小節目にある", "1〜4 小節をメトロノームつきでくり返し再生しているところ。")}
+<p>テンポの下に、練習用のボタンが並んでいます。</p>
 <ul>
   <li><b>ループ</b>：押してから、楽譜の上でくり返したい最初の小節と最後の小節をタップします。その範囲が青く塗られ、くり返し再生されます。やめるときはもう一度<b>ループ</b>を押します。ループ中に停止ボタンを押すと、ループの最初に戻ります。</li>
   <li><b>メトロノーム</b>：拍ごとにクリック音を鳴らします。小節の 1 拍目は高い音です。6/8・9/8・12/8 拍子では付点4分音符ごとに鳴ります。</li>
@@ -186,15 +186,15 @@ ${shot("ja", "app-edit", "編集画面。上段の音符が黒い四角でピア
 <p><b>楽譜</b>に戻ると、直した内容で五線譜を描き直します。よくある間違いとそれぞれの直し方は、${link("ja", "fix-errors", "読み取りミスの見つけ方と直し方")}で説明しています。</p>
 
 <h2 id="save">7. 保存・共有する</h2>
-${shot("ja", "app-export", "「保存・共有」のメニュー。共有…、MusicXML（楽譜）、MIDI、MP3（音声）", "「保存・共有」のメニュー。")}
-<p><b>保存・共有</b>には 4 つの項目があります。ファイル名は楽譜のタイトルになります。</p>
+${shot("ja", "app-export", "楽譜の下のボタン。共有、MP3（音声）で保存、MIDI で保存と、その下の「MusicXML（楽譜）で保存」と「ドレミ付きで印刷（Note Namer）」", "楽譜の下の「共有」「MP3（音声）で保存」「MIDI で保存」。")}
+<p>楽譜の下のボタンで、保存や共有ができます。ファイル名は楽譜のタイトルになります。</p>
 <ul>
-  <li><b>MusicXML（楽譜）</b>：音符を <code>.musicxml</code> のファイルに保存します。移調しているときは移調した楽譜になります。このアプリでもう一度開けるほか、MuseScore などの楽譜ソフトで開いて、印刷やさらに細かい修正ができます。${link("ja", "musicxml", "MusicXML とは")}もご覧ください。</li>
-  <li><b>MIDI</b>：段ごとに 1 トラックの <code>.mid</code> ファイルを、今のテンポで保存します。音楽ソフトや電子ピアノで使えます。</li>
-  <li><b>MP3（音声）</b>：聞こえているとおりの音（今のテンポ、パートの強調・消音、移調。メトロノームは入りません）を録音したファイルです。端末の中で数秒かけて作ります。合唱のパートごとに練習用の音源を作る、といった使い方ができます。</li>
-  <li><b>共有…</b>：アプリのリンクと MusicXML のファイルを、端末の共有メニュー（メッセージ・メールなど）で送ります。受け取った人はこのアプリで楽譜を開けます。ブラウザがファイルを添付できないときは、ファイルを保存してからリンクだけを共有（またはコピー）するので、ファイルは手で添付してください。</li>
+  <li><b>MusicXML（楽譜）で保存</b>：音符を <code>.musicxml</code> のファイルに保存します。移調しているときは移調した楽譜になります。このアプリでもう一度開けるほか、MuseScore などの楽譜ソフトで開いて、印刷やさらに細かい修正ができます。${link("ja", "musicxml", "MusicXML とは")}もご覧ください。</li>
+  <li><b>MIDI で保存</b>：段ごとに 1 トラックの <code>.mid</code> ファイルを、今のテンポで保存します。音楽ソフトや電子ピアノで使えます。</li>
+  <li><b>MP3（音声）で保存</b>：聞こえているとおりの音（今のテンポ、パートの強調・消音、移調。メトロノームは入りません）を録音したファイルです。端末の中で数秒かけて作ります。合唱のパートごとに練習用の音源を作る、といった使い方ができます。</li>
+  <li><b>共有</b>：アプリのリンクと MusicXML のファイルを、端末の共有メニュー（メッセージ・メールなど）で送ります。受け取った人はこのアプリで楽譜を開けます。ブラウザがファイルを添付できないときは、ファイルを保存してからリンクだけを共有（またはコピー）するので、ファイルは手で添付してください。</li>
 </ul>
-<p>いちばん下の<b>ドレミ付きで印刷（Note Namer）</b>は、このサイトの別のアプリ <a href="https://ktkwmr.com/notenamer/ja/">Note Namer</a> を開きます。すべての音符の下にドレミなどの音名を書いて印刷できる無料のアプリです。同じ写真か、保存した MusicXML をそちらで開いてください。</p>
+<p>その隣の<b>ドレミ付きで印刷（Note Namer）</b>は、このサイトの別のアプリ <a href="https://ktkwmr.com/notenamer/ja/">Note Namer</a> を開きます。すべての音符の下にドレミなどの音名を書いて印刷できる無料のアプリです。同じ写真か、保存した MusicXML をそちらで開いてください。</p>
 
 <h2 id="recent">8. 最近の楽譜</h2>
 <p>楽譜の上には、タイトルを表示します。MusicXML のファイルに書かれたタイトルか、なければ読み取った日時です。タイトルをクリックすると名前を変えられます。最近開いた 10 曲は、テンポや移調の設定と一緒にブラウザに保存され、左のパネルの<b>最近の楽譜</b>から開き直せます。<b>履歴を消去</b>で一覧を消し（開いている楽譜は残ります）、<b>クリア</b>で開いている楽譜を画面とブラウザから消します。</p>

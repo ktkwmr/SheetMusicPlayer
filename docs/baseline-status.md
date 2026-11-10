@@ -118,7 +118,7 @@
 | 9-3 | 状態の保存 | ✅ | 開いている楽譜（localStorage）と最近の楽譜 10 曲（IndexedDB）。MusicXML・タイトル・ファイル名・テンポ・移調。新しいファイルではテンポを楽譜の値に戻す |
 | 9-4 | スマホ対応 | ⚠️ | 390px で横スクロールなし。ただし読み取りエンジンの動作確認は PC の Chrome・Edge のみ（JSPI が必要。JSPI のないブラウザでは案内を表示）。Android の Chrome などは JSPI があり動き出すが未確認（メモリ不足の可能性） |
 | 9-5 | `accept` | ✅ | 「ファイルを選ぶ」は `accept` なし（どのファイルも選べ、中身で画像・PDF を判定）。「写真を撮る」はスマホではカメラ、PC では Web カメラ |
-| 9-6, 9-7 | 印刷・保存 | ✅ | 「保存・共有」で MusicXML・MIDI・MP3 の保存（`a[download]`）と Web Share（URL と MusicXML。添付できなければ保存してリンクだけ共有）。印刷はなし |
+| 9-6, 9-7 | 印刷・保存 | ✅ | 楽譜の下のボタン（Note Namer と同じ配置）で MusicXML・MIDI・MP3 の保存（`a[download]`）と Web Share（URL と MusicXML。添付できなければ保存してリンクだけ共有）。印刷はなし |
 | 9-8 | アクセシビリティ | ✅ | |
 | 9-9 | 自動テスト | ⚠️ | `score-model.mjs` の単体テスト（`npm test`、Actions の Test）。読み取りエンジン・表示・再生は Playwright での手動 E2E のみ |
 | 9-10 | 押したときの反応 | ✅ | |
