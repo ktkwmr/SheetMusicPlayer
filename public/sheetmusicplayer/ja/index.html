@@ -227,6 +227,9 @@
     .actions .big span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .act-more { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; font-size: 13px; color: var(--muted); }
     .act-more .linkish { font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    /* A link to another site (opens in a new tab): the external-link icon after the text */
+    .ext-link { display: inline-flex; align-items: center; gap: 4px; }
+    .ext-link .ext { width: 13px; height: 13px; flex: none; }
     @media (max-width: 420px) { .actions { grid-template-columns: 1fr; } }
     .title-row { padding: 12px 16px 0; }
     .title-input { width: 100%; border: 1px solid transparent; border-radius: var(--radius); padding: 4px 8px; margin-left: -8px; font: inherit; font-size: 18px; font-weight: 700; color: var(--ink); background: transparent; text-overflow: ellipsis; }
@@ -444,7 +447,7 @@
           <div class="act-more">
             <button type="button" class="linkish" id="actXml" data-i18n="act.xml">MusicXML（楽譜）で保存</button>
             <!-- Another app on ktkwmr.com that writes the note names under every note (a link only; nothing is passed to it) -->
-            <a class="linkish" id="actNames" href="https://ktkwmr.com/notenamer/ja/" target="_blank" rel="noopener" data-i18n="ex.names" data-i18n-attr="href:names.url">ドレミ付きで印刷（Note Namer）↗</a>
+            <a class="linkish ext-link" id="actNames" href="https://ktkwmr.com/notenamer/ja/" target="_blank" rel="noopener" data-i18n-attr="href:names.url"><span data-i18n="ex.names">楽譜にドレミを表記（Note Namer）</span><svg class="ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5"></path><path d="M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3"></path></svg></a>
           </div>
         </div>
         <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> 再生/一時停止　<kbd>Home</kbd> 停止（最初に戻る）　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでカーソルを移動</p>
@@ -585,7 +588,7 @@
           "act.mp3": "Save MP3 (audio)",
           "act.midi": "Save MIDI",
           "act.xml": "Save as MusicXML (score)",
-          "ex.names": "Print with note names (Note Namer) ↗",
+          "ex.names": "Write note names on the score (Note Namer)",
           "names.url": "https://ktkwmr.com/notenamer/",
           "share.text": "Sheet music: {title}. Open the attached MusicXML file in Sheet Music Player to play it.",
           "share.saved": "The MusicXML file was saved. Attach it to your message.",
@@ -736,7 +739,7 @@
           "act.mp3": "MP3（音声）で保存",
           "act.midi": "MIDI で保存",
           "act.xml": "MusicXML（楽譜）で保存",
-          "ex.names": "ドレミ付きで印刷（Note Namer）↗",
+          "ex.names": "楽譜にドレミを表記（Note Namer）",
           "names.url": "https://ktkwmr.com/notenamer/ja/",
           "share.text": "楽譜「{title}」です。添付の MusicXML ファイルを Sheet Music Player で開くと再生できます。",
           "share.saved": "MusicXML ファイルを保存しました。メッセージに添付してください。",
