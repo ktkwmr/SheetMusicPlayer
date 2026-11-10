@@ -76,7 +76,7 @@ ${shot("en", "app-edit", "The editor with measure 4 highlighted and marked with 
 <p>The editor changes notes and measures. It does not change the key signature, the time signature, clefs, bar lines, repeat signs, or text. If those are wrong, save the score as MusicXML and fix them in a notation program such as MuseScore (see ${link("en", "musicxml", "what MusicXML is")}). Lyrics and chord symbols are not read in the first place.</p>
 
 <h2 id="save">Save your corrections</h2>
-<p>When you switch back to Score (or save), the corrections are kept in the browser along with the score. To keep a copy as a file, choose <b>Save / share → MusicXML (score)</b>. When the notes are edited, the score is rebuilt from the notes, so slurs, articulations, and similar markings are not kept in the saved file.</p>
+<p>When you switch back to Score (or save), the corrections are kept in the browser along with the score. To keep a copy as a file, press <b>Save as MusicXML (score)</b> under the score. When the notes are edited, the score is rebuilt from the notes, so slurs, articulations, and similar markings are not kept in the saved file.</p>
 `,
   },
   ja: {
@@ -151,7 +151,7 @@ ${shot("ja", "app-edit", "4 小節目の音符が 1 つ抜けているため、4
 <p>編集画面で直せるのは音符と小節です。調号・拍子記号・音部記号・小節線・繰り返し記号・文字は直せません。これらが違うときは、MusicXML で保存して MuseScore などの楽譜ソフトで直してください（${link("ja", "musicxml", "MusicXML とは")}）。歌詞とコードネームは、もともと読み取りません。</p>
 
 <h2 id="save">直した楽譜を保存する</h2>
-<p>「楽譜」に戻ったとき（または保存したとき）に、直した内容が楽譜と一緒にブラウザに保存されます。ファイルとして残すときは <b>保存・共有 → MusicXML（楽譜）</b>を選んでください。音符を編集すると、音符から楽譜を作り直すので、スラーやアーティキュレーションなどの記号は保存したファイルに残りません。</p>
+<p>「楽譜」に戻ったとき（または保存したとき）に、直した内容が楽譜と一緒にブラウザに保存されます。ファイルとして残すときは 楽譜の下の<b>MusicXML（楽譜）で保存</b>を選んでください。音符を編集すると、音符から楽譜を作り直すので、スラーやアーティキュレーションなどの記号は保存したファイルに残りません。</p>
 `,
   },
 };

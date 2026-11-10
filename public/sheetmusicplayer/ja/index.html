@@ -86,7 +86,6 @@
 
     /* Settings menu */
     .menu { position: fixed; z-index: 1000; min-width: 168px; padding: 4px; border: 1px solid var(--ink); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow); }
-    .menu .ex-link { border-top: 1px solid var(--line); border-radius: 0 0 6px 6px; margin-top: 4px; line-height: 40px; text-decoration: none; }
     .menu button, .menu a { display: block; width: 100%; height: 40px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
     .menu a { line-height: 40px; text-decoration: none; white-space: nowrap; }
     .menu button:active, .menu a:active { background: var(--line); }
@@ -209,8 +208,10 @@
     .bpm-input::-webkit-outer-spin-button, .bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .bpm-input:focus { outline: none; border-color: var(--ink); }
     .tempo input[type=range] { flex: 1; min-width: 80px; }
-    .player-sub .end { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
-    .practice { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--paper); }
+    /* Clear: at the right end of the play row. On wide screens the bar is one flex row (.player and .player-sub
+       have no box), so order puts it after the tempo, with the loop / metronome / parts / transpose row below */
+    .clear-btn { margin-left: auto; order: 1; }
+    .practice { display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; flex-basis: 100%; order: 2; }
     .practice .grp { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
     .practice .lbl { font-size: 12px; color: var(--subtle); margin-right: 2px; }
     .practice .chip { height: 30px; padding: 0 10px; }
@@ -219,6 +220,14 @@
     .chip.part .st { font-weight: 400; font-size: 11px; }
     .tr-val { min-width: 2.6em; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 13px; }
     .loop-info { font-size: 12px; color: var(--muted); }
+    .practice .grp:has(> .loop-info:empty) { display: none; }
+    /* Save / share under the score */
+    .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 16px; border-top: 1px solid var(--line); }
+    .actions .big { height: 52px; font-size: 15px; padding: 0 8px; }
+    .actions .big span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .act-more { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; font-size: 13px; color: var(--muted); }
+    .act-more .linkish { font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    @media (max-width: 420px) { .actions { grid-template-columns: 1fr; } }
     .title-row { padding: 12px 16px 0; }
     .title-input { width: 100%; border: 1px solid transparent; border-radius: var(--radius); padding: 4px 8px; margin-left: -8px; font: inherit; font-size: 18px; font-weight: 700; color: var(--ink); background: transparent; text-overflow: ellipsis; }
     .title-input:hover { border-color: var(--line); }
@@ -390,6 +399,7 @@
             <button type="button" class="play" id="playBtn" aria-label="Play" disabled></button>
             <button type="button" class="chip stop-btn" id="stopBtn" aria-label="停止（最初に戻る）" data-i18n-attr="aria-label:stop" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1.5" fill="currentColor"></rect></svg></button>
           </div>
+          <button type="button" class="chip clear-btn" id="clearBtn" disabled data-i18n="clear">クリア</button>
         </div>
         <div class="player-sub">
           <div class="tempo">
@@ -399,14 +409,7 @@
             <button type="button" class="chip mono" data-bpm="5" aria-label="テンポを5上げる" data-i18n-attr="aria-label:bpm.p5">+5</button>
             <input id="bpmSlider" type="range" min="20" max="300" step="1" aria-label="テンポのスライダー" data-i18n-attr="aria-label:bpm.slider">
           </div>
-          <div class="end">
-            <button type="button" class="chip toggle" id="practiceBtn" aria-pressed="false" aria-controls="practice" disabled data-i18n="practice">練習モード</button>
-            <button type="button" class="chip" id="exportBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"></path></svg><span data-i18n="export">保存・共有</span></button>
-            <button type="button" class="chip" id="clearBtn" disabled data-i18n="clear">クリア</button>
-          </div>
-        </div>
-        </div>
-        <div class="practice" id="practice" hidden>
+          <div class="practice" id="practice">
           <div class="grp">
             <button type="button" class="chip toggle" id="loopBtn" aria-pressed="false" disabled><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V6a2 2 0 0 1 2-2h7.5M10.5 2 12.5 4l-2 2M13 9v1a2 2 0 0 1-2 2H3.5M5.5 14l-2-2 2-2"></path></svg><span data-i18n="loop">ループ</span></button>
             <button type="button" class="chip toggle" id="metroBtn" aria-pressed="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 1.8h4l3 12.4H3z"></path><path d="M8 11 12 3.5"></path><path d="M4.2 10.5h7.6"></path></svg><span data-i18n="metro">メトロノーム</span></button>
@@ -419,6 +422,8 @@
             <span class="tr-val" id="trVal" aria-live="polite"></span>
             <button type="button" class="chip mono" id="trUp" aria-label="半音上げる" data-i18n-attr="aria-label:tr.up">+</button>
           </div>
+          </div>
+        </div>
         </div>
         <div class="warn" id="pageWarn" hidden></div>
         <div class="title-row" id="titleRow" hidden><input id="titleInput" class="title-input" type="text" maxlength="200" aria-label="タイトル" data-i18n-attr="aria-label:title.aria;title:title.hint" title="クリックで名前を変更" enterkeyhint="done" autocomplete="off"></div>
@@ -431,6 +436,17 @@
           </div>
         </div>
         <div class="edit-wrap" id="editWrap" hidden></div>
+        <!-- Save / share under the score (the same layout as Note Namer) -->
+        <div class="actions" id="actions" hidden>
+          <button type="button" class="big" id="actShare"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 12.5V2.8M6.5 6.2 10 2.8l3.5 3.4"></path><path d="M5 9H3.5v8.2h13V9H15"></path></svg><span data-i18n="act.share">共有</span></button>
+          <button type="button" class="big secondary" id="actMp3"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z"></path><path d="M13 7.2a4 4 0 0 1 0 5.6M15.3 5a7 7 0 0 1 0 10"></path></svg><span data-i18n="act.mp3">MP3（音声）で保存</span></button>
+          <button type="button" class="big secondary" id="actMidi"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="1.5"></rect><path d="M6.5 4v12M10 4v12M13.5 4v12"></path><path d="M5.3 4h2.4v6H5.3zM8.8 4h2.4v6H8.8zM12.3 4h2.4v6h-2.4z" fill="currentColor" stroke="none"></path></svg><span data-i18n="act.midi">MIDI で保存</span></button>
+          <div class="act-more">
+            <button type="button" class="linkish" id="actXml" data-i18n="act.xml">MusicXML（楽譜）で保存</button>
+            <!-- Another app on ktkwmr.com that writes the note names under every note (a link only; nothing is passed to it) -->
+            <a class="linkish" id="actNames" href="https://ktkwmr.com/notenamer/ja/" target="_blank" rel="noopener" data-i18n="ex.names" data-i18n-attr="href:names.url">ドレミ付きで印刷（Note Namer）↗</a>
+          </div>
+        </div>
         <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> 再生/一時停止　<kbd>Home</kbd> 停止（最初に戻る）　<kbd>↑</kbd><kbd>↓</kbd> テンポ ±1（<kbd>Shift</kbd>で±5）　音符をクリックでカーソルを移動</p>
       </section>
     </div>
@@ -483,8 +499,8 @@
         <li><b>再生</b> – ▶ を押すと、青いカーソルが五線の上を進みます。❚❚ で一時停止、■ で止めて最初に戻ります。音符をクリックするとカーソルがそこに移り、そこから再生が始まります。</li>
         <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>
         <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>
-        <li><b>練習モード</b> – 楽譜でタップした小節のループ、メトロノームとカウントイン、パートの強調・消音、半音ずつの移調ができます。</li>
-        <li><b>保存・共有</b> – MusicXML（MuseScore などの楽譜ソフトで開けます）・MIDI・聞こえているとおりの MP3 で保存したり、アプリのリンクと MusicXML を共有したりできます。最近開いた 10 曲は「最近の楽譜」に残ります。</li></ol>
+        <li><b>ループ・メトロノーム・パート・移調</b> – テンポの下のボタンで、楽譜でタップした小節のループ、メトロノームとカウントイン、パートの強調・消音、半音ずつの移調ができます。</li>
+        <li><b>保存・共有</b> – 楽譜の下の「共有」（アプリのリンクと MusicXML）、「MP3（音声）で保存」（聞こえているとおり）、「MIDI で保存」。MusicXML（MuseScore などの楽譜ソフトで開けます）でも保存できます。最近開いた 10 曲は「最近の楽譜」に残ります。</li></ol>
       <p class="help-more" data-i18n-html="help.more">詳しくは：<a href="/sheetmusicplayer/ja/guide/" target="_blank" rel="noopener">画面つきの使い方ガイド</a>・<a href="/sheetmusicplayer/ja/photo-tips/" target="_blank" rel="noopener">撮り方のコツ</a>・<a href="/sheetmusicplayer/ja/fix-errors/" target="_blank" rel="noopener">読み取りミスの直し方</a>・<a href="/sheetmusicplayer/ja/faq/" target="_blank" rel="noopener">よくある質問</a></p>
     </div>
     <div class="dlg-actions">
@@ -512,15 +528,6 @@
     <button type="button" role="menuitem" id="menuPrivacy" data-i18n="menu.privacy">プライバシー</button>
     <button type="button" role="menuitem" id="menuAbout" data-i18n="menu.about">このアプリについて</button>
     <a role="menuitem" id="menuApps" href="https://ktkwmr.com/ja/" target="_blank" rel="noopener" data-i18n="menu.apps" data-i18n-attr="href:home.url">ほかのアプリ</a>
-  </div>
-
-  <div class="menu" id="exportMenu" role="menu" aria-label="保存・共有" data-i18n-attr="aria-label:export" hidden>
-    <button type="button" role="menuitem" id="exShare" data-i18n="ex.share">共有…</button>
-    <button type="button" role="menuitem" id="exXml" data-i18n="ex.xml">MusicXML（楽譜）</button>
-    <button type="button" role="menuitem" id="exMidi" data-i18n="ex.midi">MIDI</button>
-    <button type="button" role="menuitem" id="exMp3" data-i18n="ex.mp3">MP3（音声）</button>
-    <!-- Another app on ktkwmr.com that writes the note names under every note (a link only; nothing is passed to it) -->
-    <a role="menuitem" id="exNames" class="ex-link" href="https://ktkwmr.com/notenamer/ja/" target="_blank" rel="noopener" data-i18n="ex.names" data-i18n-attr="href:names.url">ドレミ付きで印刷（Note Namer）↗</a>
   </div>
 
   <dialog class="msg about" id="aboutDlg" tabindex="-1" aria-labelledby="aboutTitle">
@@ -557,7 +564,6 @@
           "loop.range": "Loop: m. {a}–{b}",
           "loop.hint": "Loop: tap the first and the last measure on the score. Tap “Loop” again to cancel.",
           "metro": "Metronome",
-          "practice": "Practice mode",
           "parts": "Parts",
           "part.normal": "normal",
           "part.solo": "louder",
@@ -575,11 +581,10 @@
           "hist.clear": "Clear history",
           "hist.confirm": "Remove the recent scores from this browser? The score that is open now stays.",
           "hist.sub": "{date} · {n} notes",
-          "export": "Save / share",
-          "ex.share": "Share…",
-          "ex.xml": "MusicXML (score)",
-          "ex.midi": "MIDI",
-          "ex.mp3": "MP3 (audio)",
+          "act.share": "Share",
+          "act.mp3": "Save MP3 (audio)",
+          "act.midi": "Save MIDI",
+          "act.xml": "Save as MusicXML (score)",
           "ex.names": "Print with note names (Note Namer) ↗",
           "names.url": "https://ktkwmr.com/notenamer/",
           "share.text": "Sheet music: {title}. Open the attached MusicXML file in Sheet Music Player to play it.",
@@ -682,7 +687,7 @@
           "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">Privacy policy</a>\n<a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">About this site</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">Source code on GitHub</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">Feedback</a>\n<a href=\"https://ktkwmr.com/\" target=\"_blank\" rel=\"noopener\">More apps by ktkwmr</a>",
           "foot.guidesTitle": "Guides",
           "foot.guides": "<li><a href=\"/sheetmusicplayer/guide/\" target=\"_blank\" rel=\"noopener\">How to use Sheet Music Player</a></li>\n<li><a href=\"/sheetmusicplayer/faq/\" target=\"_blank\" rel=\"noopener\">FAQ</a></li>\n<li><a href=\"/sheetmusicplayer/photo-tips/\" target=\"_blank\" rel=\"noopener\">Photo tips for sheet music</a></li>\n<li><a href=\"/sheetmusicplayer/fix-errors/\" target=\"_blank\" rel=\"noopener\">Fixing reading mistakes</a></li>\n<li><a href=\"/sheetmusicplayer/tempo-markings/\" target=\"_blank\" rel=\"noopener\">Tempo markings and BPM</a></li>\n<li><a href=\"/sheetmusicplayer/musicxml/\" target=\"_blank\" rel=\"noopener\">What is MusicXML?</a></li>\n<li><a href=\"/sheetmusicplayer/what-is-omr/\" target=\"_blank\" rel=\"noopener\">How music recognition works</a></li>",
-          "help.body": "<li><b>Open a score</b> – Choose images or PDFs, take photos, or drop files on the left panel, then press “Read the score”. Up to 12 files can be added; they are read in the listed order as one score (drag the handle to change the order). A MusicXML file (for example one saved from this app) opens right away, as it is.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press ▶. A blue cursor moves along the staff with the music; ❚❚ pauses, and ■ stops and goes back to the beginning. Click a note to move the cursor there; playing starts from it.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Practice mode</b> – Loop the measures you tap on the score, add a metronome or a count-in, make a part louder or mute it, and transpose by semitones.</li>\n        <li><b>Save / share</b> – Save the score as MusicXML (for MuseScore and most notation apps), MIDI, or an MP3 of what you hear, or share the app's link with the MusicXML file. The last 10 scores are kept under “Recent scores”.</li>",
+          "help.body": "<li><b>Open a score</b> – Choose images or PDFs, take photos, or drop files on the left panel, then press “Read the score”. Up to 12 files can be added; they are read in the listed order as one score (drag the handle to change the order). A MusicXML file (for example one saved from this app) opens right away, as it is.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press ▶. A blue cursor moves along the staff with the music; ❚❚ pauses, and ■ stops and goes back to the beginning. Click a note to move the cursor there; playing starts from it.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Loop, metronome, parts, transpose</b> – The buttons under the tempo: loop the measures you tap on the score, add a metronome or a count-in, make a part louder or mute it, and transpose by semitones.</li>\n        <li><b>Save / share</b> – Under the score: Share (the app's link with the MusicXML file), Save MP3 (what you hear), and Save MIDI. You can also save the score as MusicXML (for MuseScore and most notation apps). The last 10 scores are kept under “Recent scores”.</li>",
           "help.more": "More: <a href=\"/sheetmusicplayer/guide/\" target=\"_blank\" rel=\"noopener\">guide with screenshots</a> · <a href=\"/sheetmusicplayer/photo-tips/\" target=\"_blank\" rel=\"noopener\">photo tips</a> · <a href=\"/sheetmusicplayer/fix-errors/\" target=\"_blank\" rel=\"noopener\">fixing mistakes</a> · <a href=\"/sheetmusicplayer/faq/\" target=\"_blank\" rel=\"noopener\">FAQ</a>",
           "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – Up to the last 10 scores you opened (the notes the app read, as MusicXML), with their titles, file names, tempo, and transposition, are saved in your browser's storage so you can open them again. “Clear history” removes them. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">about this site</a>.</li>",
           "about.license": "© 2026 ktkwmr · Licensed under the <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a> (the same as homr, the music recognition it uses) · <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">About this site</a>",
@@ -710,7 +715,6 @@
           "loop.range": "ループ：{a}〜{b}小節",
           "loop.hint": "ループ：楽譜の上で、くり返す最初の小節と最後の小節をタップします。やめるときはもう一度「ループ」を押します。",
           "metro": "メトロノーム",
-          "practice": "練習モード",
           "parts": "パート",
           "part.normal": "通常",
           "part.solo": "強調",
@@ -728,11 +732,10 @@
           "hist.clear": "履歴を消去",
           "hist.confirm": "最近の楽譜をこのブラウザから削除しますか？今開いている楽譜は残ります。",
           "hist.sub": "{date} · {n}音",
-          "export": "保存・共有",
-          "ex.share": "共有…",
-          "ex.xml": "MusicXML（楽譜）",
-          "ex.midi": "MIDI",
-          "ex.mp3": "MP3（音声）",
+          "act.share": "共有",
+          "act.mp3": "MP3（音声）で保存",
+          "act.midi": "MIDI で保存",
+          "act.xml": "MusicXML（楽譜）で保存",
           "ex.names": "ドレミ付きで印刷（Note Namer）↗",
           "names.url": "https://ktkwmr.com/notenamer/ja/",
           "share.text": "楽譜「{title}」です。添付の MusicXML ファイルを Sheet Music Player で開くと再生できます。",
@@ -835,7 +838,7 @@
           "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>\n<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">GitHub のソースコード</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">ご意見・ご質問</a>\n<a href=\"https://ktkwmr.com/ja/\" target=\"_blank\" rel=\"noopener\">ktkwmr のほかのアプリ</a>",
           "foot.guidesTitle": "ガイド",
           "foot.guides": "<li><a href=\"/sheetmusicplayer/ja/guide/\" target=\"_blank\" rel=\"noopener\">使い方ガイド</a></li>\n<li><a href=\"/sheetmusicplayer/ja/faq/\" target=\"_blank\" rel=\"noopener\">よくある質問</a></li>\n<li><a href=\"/sheetmusicplayer/ja/photo-tips/\" target=\"_blank\" rel=\"noopener\">楽譜の撮り方のコツ</a></li>\n<li><a href=\"/sheetmusicplayer/ja/fix-errors/\" target=\"_blank\" rel=\"noopener\">読み取りミスの直し方</a></li>\n<li><a href=\"/sheetmusicplayer/ja/tempo-markings/\" target=\"_blank\" rel=\"noopener\">速度記号と BPM の一覧</a></li>\n<li><a href=\"/sheetmusicplayer/ja/musicxml/\" target=\"_blank\" rel=\"noopener\">MusicXML とは</a></li>\n<li><a href=\"/sheetmusicplayer/ja/what-is-omr/\" target=\"_blank\" rel=\"noopener\">楽譜を読み取る仕組み（OMR）</a></li>",
-          "help.body": "<li><b>楽譜を開く</b> – 画像やPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップしてから「楽譜を読み取る」を押します。ファイルは12個まで追加でき、並んだ順に1つの楽譜として読み取ります（ハンドルをドラッグすると順番を変えられます）。MusicXML（このアプリで保存したものなど）はすぐにそのまま開きます。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – ▶ を押すと、青いカーソルが五線の上を進みます。❚❚ で一時停止、■ で止めて最初に戻ります。音符をクリックするとカーソルがそこに移り、そこから再生が始まります。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>練習モード</b> – 楽譜でタップした小節のループ、メトロノームとカウントイン、パートの強調・消音、半音ずつの移調ができます。</li>\n        <li><b>保存・共有</b> – MusicXML（MuseScore などの楽譜ソフトで開けます）・MIDI・聞こえているとおりの MP3 で保存したり、アプリのリンクと MusicXML を共有したりできます。最近開いた 10 曲は「最近の楽譜」に残ります。</li>",
+          "help.body": "<li><b>楽譜を開く</b> – 画像やPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップしてから「楽譜を読み取る」を押します。ファイルは12個まで追加でき、並んだ順に1つの楽譜として読み取ります（ハンドルをドラッグすると順番を変えられます）。MusicXML（このアプリで保存したものなど）はすぐにそのまま開きます。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – ▶ を押すと、青いカーソルが五線の上を進みます。❚❚ で一時停止、■ で止めて最初に戻ります。音符をクリックするとカーソルがそこに移り、そこから再生が始まります。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>ループ・メトロノーム・パート・移調</b> – テンポの下のボタンで、楽譜でタップした小節のループ、メトロノームとカウントイン、パートの強調・消音、半音ずつの移調ができます。</li>\n        <li><b>保存・共有</b> – 楽譜の下の「共有」（アプリのリンクと MusicXML）、「MP3（音声）で保存」（聞こえているとおり）、「MIDI で保存」。MusicXML（MuseScore などの楽譜ソフトで開けます）でも保存できます。最近開いた 10 曲は「最近の楽譜」に残ります。</li>",
           "help.more": "詳しくは：<a href=\"/sheetmusicplayer/ja/guide/\" target=\"_blank\" rel=\"noopener\">画面つきの使い方ガイド</a>・<a href=\"/sheetmusicplayer/ja/photo-tips/\" target=\"_blank\" rel=\"noopener\">撮り方のコツ</a>・<a href=\"/sheetmusicplayer/ja/fix-errors/\" target=\"_blank\" rel=\"noopener\">読み取りミスの直し方</a>・<a href=\"/sheetmusicplayer/ja/faq/\" target=\"_blank\" rel=\"noopener\">よくある質問</a>",
           "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – もう一度開けるよう、最近開いた楽譜（読み取った音符のMusicXML）を最大10曲まで、タイトル・ファイル名・テンポ・移調の設定と一緒にブラウザ内に保存します。「履歴を消去」で消せます。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>をご覧ください。</li>",
           "about.license": "© 2026 ktkwmr · <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>",
@@ -2122,7 +2125,7 @@
             const E = await importApp("editor.mjs");
             // The editor shows and plays the notes transposed (the model keeps them as written).
             // Taps on the player keep a selected measure (Play starts from it)
-            editor = E.createEditor($("editWrap"), { model: model, t: t, trackName: trackName, preview: preview, onChange: onModelChange, transpose: state.transpose || 0, keepSelectionIn: "#playerBar, #practice" });
+            editor = E.createEditor($("editWrap"), { model: model, t: t, trackName: trackName, preview: preview, onChange: onModelChange, transpose: state.transpose || 0, keepSelectionIn: "#playerBar" });
           } else editor.setTranspose(state.transpose || 0);
           editor.focus();
         } else {
@@ -2270,8 +2273,7 @@
         const ready = mode === "edit" ? !!(model && model.notes.length) : timeline.events.length > 0;
         $("playBtn").disabled = !ready || busy; $("stopBtn").disabled = !ready || busy;
         $("clearBtn").disabled = !state.xml || busy;
-        $("exportBtn").disabled = !state.xml || busy || exporting;
-        $("practiceBtn").disabled = !state.xml;
+        ["actShare", "actMp3", "actMidi", "actXml"].forEach((id) => { $(id).disabled = !state.xml || busy || exporting; });
         $("loopBtn").disabled = !ready || busy || mode === "edit";
         $("modeEdit").disabled = !state.xml || busy || !timeline.events.length;
         $("modeScore").setAttribute("aria-pressed", mode === "score"); $("modeEdit").setAttribute("aria-pressed", mode === "edit");
@@ -2302,10 +2304,6 @@
       $("stopBtn").onclick = stopToStart;
       $("metroBtn").onclick = () => { metronome = !metronome; renderPlayer(); };
       $("countBtn").onclick = () => { countIn = !countIn; renderPlayer(); };
-      $("practiceBtn").onclick = function () {
-        const open = $("practice").hidden;
-        $("practice").hidden = !open; this.setAttribute("aria-pressed", open);
-      };
       document.querySelectorAll("[data-bpm]").forEach((b) => { b.onclick = () => setBpm(state.bpm + +b.dataset.bpm); });
       $("bpmSlider").oninput = (e) => setBpm(+e.target.value);
       $("bpmInput").onchange = (e) => { const v = +e.target.value; if (v) setBpm(v); else renderTempo(); };
@@ -2315,6 +2313,7 @@
       // ---------- Title ----------
       function renderTitle() {
         $("titleRow").hidden = !state.xml;
+        $("actions").hidden = !state.xml;
         if (document.activeElement !== $("titleInput")) $("titleInput").value = state.title || "";
       }
       $("titleInput").onchange = function () {
@@ -2351,37 +2350,8 @@
       $("trDown").onclick = () => setTranspose(state.transpose - 1);
       $("trUp").onclick = () => setTranspose(state.transpose + 1);
 
-      // ---------- Save / share (MusicXML, MIDI, MP3) ----------
+      // ---------- Save / share under the score (MusicXML, MIDI, MP3) ----------
       let exporting = false, exportCancelled = false;
-      const exportMenu = $("exportMenu"), exportBtn = $("exportBtn");
-      function closeExport(returnFocus) {
-        if (exportMenu.hidden) return;
-        exportMenu.hidden = true; exportBtn.setAttribute("aria-expanded", "false");
-        if (returnFocus) exportBtn.focus();
-      }
-      exportBtn.addEventListener("click", function () {
-        if (!exportMenu.hidden) { closeExport(true); return; }
-        const r = exportBtn.getBoundingClientRect();
-        exportMenu.style.top = r.bottom + 6 + "px";
-        exportMenu.style.right = Math.max(8, document.documentElement.clientWidth - r.right) + "px";
-        exportMenu.hidden = false; exportBtn.setAttribute("aria-expanded", "true");
-        exportMenu.querySelector('[role="menuitem"]:not([hidden])').focus();
-      });
-      document.addEventListener("click", function (e) {
-        if (!exportMenu.hidden && !exportMenu.contains(e.target) && !exportBtn.contains(e.target)) closeExport(false);
-      });
-      document.addEventListener("keydown", function (e) {
-        if (exportMenu.hidden) return;
-        if (e.key === "Escape") { closeExport(true); return; }
-        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-          e.preventDefault();
-          const items = Array.prototype.slice.call(exportMenu.querySelectorAll('[role="menuitem"]:not([hidden])'));
-          const i = items.indexOf(document.activeElement);
-          items[e.key === "ArrowDown" ? (i + 1) % items.length : (i - 1 + items.length) % items.length].focus();
-        }
-      }, true);
-      window.addEventListener("resize", function () { closeExport(false); });
-
       const fileBase = () => (state.title || state.name || "score").replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|]+/g, "_").trim().slice(0, 80) || "score";
       function download(blob, name) {
         const a = document.createElement("a");
@@ -2401,14 +2371,11 @@
         if (staleScore) await showCurrent();
         return timeline;
       }
-      $("exXml").onclick = async function () {
-        closeExport(false);
+      $("actXml").onclick = async function () {
         if (!state.xml) return;
         download(new Blob([await exportXml()], { type: "application/vnd.recordare.musicxml+xml" }), fileBase() + ".musicxml");
       };
-      $("exNames").addEventListener("click", () => closeExport(false));
-      $("exMidi").onclick = async function () {
-        closeExport(false);
+      $("actMidi").onclick = async function () {
         if (!state.xml) return;
         const X = await importApp("export.mjs");
         const s = await exportNotes(), m0 = s.measures && s.measures[0];
@@ -2425,8 +2392,7 @@
         });
         return lameLoading;
       }
-      $("exMp3").onclick = async function () {
-        closeExport(false);
+      $("actMp3").onclick = async function () {
         if (!state.xml || exporting || busy) return;
         exporting = true; exportCancelled = false; renderPlayer();
         showError("");
@@ -2449,8 +2415,7 @@
       // Share: the app's link and the MusicXML file (when the browser can attach it); otherwise the file is
       // saved and the link is shared (or copied) on its own
       const appUrl = () => new URL(lang === "ja" ? "ja/" : "./", document.baseURI).href;
-      $("exShare").onclick = async function () {
-        closeExport(false);
+      $("actShare").onclick = async function () {
         if (!state.xml) return;
         const xml = await exportXml(), name = fileBase() + ".musicxml", url = appUrl();
         const text = t("share.text", { title: state.title });
@@ -2489,7 +2454,7 @@
       document.addEventListener("keydown", function (e) {
         const el = e.target, tag = el && el.tagName;
         if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
-        if (!$("settingsMenu").hidden || !exportMenu.hidden || document.querySelector("dialog[open]")) return;
+        if (!$("settingsMenu").hidden || document.querySelector("dialog[open]")) return;
         if ((tag === "INPUT" && el.type !== "range") || tag === "SELECT" || tag === "TEXTAREA") return;
         if (e.key === " ") { if (tag === "BUTTON") return; e.preventDefault(); if (playing) stop(); else start(); }
         else if (tag === "INPUT") return;

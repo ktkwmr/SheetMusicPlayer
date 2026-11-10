@@ -72,7 +72,7 @@ ${pre(SNIPPET)}
 <h2 id="from-app">From this app to MuseScore</h2>
 <ol>
   <li>Open and read a score in this app. Fix mistakes in Edit if needed (see ${link("en", "fix-errors", "fixing reading mistakes")}).</li>
-  <li>Choose <b>Save / share → MusicXML (score)</b>. A <code>.musicxml</code> file is saved to your downloads.</li>
+  <li>Press <b>Save as MusicXML (score)</b> under the score. A <code>.musicxml</code> file is saved to your downloads.</li>
   <li>In MuseScore, choose <b>File → Open</b> and select the file (or drag it onto the window).</li>
   <li>Now you can correct what this app's editor cannot change (key, clefs, repeat signs), print, or arrange it further. (This app can also save MIDI and MP3, and transpose, by itself.)</li>
 </ol>
@@ -132,7 +132,7 @@ ${pre(SNIPPET)}
 <h2 id="from-app">このアプリから MuseScore へ</h2>
 <ol>
   <li>このアプリで楽譜を開いて読み取ります。必要なら「編集」で間違いを直します（${link("ja", "fix-errors", "読み取りミスの直し方")}）。</li>
-  <li><b>保存・共有 → MusicXML（楽譜）</b>を選ぶと、<code>.musicxml</code> のファイルがダウンロードフォルダに保存されます。</li>
+  <li>楽譜の下の<b>MusicXML（楽譜）で保存</b>を押すと、<code>.musicxml</code> のファイルがダウンロードフォルダに保存されます。</li>
   <li>MuseScore で <b>ファイル → 開く</b> を選んでファイルを選びます（ウィンドウにドラッグしても開けます）。</li>
   <li>このアプリの編集画面では直せないもの（調号・音部記号・繰り返し記号）の修正や、印刷、編曲ができます（移調と MIDI・MP3 の保存は、このアプリだけでもできます）。</li>
 </ol>
