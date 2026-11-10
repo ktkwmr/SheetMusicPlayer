@@ -17,7 +17,7 @@ PR を出すと Cloudflare のプレビュー URL ができるので、そこで
 
 ## 2026-11-10 練習モードと「保存・共有」メニューをなくした
 
-guide の「5. 練習する」「7. 保存・共有する」、faq（練習・移調・保存）、fix-errors・musicxml の「保存・共有 → MusicXML」を、テンポの下のボタン・楽譜の下のボタンの説明に直した。画面写真（app-practice・app-export ほか）を撮り直した。
+guide の「5. 練習する」「7. 保存・共有する」（Note Namer へのリンクの名前を「楽譜にドレミを表記（Note Namer）」に）、faq（練習・移調・保存）、fix-errors・musicxml の「保存・共有 → MusicXML」を、テンポの下のボタン・楽譜の下のボタンの説明に直した。画面写真（app-practice・app-export ほか）を撮り直した。
 
 ## 2026-11-09 Note Namer へのリンク
 

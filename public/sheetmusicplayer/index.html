@@ -184,6 +184,11 @@
     @media (max-width: 900px), (max-height: 520px) {
       body::before { content: ""; display: block; position: sticky; top: 0; z-index: 950; height: env(safe-area-inset-top, 0px); background: var(--paper); }
       .topbar { position: relative; padding-top: 10px; }
+      /* Home-screen app (html.standalone): the top bar stays at the top too. There env(safe-area-inset-top) can
+         be 0, so the strip above has no height and the page blurred under the status bar on the iPhone */
+      html.standalone body::before { display: none; }
+      html.standalone .topbar { position: sticky; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+      html.standalone .player { top: var(--topbar-h, 0px); }
       .player-bar { display: contents; }
       .player { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 8px 12px; background: var(--paper); border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
       .player-sub { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 10px 12px; border-bottom: 1px solid var(--line); }
@@ -225,6 +230,9 @@
     .actions .big span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .act-more { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; font-size: 13px; color: var(--muted); }
     .act-more .linkish { font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    /* A link to another site (opens in a new tab): the external-link icon after the text */
+    .ext-link { display: inline-flex; align-items: center; gap: 4px; }
+    .ext-link .ext { width: 13px; height: 13px; flex: none; }
     @media (max-width: 420px) { .actions { grid-template-columns: 1fr; } }
     .title-row { padding: 12px 16px 0; }
     .title-input { width: 100%; border: 1px solid transparent; border-radius: var(--radius); padding: 4px 8px; margin-left: -8px; font: inherit; font-size: 18px; font-weight: 700; color: var(--ink); background: transparent; text-overflow: ellipsis; }
@@ -444,7 +452,7 @@
           <div class="act-more">
             <button type="button" class="linkish" id="actXml" data-i18n="act.xml">Save as MusicXML (score)</button>
             <!-- Another app on ktkwmr.com that writes the note names under every note (a link only; nothing is passed to it) -->
-            <a class="linkish" id="actNames" href="https://ktkwmr.com/notenamer/" target="_blank" rel="noopener" data-i18n="ex.names" data-i18n-attr="href:names.url">Print with note names (Note Namer) ↗</a>
+            <a class="linkish ext-link" id="actNames" href="https://ktkwmr.com/notenamer/" target="_blank" rel="noopener" data-i18n-attr="href:names.url"><span data-i18n="ex.names">Write note names on the score (Note Namer)</span><svg class="ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5"></path><path d="M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3"></path></svg></a>
           </div>
         </div>
         <p class="keys" id="keys" data-i18n-html="keys"><kbd>Space</kbd> play / pause　<kbd>Home</kbd> stop (back to the beginning)　<kbd>↑</kbd><kbd>↓</kbd> tempo ±1 (<kbd>Shift</kbd> ±5)　click a note to move the cursor there</p>
@@ -593,7 +601,7 @@
           "act.mp3": "Save MP3 (audio)",
           "act.midi": "Save MIDI",
           "act.xml": "Save as MusicXML (score)",
-          "ex.names": "Print with note names (Note Namer) ↗",
+          "ex.names": "Write note names on the score (Note Namer)",
           "names.url": "https://ktkwmr.com/notenamer/",
           "share.text": "Sheet music: {title}. Open the attached MusicXML file in Sheet Music Player to play it.",
           "share.saved": "The MusicXML file was saved. Attach it to your message.",
@@ -744,7 +752,7 @@
           "act.mp3": "MP3（音声）で保存",
           "act.midi": "MIDI で保存",
           "act.xml": "MusicXML（楽譜）で保存",
-          "ex.names": "ドレミ付きで印刷（Note Namer）↗",
+          "ex.names": "楽譜にドレミを表記（Note Namer）",
           "names.url": "https://ktkwmr.com/notenamer/ja/",
           "share.text": "楽譜「{title}」です。添付の MusicXML ファイルを Sheet Music Player で開くと再生できます。",
           "share.saved": "MusicXML ファイルを保存しました。メッセージに添付してください。",
@@ -900,6 +908,7 @@
 
       // The player sticks just under the sticky top bar, whose height changes with wrapping and the status bar
       const topbar = document.querySelector(".topbar");
+      if (matchMedia("(display-mode: standalone)").matches || navigator.standalone) document.documentElement.classList.add("standalone");
       new ResizeObserver(function () { document.documentElement.style.setProperty("--topbar-h", topbar.offsetHeight + "px"); }).observe(topbar);
 
       // ---------- Saved state ----------
