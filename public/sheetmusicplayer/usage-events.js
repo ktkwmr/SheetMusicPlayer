@@ -30,8 +30,10 @@
   function tapName(el) {
     if (el.dataset.track) return el.dataset.track;
     if (el.id) return el.id;
+    if (el.classList.contains("cookie-settings")) return "cookie-settings";
     if (el.dataset.bpm) return "bpm" + (+el.dataset.bpm > 0 ? "+" : "") + el.dataset.bpm;
     if (el.tagName === "A" && el.href) {
+      if (/^(blob|data):/.test(el.href)) return "download";
       try {
         const u = new URL(el.href, document.baseURI);
         if (u.origin === location.origin) return "link:" + u.pathname;
@@ -43,6 +45,8 @@
     return (box ? box.id : "page") + ":" + (cls || el.tagName.toLowerCase());
   }
   document.addEventListener("click", function (e) {
+    // Only what the visitor tapped (the app's own clicks, such as starting a download, are not counted)
+    if (!e.isTrusted) return;
     const el = e.target && e.target.closest && e.target.closest("button, a[href], summary, [role=button], input[type=checkbox], input[type=radio]");
     if (!el || el.disabled) return;
     // "Cookie settings" in the footer: open Zaraz's consent banner again

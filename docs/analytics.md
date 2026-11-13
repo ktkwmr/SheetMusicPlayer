@@ -21,7 +21,7 @@
 
 | イベント | パラメーター | いつ |
 |---|---|---|
-| `smp_tap` | `button` | ボタン・リンクを押したとき。名前は要素の `id`（なければ `data-track`、テンポの ±5 は `bpm+5` など、リンクは `link:/sheetmusicplayer/guide/` や `link:github.com`、それ以外は「上にある id:クラス名」） |
+| `smp_tap` | `button` | ボタン・リンクを押したとき。名前は要素の `id`（なければ `data-track`、テンポの ±5 は `bpm+5` など、リンクは `link:/sheetmusicplayer/guide/` や `link:github.com`、「Cookie の設定」は `cookie-settings`、それ以外は「上にある id:クラス名」）。アプリが自分で起こすクリック（ダウンロードなど）は数えない |
 | `smp_engaged` | `seconds`, `play_seconds` | ページが隠れたとき・閉じたとき。前回から、ページが見えていた秒数と再生していた秒数 |
 | `smp_open` | `via`（file / camera）, `kind`（image / pdf / xml / mxl / other、複数は `+` でつなぐ）, `files` | ファイルを選んだとき |
 | `smp_read` | `result`（ok / cancel / image / pdf / no-staff / unsupported / download / memory / render / xml / error）, `kind`, `files`, `pages`, `seconds`, `tempo`（テンポの取り方） | 読み取り（MusicXML を開くのも含む）が終わったとき |
