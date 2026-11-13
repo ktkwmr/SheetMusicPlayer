@@ -22,7 +22,7 @@
 - 対応環境: 動作確認は PC の Chrome・Edge 137 以降、iPhone の Safari（iOS 27.2、読み取り → 再生まで。COEP `credentialless` の下でも動いた）、Android の Chrome。エンジンに JSPI が必要で、ないブラウザでは案内を出す（`supported` は `WebAssembly.Suspending` の有無で判定）。JSPI は Firefox 153・Mac／iPad の Safari 27 にも入ったが、これらでは未確認。動作を確かめたら README・記事（`guide`・`faq`）・アプリの文言（`err.unsupported`、JSON-LD の `browserRequirements`）を一緒に直す。
 
 ## ルール
-- 手で編集するのは `public/sheetmusicplayer/index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`export.mjs`・`sw.js`、`engine/python/`、`scripts/`。
+- 手で編集するのは `public/sheetmusicplayer/index.html`・`omr-worker.mjs`・`score-model.mjs`・`editor.mjs`・`export.mjs`・`usage-events.js`・`sw.js`、`engine/python/`、`scripts/`。
   生成ファイルは編集しない:
   - `public/sheetmusicplayer/ja/index.html`、記事と情報ページ（`guide/` など・`about/`・`privacy/` とその `ja/`）、`sitemap.xml` → `node scripts/build-ja.mjs`・`node scripts/build-pages.mjs`（`--check` で確認）
   - `public/sheetmusicplayer/guide/img/`、`scripts/pages/data/photo-results.json` → `node scripts/render-guide-images.mjs`（`npx wrangler dev` を起動してから。10〜20 分）
@@ -47,6 +47,7 @@
 - 移調: `state.xml` は移調前のまま持ち、表示・再生・書き出しは `transposeXml` を通す。編集画面は移調した高さで表示・再生する（`model` は移調前のまま。`editor.mjs` は「表示の高さ＝model の高さ＋移調」で描き、入力は移調分を引いて model に書く。再生は `source()` が移調を足す）。
 - 書き出し（`export.mjs`）: MIDI と MP3。MP3 は聞こえているとおり（テンポ・パートの強調／消音・移調）に、アプリの音源を OfflineAudioContext で 20 秒ずつ作って lamejs（`vendor/lame.min.js`、LGPL-3.0、`build-engine.py` が配置）で変換する。共有は Web Share で URL と MusicXML を送り、ファイルを添付できないブラウザでは保存してから URL だけ共有（またはコピー）する。
 - 保存・共有は楽譜の下のボタン（`#actions`。Note Namer と同じ配置: 共有・MP3・MIDI の大きなボタンと、その下の MusicXML の保存）。練習用のボタン（ループ・メトロノーム・カウントイン・パート・移調）はテンポの下に常に出し、「クリア」は再生の段の右端に置く。MusicXML の保存の隣に、同じドメインの別アプリ Note Namer（すべての音符に音名を付けて印刷するアプリ、ktkwmr/NoteNamer）へのリンク（`actNames`、新しいタブ。日本語ページは `/notenamer/ja/`）を置いている。リンクだけで、楽譜などのデータは渡さない（アプリ同士を依存させない）。
+- 利用状況の計測（Cloudflare Zaraz → GA4、同意バナーで同意した人だけ）: `usage-events.js`（タップ・滞在時間）と `index.html` の `track()`（読み取り・書き出し）。楽譜の内容（タイトル・ファイル名・音符・画像・エラーの本文）は送らない。イベントを足したら `docs/analytics.md` の表と、送る内容を変えたらプライバシーの説明も直す。Zaraz は `wrangler dev`・プレビューにはないので、ローカルでは `/cdn-cgi/zaraz/i.js` を Playwright で差し替えて確かめる（`docs/analytics.md`）。
 - 外部ホストを足したら `public/_headers` の CSP と、プライバシーの説明（`scripts/pages/privacy.mjs`、アプリ内の `privacy.body`、README）を同じ PR で直す。
 - トップページ（https://ktkwmr.com/）のアプリ一覧に、このアプリの名前・説明・特徴を載せる（`ktkwmr/ktkwmr.com` の `scripts/pages/home.mjs` の `APPS`。アイコンは `ICON`。`public/robots.txt` の `Sitemap:` 行も）。ガイド記事を追加・改名・削除したとき、アプリ名・説明・アイコンを変えたときは、`ktkwmr/ktkwmr.com` に `home.mjs` を直す PR を別に出す（ベースライン §2-16）。
 - アプリの下のフッター（`index.html` の `foot.guides`、英日）に記事の一覧を手で書いている（このアプリはアプリの下の説明に記事の一覧がないため。ベースライン §9-14）。記事を追加・改名・削除したら、ここも直す。

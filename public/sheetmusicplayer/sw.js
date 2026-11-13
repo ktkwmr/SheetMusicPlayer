@@ -5,7 +5,7 @@
 const PREFIX = "sheetmusicplayer-";
 const CACHE = PREFIX + "cache";
 const CORE = ["./", "index.html", "ja/", "omr-worker.mjs", "score-model.mjs", "editor.mjs", "manifest.json", "THIRD_PARTY_LICENSES.md",
-  "vendor/opensheetmusicdisplay.min.js", "vendor/pdf.min.mjs", "vendor/pdf.worker.min.mjs", "export.mjs", "vendor/lame.min.js"];
+  "vendor/opensheetmusicdisplay.min.js", "vendor/pdf.min.mjs", "vendor/pdf.worker.min.mjs", "export.mjs", "vendor/lame.min.js", "usage-events.js"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -47,6 +47,9 @@ function withWorkerHeaders(req, res) {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  // Cloudflare Zaraz (analytics, /cdn-cgi/zaraz/…): always from the network, never cached. Its script is made
+  // for each request, and it is not needed offline
+  if (new URL(req.url).pathname.startsWith("/cdn-cgi/")) return;
   // Engine files never change for a version: cache first, and never copied into the page cache
   if (new URL(req.url).pathname.includes("/sheetmusicplayer/engine/")) {
     event.respondWith(caches.match(req, { ignoreSearch: true }).then((r) => (r ? withWorkerHeaders(req, r) : fetch(req))));

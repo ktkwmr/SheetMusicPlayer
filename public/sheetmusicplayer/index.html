@@ -331,6 +331,10 @@
     .site-foot a:hover { text-decoration: underline; }
     .site-foot .meta { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; }
 </style>
+<!-- Usage analytics: Cloudflare Zaraz → Google Analytics 4, only after consent in Zaraz's banner
+     ("Auto-inject script" is off in the Zaraz settings, so it is loaded here). See usage-events.js -->
+<script src="/cdn-cgi/zaraz/i.js" referrerpolicy="origin"></script>
+<script src="/sheetmusicplayer/usage-events.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -480,6 +484,7 @@
         <span>Sheet Music Player · © 2026 ktkwmr</span>
         <a href="/sheetmusicplayer/privacy/" target="_blank" rel="noopener">Privacy policy</a>
         <a href="/sheetmusicplayer/about/" target="_blank" rel="noopener">About this site</a>
+        <a href="#" class="cookie-settings">Cookie settings</a>
         <a href="https://github.com/ktkwmr/SheetMusicPlayer" target="_blank" rel="noopener">Source code on GitHub</a>
         <a href="https://github.com/ktkwmr/SheetMusicPlayer/issues" target="_blank" rel="noopener">Feedback</a>
         <a href="https://ktkwmr.com/" target="_blank" rel="noopener">More apps by ktkwmr</a>
@@ -526,9 +531,10 @@
     <h2 id="privacyTitle" data-i18n="menu.privacy">Privacy</h2>
     <div class="help-body">
       <ul class="help-list" data-i18n-html="privacy.body">
-        <li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>
+        <li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts or ads.</li>
         <li><b>Data saved in your browser</b> – Up to the last 10 scores you opened (the notes the app read, as MusicXML), with their titles, file names, tempo, and transposition, are saved in your browser's storage so you can open them again. “Clear history” removes them. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>
         <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>
+        <li><b>Usage analytics (only if you agree)</b> – If you choose “Accept all” in the cookie banner, Google Analytics (through Cloudflare Zaraz) records how the app is used: the pages viewed and for how long, the buttons tapped, how long music is played, and the kind, number, and result of the files read (such as “PDF, 2 files, read in 40 seconds”). Titles, file names, and the content of your music are never sent. Your choice and an ID to count returning visits are kept in cookies. You can change your choice at any time from “Cookie settings” at the bottom of the page.</li>
         <li><b>Contact</b> – Questions and feedback: <a href="https://github.com/ktkwmr/SheetMusicPlayer/issues" target="_blank" rel="noopener">GitHub Issues</a>.</li>
         <li><b>Full policy</b> – See the <a href="/sheetmusicplayer/privacy/" target="_blank" rel="noopener">privacy policy</a> and <a href="/sheetmusicplayer/about/" target="_blank" rel="noopener">about this site</a>.</li>
       </ul>
@@ -700,12 +706,12 @@
           "menu.about": "About",
           "menu.apps": "More apps",
           "home.url": "https://ktkwmr.com/",
-          "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">Privacy policy</a>\n<a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">About this site</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">Source code on GitHub</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">Feedback</a>\n<a href=\"https://ktkwmr.com/\" target=\"_blank\" rel=\"noopener\">More apps by ktkwmr</a>",
+          "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">Privacy policy</a>\n<a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">About this site</a>\n<a href=\"#\" class=\"cookie-settings\">Cookie settings</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">Source code on GitHub</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">Feedback</a>\n<a href=\"https://ktkwmr.com/\" target=\"_blank\" rel=\"noopener\">More apps by ktkwmr</a>",
           "foot.guidesTitle": "Guides",
           "foot.guides": "<li><a href=\"/sheetmusicplayer/guide/\" target=\"_blank\" rel=\"noopener\">How to use Sheet Music Player</a></li>\n<li><a href=\"/sheetmusicplayer/faq/\" target=\"_blank\" rel=\"noopener\">FAQ</a></li>\n<li><a href=\"/sheetmusicplayer/photo-tips/\" target=\"_blank\" rel=\"noopener\">Photo tips for sheet music</a></li>\n<li><a href=\"/sheetmusicplayer/fix-errors/\" target=\"_blank\" rel=\"noopener\">Fixing reading mistakes</a></li>\n<li><a href=\"/sheetmusicplayer/tempo-markings/\" target=\"_blank\" rel=\"noopener\">Tempo markings and BPM</a></li>\n<li><a href=\"/sheetmusicplayer/musicxml/\" target=\"_blank\" rel=\"noopener\">What is MusicXML?</a></li>\n<li><a href=\"/sheetmusicplayer/what-is-omr/\" target=\"_blank\" rel=\"noopener\">How music recognition works</a></li>",
           "help.body": "<li><b>Open a score</b> – Choose images or PDFs, take photos, or drop files on the left panel, then press “Read the score”. Up to 12 files can be added; they are read in the listed order as one score (drag the handle to change the order). A MusicXML file (for example one saved from this app) opens right away, as it is.</li>\n        <li><b>Wait for the reading</b> – The first time, the reading engine is downloaded (about 130 MB). Reading takes from about ten seconds to a minute per page, depending on your computer.</li>\n        <li><b>Play</b> – Press ▶. A blue cursor moves along the staff with the music; ❚❚ pauses, and ■ stops and goes back to the beginning. Click a note to move the cursor there; playing starts from it.</li>\n        <li><b>Tempo</b> – The tempo starts at the marking found on the page (♩ = 120 when there is none). Change it with −5 / +5, the number, or the slider, even while playing.</li>\n        <li><b>Fix mistakes</b> – Switch to “Edit”. Each note is a box: drag it up or down to change the pitch, sideways to move it, drag its right edge to change the length, click an empty spot to add a note, and right-click to delete. Click a measure number to add or delete measures. Back in “Score”, the staff is redrawn with your changes.</li>\n        <li><b>Loop, metronome, parts, transpose</b> – The buttons under the tempo: loop the measures you tap on the score, add a metronome or a count-in, make a part louder or mute it, and transpose by semitones.</li>\n        <li><b>Save / share</b> – Under the score: Share (the app's link with the MusicXML file), Save MP3 (what you hear), and Save MIDI. You can also save the score as MusicXML (for MuseScore and most notation apps). The last 10 scores are kept under “Recent scores”.</li>",
           "help.more": "More: <a href=\"/sheetmusicplayer/guide/\" target=\"_blank\" rel=\"noopener\">guide with screenshots</a> · <a href=\"/sheetmusicplayer/photo-tips/\" target=\"_blank\" rel=\"noopener\">photo tips</a> · <a href=\"/sheetmusicplayer/fix-errors/\" target=\"_blank\" rel=\"noopener\">fixing mistakes</a> · <a href=\"/sheetmusicplayer/faq/\" target=\"_blank\" rel=\"noopener\">FAQ</a>",
-          "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts, cookies, or ads.</li>\n        <li><b>Data saved in your browser</b> – Up to the last 10 scores you opened (the notes the app read, as MusicXML), with their titles, file names, tempo, and transposition, are saved in your browser's storage so you can open them again. “Clear history” removes them. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">about this site</a>.</li>",
+          "privacy.body": "<li><b>Your music stays on your device</b> – The photo, image, or PDF you open is read only in your browser and is never sent to a server. The photo you take with the camera is not saved. This app has no accounts or ads.</li>\n        <li><b>Data saved in your browser</b> – Up to the last 10 scores you opened (the notes the app read, as MusicXML), with their titles, file names, tempo, and transposition, are saved in your browser's storage so you can open them again. “Clear history” removes them. The app and its reading engine are saved there too, so they work offline. You can delete them by clearing this site's data in your browser settings.</li>\n        <li><b>Server logs and page views</b> – This site is hosted on Cloudflare. Standard access logs (such as IP address, time, and the requested page or file) are kept for operation and security. Cloudflare Web Analytics counts page views without cookies (the page URL, referrer, browser information, and page load time).</li>\n        <li><b>Usage analytics (only if you agree)</b> – If you choose “Accept all” in the cookie banner, Google Analytics (through Cloudflare Zaraz) records how the app is used: the pages viewed and for how long, the buttons tapped, how long music is played, and the kind, number, and result of the files read (such as “PDF, 2 files, read in 40 seconds”). Titles, file names, and the content of your music are never sent. Your choice and an ID to count returning visits are kept in cookies. You can change your choice at any time from “Cookie settings” at the bottom of the page.</li>\n        <li><b>Contact</b> – Questions and feedback: <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub Issues</a>.</li>\n        <li><b>Full policy</b> – See the <a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">privacy policy</a> and <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">about this site</a>.</li>",
           "about.license": "© 2026 ktkwmr · Licensed under the <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a> (the same as homr, the music recognition it uses) · <a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">About this site</a>",
           "close": "Close",
           "loading": "Loading…"
@@ -851,12 +857,12 @@
           "menu.about": "このアプリについて",
           "menu.apps": "ほかのアプリ",
           "home.url": "https://ktkwmr.com/ja/",
-          "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>\n<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">GitHub のソースコード</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">ご意見・ご質問</a>\n<a href=\"https://ktkwmr.com/ja/\" target=\"_blank\" rel=\"noopener\">ktkwmr のほかのアプリ</a>",
+          "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>\n<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>\n<a href=\"#\" class=\"cookie-settings\">Cookie の設定</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">GitHub のソースコード</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">ご意見・ご質問</a>\n<a href=\"https://ktkwmr.com/ja/\" target=\"_blank\" rel=\"noopener\">ktkwmr のほかのアプリ</a>",
           "foot.guidesTitle": "ガイド",
           "foot.guides": "<li><a href=\"/sheetmusicplayer/ja/guide/\" target=\"_blank\" rel=\"noopener\">使い方ガイド</a></li>\n<li><a href=\"/sheetmusicplayer/ja/faq/\" target=\"_blank\" rel=\"noopener\">よくある質問</a></li>\n<li><a href=\"/sheetmusicplayer/ja/photo-tips/\" target=\"_blank\" rel=\"noopener\">楽譜の撮り方のコツ</a></li>\n<li><a href=\"/sheetmusicplayer/ja/fix-errors/\" target=\"_blank\" rel=\"noopener\">読み取りミスの直し方</a></li>\n<li><a href=\"/sheetmusicplayer/ja/tempo-markings/\" target=\"_blank\" rel=\"noopener\">速度記号と BPM の一覧</a></li>\n<li><a href=\"/sheetmusicplayer/ja/musicxml/\" target=\"_blank\" rel=\"noopener\">MusicXML とは</a></li>\n<li><a href=\"/sheetmusicplayer/ja/what-is-omr/\" target=\"_blank\" rel=\"noopener\">楽譜を読み取る仕組み（OMR）</a></li>",
           "help.body": "<li><b>楽譜を開く</b> – 画像やPDFを選ぶ、写真を撮る、または左のパネルにファイルをドロップしてから「楽譜を読み取る」を押します。ファイルは12個まで追加でき、並んだ順に1つの楽譜として読み取ります（ハンドルをドラッグすると順番を変えられます）。MusicXML（このアプリで保存したものなど）はすぐにそのまま開きます。</li>\n        <li><b>読み取りを待つ</b> – 初回は読み取りエンジン（約130MB）をダウンロードします。読み取りには、PCの性能によって1ページ10秒〜1分ほどかかります。</li>\n        <li><b>再生</b> – ▶ を押すと、青いカーソルが五線の上を進みます。❚❚ で一時停止、■ で止めて最初に戻ります。音符をクリックするとカーソルがそこに移り、そこから再生が始まります。</li>\n        <li><b>テンポ</b> – 楽譜に書かれたテンポで始まります（見つからないときは ♩ = 120）。−5／+5、数字の入力、スライダーで、再生中でも変えられます。</li>\n        <li><b>間違いを直す</b> – 「編集」に切り替えると、音符が四角で表示されます。上下にドラッグで音の高さ、左右で位置、右端をドラッグで長さを変え、空いている所をクリックで追加、右クリックで削除できます。小節番号をクリックすると小節の追加・削除もできます。「楽譜」に戻ると、直した内容で五線譜が描き直されます。</li>\n        <li><b>ループ・メトロノーム・パート・移調</b> – テンポの下のボタンで、楽譜でタップした小節のループ、メトロノームとカウントイン、パートの強調・消音、半音ずつの移調ができます。</li>\n        <li><b>保存・共有</b> – 楽譜の下の「共有」（アプリのリンクと MusicXML）、「MP3（音声）で保存」（聞こえているとおり）、「MIDI で保存」。MusicXML（MuseScore などの楽譜ソフトで開けます）でも保存できます。最近開いた 10 曲は「最近の楽譜」に残ります。</li>",
           "help.more": "詳しくは：<a href=\"/sheetmusicplayer/ja/guide/\" target=\"_blank\" rel=\"noopener\">画面つきの使い方ガイド</a>・<a href=\"/sheetmusicplayer/ja/photo-tips/\" target=\"_blank\" rel=\"noopener\">撮り方のコツ</a>・<a href=\"/sheetmusicplayer/ja/fix-errors/\" target=\"_blank\" rel=\"noopener\">読み取りミスの直し方</a>・<a href=\"/sheetmusicplayer/ja/faq/\" target=\"_blank\" rel=\"noopener\">よくある質問</a>",
-          "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・Cookie・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – もう一度開けるよう、最近開いた楽譜（読み取った音符のMusicXML）を最大10曲まで、タイトル・ファイル名・テンポ・移調の設定と一緒にブラウザ内に保存します。「履歴を消去」で消せます。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>をご覧ください。</li>",
+          "privacy.body": "<li><b>楽譜は端末の外に出ません</b> – 開いた写真・画像・PDFは、ブラウザの中だけで読み取り、サーバーに送ることはありません。カメラで撮った写真も保存しません。アカウント登録・広告はありません。</li>\n        <li><b>ブラウザに保存するデータ</b> – もう一度開けるよう、最近開いた楽譜（読み取った音符のMusicXML）を最大10曲まで、タイトル・ファイル名・テンポ・移調の設定と一緒にブラウザ内に保存します。「履歴を消去」で消せます。オフラインで使えるよう、アプリ本体と読み取りエンジンも保存します。ブラウザの設定でこのサイトのデータを削除すると消えます。</li>\n        <li><b>サーバーのログと閲覧数</b> – 本サイトは Cloudflare で配信しています。運用とセキュリティのため、一般的なアクセスログ（IP アドレス・日時・アクセスしたページやファイルなど）が記録されます。Cloudflare Web Analytics で、Cookie を使わずにページの閲覧数（ページの URL・参照元・ブラウザの情報・表示速度）を集計しています。</li>\n        <li><b>アクセス解析（同意した場合のみ）</b> – Cookie のバナーで「すべて同意」を選んだ場合に限り、Google アナリティクス（Cloudflare Zaraz 経由）でアプリの使われ方を記録します。見たページと時間、押したボタン、再生した時間、読み取ったファイルの種類・数・結果（「PDF 2 個を 40 秒で読み取り」など）です。楽譜のタイトル・ファイル名・内容は送りません。選択の内容と、再訪を数えるための ID を Cookie に保存します。選択はページ下の「Cookie の設定」からいつでも変えられます。</li>\n        <li><b>お問い合わせ</b> – ご質問・ご意見は <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">GitHub の Issues</a> へ。</li>\n        <li><b>詳しくは</b> – <a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>と<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>をご覧ください。</li>",
           "about.license": "© 2026 ktkwmr · <a href=\"https://github.com/ktkwmr/SheetMusicPlayer/blob/main/LICENSE\" target=\"_blank\" rel=\"noopener\">GNU AGPL v3</a>（使用している楽譜認識 homr と同じライセンス）· <a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>",
           "close": "閉じる",
           "loading": "読み込み中…"
@@ -1035,6 +1041,8 @@
       }
       function hideStatus() { $("status").hidden = true; }
       function showError(msg) { const e = $("error"); e.textContent = msg; e.hidden = !msg; }
+      // Usage events (usage-events.js; nothing is sent without Zaraz and the visitor's consent). Never pass score content.
+      const track = (name, params) => { if (window.smpTrack) window.smpTrack(name, params); };
       const mb = (b) => (b / 1e6).toFixed(b < 1e7 ? 1 : 0) + " MB";
 
       // ---------- Opening files ----------
@@ -1206,6 +1214,7 @@
         if (busy) return;
         showError("");
         const kinds = await Promise.all(files.map(sniff));
+        track("smp_open", { via: label ? "camera" : "file", kind: Array.from(new Set(kinds.map((k) => k || "other"))).sort().join("+"), files: files.length });
         // A MusicXML file is not read: it opens right away, as before
         if (files.length === 1 && isXml(kinds[0])) { await openMusicXml(files[0], kinds[0]); return; }
         const errors = [];
@@ -1520,11 +1529,13 @@
           partModes = {}; renderTitle();
           saveState();
           showStatus(t("st.xml.done"), { bar: false });
+          track("smp_read", { result: "ok", kind: kind, files: 1 });
           scrollToPlayer();
         } catch (e) {
           hideStatus();
           console.error(e);
           showError(t(e && e.code === "render" ? "err.render" : "err.xml"));
+          track("smp_read", { result: e && e.code === "render" ? "render" : "xml", kind: kind, files: 1 });
           // The previous score (if any) stays
           if (state.xml) await showCurrent().catch(() => {});
           else if (osmd) { try { osmd.clear(); } catch (e2) {} $("score").innerHTML = ""; osmd = null; timeline = { steps: [], events: [], endQ: 0, notes: 0, tempoRatio: [] }; playSrc = timeline; $("playhead").hidden = true; $("empty").hidden = false; }
@@ -1659,12 +1670,14 @@
           const secs = Math.round((performance.now() - t0) / 1000);
           showStatus(n > 1 ? t("st.done.pages", { n: xmls.length, s: secs }) : t("st.done", { s: secs }), { bar: false });
           if (skipped.length) { $("pageWarn").textContent = skipped.map((i) => t("err.nostaff.page", { i: i })).join(" "); $("pageWarn").hidden = false; }
+          track("smp_read", { result: "ok", kind: Array.from(new Set(items.map((q) => q.kind))).sort().join("+"), files: items.length, pages: xmls.length, seconds: secs, tempo: tempo ? tempo.source : "none" });
           // Read: the next files chosen make a new score
           done = true;
           clearQueue();
         } catch (e) {
           hideStatus();
           const code = e && e.code;
+          track("smp_read", { result: ["cancel", "image", "pdf", "no-staff", "unsupported", "download", "memory", "render"].includes(code) ? code : "error", kind: Array.from(new Set(items.map((q) => q.kind))).sort().join("+"), files: items.length, seconds: Math.round((performance.now() - t0) / 1000) });
           if (code === "cancel") { /* nothing */ }
           else if (code === "image") showError(t("err.image"));
           else if (code === "pdf") showError(t("err.pdf"));
@@ -2253,6 +2266,7 @@
         evIdx = firstAt(playSrc.events, posQ);
         tick(); timer = setInterval(tick, 25);
         raf = requestAnimationFrame(frame);
+        if (window.smpPlaying) window.smpPlaying(true);
         try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then((w) => { wake = w; }).catch(() => {}); } catch (e) {}
         renderPlayer();
       }
@@ -2261,6 +2275,7 @@
         if (!playing) return;
         posQ = currentQ();
         playing = false; clearInterval(timer); cancelAnimationFrame(raf);
+        if (window.smpPlaying) window.smpPlaying(false);
         // Silence the notes that are already scheduled
         const old = bus; bus = null;
         if (old) { old.gain.setTargetAtTime(0, ctx.currentTime, 0.02); setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 400); }
@@ -2391,6 +2406,7 @@
       $("actXml").onclick = async function () {
         if (!state.xml) return;
         download(new Blob([await exportXml()], { type: "application/vnd.recordare.musicxml+xml" }), fileBase() + ".musicxml");
+        track("smp_export", { type: "musicxml", result: "ok" });
       };
       $("actMidi").onclick = async function () {
         if (!state.xml) return;
@@ -2398,6 +2414,7 @@
         const s = await exportNotes(), m0 = s.measures && s.measures[0];
         const bytes = X.midiFile({ events: s.events, tracks: s.tracks, bpm: state.bpm, timeSig: m0 ? [m0.beats, m0.beatType] : null, title: state.title });
         download(new Blob([bytes], { type: "audio/midi" }), fileBase() + ".mid");
+        track("smp_export", { type: "midi", result: "ok" });
       };
       let lameLoading = null;
       function loadLame() {
@@ -2424,8 +2441,10 @@
           });
           if (blob) { download(blob, fileBase() + ".mp3"); showStatus(t("st.mp3.done"), { bar: false }); }
           else hideStatus();
+          track("smp_export", { type: "mp3", result: blob ? "ok" : "cancel" });
         } catch (e) {
           hideStatus(); console.error(e);
+          track("smp_export", { type: "mp3", result: "error" });
           showError(t("err.mp3", { msg: String((e && e.message) || e).slice(0, 120) }));
         } finally { exporting = false; renderPlayer(); }
       };
@@ -2444,11 +2463,12 @@
           }
         }
         try {
-          if (file) { await navigator.share({ title: state.title, text: text, url: url, files: [file] }); return; }
+          if (file) { await navigator.share({ title: state.title, text: text, url: url, files: [file] }); track("smp_export", { type: "share", result: "file" }); return; }
           download(new Blob([xml], { type: "application/vnd.recordare.musicxml+xml" }), name);
-          if (navigator.share) { showStatus(t("share.saved"), { bar: false }); await navigator.share({ title: state.title, text: text, url: url }); }
-          else { await navigator.clipboard.writeText(text + "\n" + url); showStatus(t("share.copied"), { bar: false }); }
+          if (navigator.share) { showStatus(t("share.saved"), { bar: false }); await navigator.share({ title: state.title, text: text, url: url }); track("smp_export", { type: "share", result: "link" }); }
+          else { await navigator.clipboard.writeText(text + "\n" + url); showStatus(t("share.copied"), { bar: false }); track("smp_export", { type: "share", result: "copied" }); }
         } catch (e) {
+          track("smp_export", { type: "share", result: e && e.name === "AbortError" ? "cancel" : "error" });
           if (!e || e.name !== "AbortError") { console.error(e); showStatus(t("share.saved"), { bar: false }); }
         }
       };

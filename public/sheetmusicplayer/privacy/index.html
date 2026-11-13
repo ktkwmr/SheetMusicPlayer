@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="/sheetmusicplayer/icons/icon.svg" />
   <link rel="apple-touch-icon" href="/sheetmusicplayer/icons/apple-touch-icon.png" />
   <title>Privacy Policy | Sheet Music Player</title>
-  <meta name="description" content="How Sheet Music Player handles information: your sheet music is read on your device and never uploaded, data saved in your browser, external services (Cloudflare), analytics without cookies, and no ads." />
+  <meta name="description" content="How Sheet Music Player handles information: your sheet music is read on your device and never uploaded, data saved in your browser, external services (Cloudflare, and Google Analytics only with your consent), cookies, and no ads." />
   <link rel="canonical" href="https://ktkwmr.com/sheetmusicplayer/privacy/" />
   <link rel="alternate" hreflang="en" href="https://ktkwmr.com/sheetmusicplayer/privacy/" />
   <link rel="alternate" hreflang="ja" href="https://ktkwmr.com/sheetmusicplayer/ja/privacy/" />
@@ -16,7 +16,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sheet Music Player" />
   <meta property="og:title" content="Privacy Policy" />
-  <meta property="og:description" content="How Sheet Music Player handles information: your sheet music is read on your device and never uploaded, data saved in your browser, external services (Cloudflare), analytics without cookies, and no ads." />
+  <meta property="og:description" content="How Sheet Music Player handles information: your sheet music is read on your device and never uploaded, data saved in your browser, external services (Cloudflare, and Google Analytics only with your consent), cookies, and no ads." />
   <meta property="og:locale" content="en_US" />
   <meta property="og:locale:alternate" content="ja_JP" />
   <meta property="og:url" content="https://ktkwmr.com/sheetmusicplayer/privacy/" />
@@ -29,10 +29,10 @@
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": "Privacy policy",
-    "description": "How Sheet Music Player handles information: your sheet music is read on your device and never uploaded, data saved in your browser, external services (Cloudflare), analytics without cookies, and no ads.",
+    "description": "How Sheet Music Player handles information: your sheet music is read on your device and never uploaded, data saved in your browser, external services (Cloudflare, and Google Analytics only with your consent), cookies, and no ads.",
     "url": "https://ktkwmr.com/sheetmusicplayer/privacy/",
     "inLanguage": "en",
-    "dateModified": "2026-10-22",
+    "dateModified": "2026-11-13",
     "isPartOf": {
       "@type": "WebSite",
       "name": "Sheet Music Player",
@@ -163,6 +163,9 @@
       .site-head, .site-foot, .cta { display: none; }
     }
   </style>
+  <!-- Usage analytics: Cloudflare Zaraz → Google Analytics 4, only after consent (see usage-events.js) -->
+  <script src="/cdn-cgi/zaraz/i.js" referrerpolicy="origin"></script>
+  <script src="/sheetmusicplayer/usage-events.js"></script>
 </head>
 <body>
   <header class="site-head">
@@ -213,16 +216,32 @@
     <tbody>
       <tr><th scope="row"><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare</a> (Cloudflare, Inc.)</th><td data-label="When:">Every page and file request (including the download of the reading engine)</td><td data-label="Information sent:">IP address, browser information (user agent), requested URL, date and time</td><td data-label="Purpose:">Hosting this site, security, and access logs for operation</td></tr>
       <tr><th scope="row"><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare Web Analytics</a> (Cloudflare, Inc.)</th><td data-label="When:">Every page view</td><td data-label="Information sent:">IP address, browser information (user agent), the URL of the page, referrer, page load time. No cookies are used.</td><td data-label="Purpose:">Counting page views (see "Analytics" below)</td></tr>
+      <tr><th scope="row"><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare Zaraz</a> (Cloudflare, Inc.)</th><td data-label="When:">Every page view, and when you use the app (such as tapping a button)</td><td data-label="Information sent:">IP address, browser information (user agent), the URL of the page, referrer, and the usage events listed in "Analytics" below</td><td data-label="Purpose:">Showing the cookie banner, and passing usage events on to Google Analytics only if you agree</td></tr>
+      <tr><th scope="row"><a href="https://policies.google.com/privacy" rel="noopener">Google Analytics</a> (Google LLC)</th><td data-label="When:">Only if you choose “Accept all” in the cookie banner: every page view, and when you use the app. Sent from Cloudflare's servers, not from your browser</td><td data-label="Information sent:">A random ID for your browser, the URL of the page, referrer, browser information, approximate location from a shortened IP address, and the usage events listed in "Analytics" below</td><td data-label="Purpose:">Understanding how the site is used, to improve it (see "Analytics" below)</td></tr>
     </tbody>
   </table>
 </div>
 <p>Your sheet music is not included in any of these.</p>
 
 <h2 id="cookies">5. Cookies and advertising</h2>
-<p>This site does not set cookies and does not show ads. If we add ads in the future, we will update this policy before they are shown.</p>
+<p>This site uses cookies only for analytics:</p>
+<ul>
+  <li><b>Your choice in the cookie banner</b> (set by Cloudflare Zaraz when you choose), so the banner is not shown again.</li>
+  <li><b>A random ID for Google Analytics</b>, only if you choose “Accept all”, to count returning visits. It does not contain your name or other personal details.</li>
+</ul>
+<p>You can change your choice at any time from “Cookie settings” at the bottom of each page. This site does not show ads. If we add ads in the future, we will update this policy before they are shown.</p>
 
 <h2 id="analytics">6. Analytics</h2>
-<p>To see how many people use this site, we use <b>Cloudflare Web Analytics</b>. It counts page views without cookies and without identifying or tracking individual visitors across sites. We do not use Google Analytics.</p>
+<p>To see how many people use this site, we use <b>Cloudflare Web Analytics</b>. It counts page views without cookies and without identifying or tracking individual visitors across sites.</p>
+<p>To learn how the app and the guides are used, so we can improve them, we also use <b>Google Analytics</b> through <b>Cloudflare Zaraz</b>, <b>only if you agree</b> in the cookie banner. It records:</p>
+<ul>
+  <li>the pages viewed, how long they were open, and where you came from (referrer);</li>
+  <li>the buttons and links tapped (by name, such as “Play” or “Save MIDI”);</li>
+  <li>how long music was played;</li>
+  <li>the kind, number, and result of the files read (such as “PDF, 2 files, 3 pages, read in 40 seconds”, or the kind of error), and which files were saved or shared (MusicXML, MIDI, MP3).</li>
+</ul>
+<p>Titles, file names, the photos, images, and PDFs you open, and the notes read from them are never sent. The data is sent to Google from Cloudflare's servers (your browser does not connect to Google), with the end of your IP address removed. Google signals and advertising features are turned off, and the data is kept for 14 months. See <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">how Google uses information from sites that use its services</a>.</p>
+<p>If you choose “Reject all”, or do not choose, nothing is sent to Google Analytics.</p>
 
 <h2 id="third-party">7. Sharing with third parties</h2>
 <p>We do not collect personal information that identifies you, and we do not sell or provide it to third parties, except where required by law.</p>
@@ -232,7 +251,7 @@
 
 <h2 id="changes">9. Changes to this policy</h2>
 <p>We may update this policy when the site changes, for example when we add or remove a service. The updated policy applies from the time it is posted on this page.</p>
-<p>Effective: October 22, 2026 (last updated: November 6, 2026)</p>
+<p>Effective: October 22, 2026 (last updated: November 13, 2026)</p>
     </article>
     <aside class="cta">
       <h2>Hear your sheet music</h2>
@@ -258,6 +277,7 @@
         <span>Sheet Music Player · © 2026 ktkwmr</span>
         <a href="/sheetmusicplayer/about/">About this site</a>
         <a href="/sheetmusicplayer/privacy/" aria-current="page">Privacy policy</a>
+        <a href="#" class="cookie-settings">Cookie settings</a>
         <a href="https://github.com/ktkwmr/SheetMusicPlayer" rel="noopener">Source code on GitHub</a>
         <a href="https://github.com/ktkwmr/SheetMusicPlayer/issues" rel="noopener">Feedback</a>
         <a href="https://ktkwmr.com/">More apps by ktkwmr</a>
