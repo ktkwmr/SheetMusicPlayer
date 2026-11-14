@@ -84,7 +84,7 @@
 | # | 項目 | 状態 | メモ |
 |---|---|---|---|
 | 6-1, 6-2 | `_headers`・CSP の基本形 | ✅ | `wasm-unsafe-eval`（エンジン）、`worker-src 'self' blob:`、`media-src blob:`（Web カメラ）。COOP `same-origin` + COEP `credentialless` + CORP `same-origin`（スレッドで高速化） |
-| 6-3 | 外部ホストの CSP | ✅ | 外部は Cloudflare Web Analytics だけ。ライブラリはすべて自サイトから配信 |
+| 6-3 | 外部ホストの CSP | ✅ | 外部は Cloudflare Web Analytics だけ。ライブラリはすべて自サイトから配信。Zaraz（GA4）は同じオリジンの `/cdn-cgi/zaraz/` なので CSP は変えていない |
 | 6-4 | CSP 違反 0 件 | ✅ | `wrangler dev` + Chromium で、読み取り・表示・再生・PDF・カメラ・About を通して違反 0 件。例外として Tesseract.js のワーカー 1 ファイルだけ `unsafe-eval` を許可（`_headers` にコメント） |
 | 6-5 | Permissions-Policy | ✅ | `camera=(self)`（写真を撮る） |
 
@@ -139,6 +139,7 @@
 | 10-7 | 人間の内容確認 | 👤 待ち | PR のプレビューで確認（`docs/article-review.md`） |
 | 11-1〜11-3 | Web Analytics | ✅ | 同じ token |
 | 11-4 | 本番での beacon 確認 | 👤 待ち | COEP（credentialless）の下で beacon が読み込めるかも確認する |
+| （追加） | Zaraz + GA4（同意したときだけ） | ⚠️ | 実装済み・本番の確認待ち（`docs/analytics.md`）。ベースラインにはまだ項目がない |
 | 12-1, 12-2 | Actions | ✅ | |
 | 13 | 公開直前の確認 | 👤 待ち | |
 | 14 | Search Console など | 👤 待ち | |
@@ -153,3 +154,4 @@
 - COEP のページで、Service Worker がキャッシュから作り直したレスポンスでワーカーのスクリプトを返すと、COEP ヘッダーがないためワーカーが起動しない。キャッシュに入れるときに元のヘッダーを残すか、返すときに付ける。
 - 記事の画面写真や比較表は、同じ見本から Playwright で作り直せるスクリプトにしておく（`render-guide-images.mjs`）。実測値を本文で言葉にするときは、値が変わったらビルドが止まるようにする。
 - 実際に E2E で 2 回目以降の訪問（Service Worker が制御している状態）と日本語ページも通す。初回・英語だけの確認では上の 2 つは見つからなかった。
+- Zaraz + GA4: 「Auto-inject script」を切って `<script src="/cdn-cgi/zaraz/i.js">` を手で書くと、同じドメインのアプリごとに入れられる（プライバシーの説明を直したアプリから順に）。Service Worker は `/cdn-cgi/` を素通しにする。workers.dev のプレビューと `wrangler dev` には Zaraz がないので、計測は本番で確かめる。

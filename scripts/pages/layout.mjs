@@ -27,6 +27,7 @@ const UI = {
     ctaBody: "Take a photo of a score or open an image or PDF, and play it with a cursor that follows the staff. Free, no sign-up, and your music stays on your device.",
     footer: "Sheet Music Player · © 2026 ktkwmr",
     source: "Source code on GitHub",
+    cookies: "Cookie settings",
     feedback: "Feedback",
     home: "More apps by ktkwmr",
     homeUrl: "https://ktkwmr.com/",
@@ -40,6 +41,7 @@ const UI = {
     ctaBody: "楽譜の写真や画像・PDFを読み取って、五線譜の上をカーソルが進みながら再生します。無料・登録不要、楽譜は端末の外に出ません。",
     footer: "Sheet Music Player · © 2026 ktkwmr",
     source: "GitHub のソースコード",
+    cookies: "Cookie の設定",
     feedback: "ご意見・ご質問",
     home: "ktkwmr のほかのアプリ",
     homeUrl: "https://ktkwmr.com/ja/",
@@ -220,6 +222,9 @@ ${JSON.stringify(jsonLd, null, 2).replace(/</g, "\\u003c").replace(/^/gm, "  ")}
   </script>
   <style>${CSS}
   </style>
+  <!-- Usage analytics: Cloudflare Zaraz → Google Analytics 4, only after consent (see usage-events.js) -->
+  <script src="/cdn-cgi/zaraz/i.js" referrerpolicy="origin"></script>
+  <script src="/sheetmusicplayer/usage-events.js"></script>
 </head>
 <body>
   <header class="site-head">
@@ -253,6 +258,7 @@ ${nav}
 ` : ""}      <p class="meta">
         <span>${ui.footer}</span>
 ${infoPages.map((p) => `        <a href="${pagePath(lang, p.slug)}"${p.slug === page.slug ? ' aria-current="page"' : ""}>${escapeHtml(p[lang].nav)}</a>`).join("\n")}
+        <a href="#" class="cookie-settings">${ui.cookies}</a>
         <a href="https://github.com/ktkwmr/SheetMusicPlayer" rel="noopener">${ui.source}</a>
         <a href="https://github.com/ktkwmr/SheetMusicPlayer/issues" rel="noopener">${ui.feedback}</a>
         <a href="${ui.homeUrl}">${ui.home}</a>
