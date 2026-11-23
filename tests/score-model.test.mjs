@@ -347,7 +347,7 @@ const repMarks = (xml, part = 0) => {
     m.getAttribute("number"),
     Array.from(m.querySelectorAll("step")).map((s) => s.textContent).join(""),
     Array.from(m.querySelectorAll("barline")).flatMap((b) => Array.from(b.children).map((c) =>
-      `${b.getAttribute("location")}:${c.localName}:${c.getAttribute("direction") || c.getAttribute("type") || ""}${c.getAttribute("number") || ""}`)).join(" "),
+      `${b.getAttribute("location")}:${c.localName}:${c.getAttribute("direction") || c.getAttribute("type") || c.textContent || ""}${c.getAttribute("number") || ""}`)).join(" "),
   ]);
 };
 
@@ -401,4 +401,39 @@ test("fixRepeats keeps a start repeat at the start of a line, and a part's empty
 test("fixRepeats leaves scores without repeats as they are", () => {
   const xml = fixture("piano.musicxml");
   assert.equal(SM.fixRepeats(xml), xml);
+});
+
+test("parseScore / buildXml keep the repeat signs and endings, and the editor can set them", () => {
+  const xml = SM.fixRepeats(repScore(HOMR_REPEAT));
+  const m = SM.parseScore(xml);
+  assert.deepEqual(m.measures.map((x) => [x.fwd, x.back, x.ending]), [
+    [false, false, ""], [false, false, ""], [true, false, ""], [false, false, ""],
+    [false, true, "1"], [false, false, "2"], [false, false, ""],
+  ]);
+  const out = SM.buildXml(m, xml);
+  assert.deepEqual(repMarks(out), repMarks(xml).map((r) => [r[0], r[1], r[2].replace(/left:repeat/, "left:bar-style:heavy-light left:repeat").replace(/right:ending:stop1 right:repeat/, "right:bar-style:light-heavy right:ending:stop1 right:repeat")]));
+  // The reader missed the endings: mark them as the user would in the editor
+  const plain = SM.parseScore(SM.fixRepeats(repScore(HOMR_REPEAT.map((x) => x.replace(/<barline location="\w+"><ending[^>]*\/><\/barline>/g, "")))));
+  assert.deepEqual(plain.measures.map((x) => x.ending), ["", "", "", "", "", "", ""]);
+  plain.measures[4].ending = "1"; plain.measures[5].ending = "2";
+  const fixed = SM.buildXml(plain, xml);
+  assert.deepEqual(repMarks(fixed).map((r) => r[2]), [
+    "", "", "left:bar-style:heavy-light left:repeat:forward", "",
+    "left:ending:start1 right:bar-style:light-heavy right:ending:stop1 right:repeat:backward",
+    "left:ending:start2 right:ending:discontinue2", "",
+  ]);
+  // Removing a repeat sign also removes its thick bar line
+  plain.measures[2].fwd = false;
+  assert.equal(repMarks(SM.buildXml(plain, xml))[2][2], "");
+  // An ending of two measures is one bracket
+  plain.measures[3].ending = "1"; plain.measures[3].fwd = false;
+  const two = repMarks(SM.buildXml(plain, xml)).map((r) => r[2]);
+  assert.equal(two[3], "left:ending:start1");
+  assert.equal(two[4], "right:bar-style:light-heavy right:ending:stop1 right:repeat:backward");
+});
+
+test("insertMeasure adds a measure without repeat signs", () => {
+  const m = SM.parseScore(SM.fixRepeats(repScore(HOMR_REPEAT)));
+  SM.insertMeasure(m, 4);
+  assert.deepEqual([m.measures[5].fwd, m.measures[5].back, m.measures[5].ending], [false, false, ""]);
 });

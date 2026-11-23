@@ -6,8 +6,10 @@
 // got wrong is too long or too short (those measures are flagged for the user).
 //
 // model = {
-//   measures: [{ start, len, beats, beatType, fifths, src, flagged }]   src: index of the measure in the
-//                                                                        source XML (-1 for a new one)
+//   measures: [{ start, len, beats, beatType, fifths, src, flagged,     src: index of the measure in the
+//                fwd, back, ending }]                                    source XML (-1 for a new one)
+//             fwd / back: start |: / end :| repeat sign · ending: number of the 1st / 2nd … ending the
+//             measure is in ("" for none)
 //   parts:    [{ id, staves, clefs: { [staff]: { sign, line } } }]
 //   tracks:   [{ part, staff }]                                          one per staff (piano: right / left)
 //   notes:    [{ id, track, start, dur, midi }]
@@ -389,14 +391,22 @@ export function parseScore(xml) {
   const model = { measures: [], parts: [], tracks: [], notes: [] };
 
   // Bar lines: from the time signatures of the first part
-  let beats = 4, beatType = 4, fifths = 0, start = 0;
+  let beats = 4, beatType = 4, fifths = 0, start = 0, ending = "";
   kids(partEls[0], "measure").forEach((m, i) => {
+    // Repeat signs and endings (an ending runs from its start to its stop / discontinue)
+    const bars = kids(m, "barline"), repeats = bars.flatMap((b) => kids(b, "repeat")), ends = bars.flatMap((b) => kids(b, "ending"));
+    const fwd = repeats.some((r) => r.getAttribute("direction") === "forward");
+    const back = repeats.some((r) => r.getAttribute("direction") === "backward");
+    const st = ends.find((e) => e.getAttribute("type") === "start");
+    if (st) ending = (st.getAttribute("number") || "1").trim();
+    const inEnding = ending;
+    if (ends.some((e) => e.getAttribute("type") !== "start")) ending = "";
     m.querySelectorAll("attributes").forEach((a) => {
       if (text(a, "time beats")) { beats = +text(a, "time beats"); beatType = +text(a, "time beat-type"); }
       if (text(a, "key fifths") != null) fifths = +text(a, "key fifths");
     });
     const len = Math.round(beats * 4 / beatType * PPQ);
-    model.measures.push({ start, len, beats, beatType, fifths, src: i, flagged: false });
+    model.measures.push({ start, len, beats, beatType, fifths, src: i, flagged: false, fwd, back, ending: inEnding });
     start += len;
   });
 
@@ -492,7 +502,7 @@ function relayout(model) {
 export function insertMeasure(model, i) {
   const ref = model.measures[i];
   const at = ref.start + ref.len;
-  model.measures.splice(i + 1, 0, { start: at, len: ref.len, beats: ref.beats, beatType: ref.beatType, fifths: ref.fifths, src: -1, flagged: false });
+  model.measures.splice(i + 1, 0, { start: at, len: ref.len, beats: ref.beats, beatType: ref.beatType, fifths: ref.fifths, src: -1, flagged: false, fwd: false, back: false, ending: "" });
   for (const n of model.notes) if (n.start >= at) n.start += ref.len;
   relayout(model);
 }
@@ -560,6 +570,38 @@ function noteXml({ midi, ticks, value, chord, tieStart, tieStop, voice, staff, f
 // Writes the model back as MusicXML. The header, part list and part ids, and each source
 // measure's bar lines (repeats, endings) and line breaks are kept from the source XML.
 // Lyrics, slurs, articulations and other markings are not kept.
+// A bar line of a measure: what the source XML has there (double bar, fermata …), with the repeat
+// signs and endings of the model (the user can change them in the editor)
+function barlineXml(ms, i, src, side) {
+  const m = ms[i], prev = ms[i - 1], next = ms[i + 1];
+  let b = src && kids(src, "barline").find((x) => (x.getAttribute("location") || "right") === side);
+  if (b) {
+    b = b.cloneNode(true);
+    const hadRepeat = kids(b, "repeat").length > 0;
+    for (const c of [...kids(b, "repeat"), ...kids(b, "ending")]) c.remove();
+    if (hadRepeat) for (const c of kids(b, "bar-style")) c.remove();
+  }
+  const make = () => { const x = new DOMParser().parseFromString(`<barline location="${side}"/>`, "application/xml").documentElement; return x; };
+  const add = (name, attrs, textValue) => {
+    b = b || make();
+    const el = b.ownerDocument.createElement(name);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    if (textValue) el.textContent = textValue;
+    if (name === "bar-style") b.insertBefore(el, b.firstChild); else b.appendChild(el);
+  };
+  const ending = m.ending || "";
+  if (side === "left") {
+    if (m.fwd) add("bar-style", {}, "heavy-light");
+    if (ending && (!prev || prev.ending !== ending || prev.back)) add("ending", { number: ending, type: "start" });
+    if (m.fwd) add("repeat", { direction: "forward" });
+  } else {
+    if (m.back) { for (const c of kids(b || make(), "bar-style")) c.remove(); add("bar-style", {}, "light-heavy"); }
+    if (ending && (!next || next.ending !== ending || m.back)) add("ending", { number: ending, type: m.back ? "stop" : "discontinue" });
+    if (m.back) add("repeat", { direction: "backward" });
+  }
+  return b && b.children.length ? new XMLSerializer().serializeToString(b) : "";
+}
+
 export function buildXml(model, sourceXml, tempo) {
   const doc = new DOMParser().parseFromString(sourceXml, "application/xml");
   const partEls = Array.from(doc.querySelectorAll("score-partwise > part"));
@@ -591,6 +633,7 @@ export function buildXml(model, sourceXml, tempo) {
       if (mi === 0 && p === 0 && tempo) {
         body += `<direction placement="above"><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>${Math.round(tempo)}</per-minute></metronome></direction-type><sound tempo="${Math.round(tempo)}"/></direction>`;
       }
+      body += barlineXml(model.measures, mi, src, "left");
       const mStart = meas.start, mEnd = meas.start + meas.len;
       let wroteAny = false;
       tracks.forEach((tr) => {
@@ -646,7 +689,7 @@ export function buildXml(model, sourceXml, tempo) {
           gap(meas.len);
         });
       });
-      if (src) src.querySelectorAll(":scope > barline").forEach((b) => { body += new XMLSerializer().serializeToString(b); });
+      body += barlineXml(model.measures, mi, src, "right");
       xml += `<measure number="${mi + 1}">${body}</measure>`;
       prev = meas;
     });

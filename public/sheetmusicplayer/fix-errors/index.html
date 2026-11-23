@@ -232,6 +232,7 @@
 <tr><th scope="row">Select several</th><td>Drag across an empty area, then move or delete them together</td></tr>
 <tr><th scope="row">Snap to</th><td>Grid: quarter, eighth, sixteenth notes, or eighth-note triplets</td></tr>
 <tr><th scope="row">Add or delete measures</th><td>Click a measure number at the top, then “Add after” (with the number of measures) or “Delete”. Click anywhere else to deselect the measure</td></tr>
+<tr><th scope="row">Repeat signs and endings</th><td>Click a measure number, then <b>|:</b> (start of a repeat), <b>:|</b> (end of a repeat), <b>1.</b> or <b>2.</b> (1st or 2nd ending). Click again to remove. For an ending of several measures, mark each of them</td></tr>
 <tr><th scope="row">Scroll and zoom</th><td>Mouse: the wheel scrolls (<kbd>Shift</kbd>: sideways), <kbd>Ctrl</kbd> + wheel zooms in time. Touch screen: drag an empty spot to scroll, pinch to zoom, and hold a moment before dragging to select several</td></tr>
 <tr><th scope="row">Undo / redo</th><td>The arrow buttons, or <kbd>Ctrl</kbd>+<kbd>Z</kbd></td></tr>
 </tbody>
@@ -252,12 +253,13 @@
 <tr><th scope="row">A note is missing or extra</th><td>Notes in a dense chord, or a mark on the paper taken for a note</td><td>Click to add, right-click to delete</td></tr>
 <tr><th scope="row">Too few measures after a long rest</th><td>A multi-measure rest (a thick bar with a number) read as a single measure</td><td>Click that measure's number and “Add after” the missing number of measures</td></tr>
 <tr><th scope="row">One octave off</th><td>An 8va line, or a clef change that was missed</td><td>Select the notes and press <kbd>Shift</kbd>+<kbd>↑</kbd> or <kbd>↓</kbd></td></tr>
+<tr><th scope="row">The 1st ending plays again after the repeat</th><td>The brackets of the 1st and 2nd endings were missed (they are thin lines above the staff)</td><td>Click the measure numbers and mark them <b>1.</b> and <b>2.</b></td></tr>
 </tbody>
 </table>
 </div>
 
 <h2 id="limits">What the editor cannot change</h2>
-<p>The editor changes notes and measures. It does not change the key signature, the time signature, clefs, bar lines, repeat signs, or text. If those are wrong, save the score as MusicXML and fix them in a notation program such as MuseScore (see <a href="/sheetmusicplayer/musicxml/">what MusicXML is</a>). Lyrics and chord symbols are not read in the first place.</p>
+<p>The editor changes notes, measures, repeat signs, and 1st / 2nd endings. It does not change the key signature, the time signature, clefs, other bar lines, or text. If those are wrong, save the score as MusicXML and fix them in a notation program such as MuseScore (see <a href="/sheetmusicplayer/musicxml/">what MusicXML is</a>). Lyrics and chord symbols are not read in the first place.</p>
 
 <h2 id="save">Save your corrections</h2>
 <p>When you switch back to Score (or save), the corrections are kept in the browser along with the score. To keep a copy as a file, press <b>Save as MusicXML (score)</b> under the score. When the notes are edited, the score is rebuilt from the notes, so slurs, articulations, and similar markings are not kept in the saved file.</p>

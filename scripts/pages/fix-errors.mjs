@@ -48,6 +48,7 @@ ${shot("en", "app-edit", "The editor with measure 4 highlighted and marked with 
 <tr><th scope="row">Select several</th><td>Drag across an empty area, then move or delete them together</td></tr>
 <tr><th scope="row">Snap to</th><td>Grid: quarter, eighth, sixteenth notes, or eighth-note triplets</td></tr>
 <tr><th scope="row">Add or delete measures</th><td>Click a measure number at the top, then “Add after” (with the number of measures) or “Delete”. Click anywhere else to deselect the measure</td></tr>
+<tr><th scope="row">Repeat signs and endings</th><td>Click a measure number, then <b>|:</b> (start of a repeat), <b>:|</b> (end of a repeat), <b>1.</b> or <b>2.</b> (1st or 2nd ending). Click again to remove. For an ending of several measures, mark each of them</td></tr>
 <tr><th scope="row">Scroll and zoom</th><td>Mouse: the wheel scrolls (<kbd>Shift</kbd>: sideways), <kbd>Ctrl</kbd> + wheel zooms in time. Touch screen: drag an empty spot to scroll, pinch to zoom, and hold a moment before dragging to select several</td></tr>
 <tr><th scope="row">Undo / redo</th><td>The arrow buttons, or <kbd>Ctrl</kbd>+<kbd>Z</kbd></td></tr>
 </tbody>
@@ -68,12 +69,13 @@ ${shot("en", "app-edit", "The editor with measure 4 highlighted and marked with 
 <tr><th scope="row">A note is missing or extra</th><td>Notes in a dense chord, or a mark on the paper taken for a note</td><td>Click to add, right-click to delete</td></tr>
 <tr><th scope="row">Too few measures after a long rest</th><td>A multi-measure rest (a thick bar with a number) read as a single measure</td><td>Click that measure's number and “Add after” the missing number of measures</td></tr>
 <tr><th scope="row">One octave off</th><td>An 8va line, or a clef change that was missed</td><td>Select the notes and press <kbd>Shift</kbd>+<kbd>↑</kbd> or <kbd>↓</kbd></td></tr>
+<tr><th scope="row">The 1st ending plays again after the repeat</th><td>The brackets of the 1st and 2nd endings were missed (they are thin lines above the staff)</td><td>Click the measure numbers and mark them <b>1.</b> and <b>2.</b></td></tr>
 </tbody>
 </table>
 </div>
 
 <h2 id="limits">What the editor cannot change</h2>
-<p>The editor changes notes and measures. It does not change the key signature, the time signature, clefs, bar lines, repeat signs, or text. If those are wrong, save the score as MusicXML and fix them in a notation program such as MuseScore (see ${link("en", "musicxml", "what MusicXML is")}). Lyrics and chord symbols are not read in the first place.</p>
+<p>The editor changes notes, measures, repeat signs, and 1st / 2nd endings. It does not change the key signature, the time signature, clefs, other bar lines, or text. If those are wrong, save the score as MusicXML and fix them in a notation program such as MuseScore (see ${link("en", "musicxml", "what MusicXML is")}). Lyrics and chord symbols are not read in the first place.</p>
 
 <h2 id="save">Save your corrections</h2>
 <p>When you switch back to Score (or save), the corrections are kept in the browser along with the score. To keep a copy as a file, press <b>Save as MusicXML (score)</b> under the score. When the notes are edited, the score is rebuilt from the notes, so slurs, articulations, and similar markings are not kept in the saved file.</p>
@@ -123,6 +125,7 @@ ${shot("ja", "app-edit", "4 小節目の音符が 1 つ抜けているため、4
 <tr><th scope="row">まとめて選ぶ</th><td>空いている所をドラッグして囲み、まとめて移動・削除</td></tr>
 <tr><th scope="row">マス目</th><td>4分音符・8分音符・16分音符・3連8分音符から選ぶ</td></tr>
 <tr><th scope="row">小節を追加・削除する</th><td>上の小節番号をクリックし、数を入れて「後ろに追加」、または「削除」。ほかの所をクリックすると小節の選択が外れる</td></tr>
+<tr><th scope="row">繰り返し記号・かっこ</th><td>小節番号をクリックし、<b>|:</b>（繰り返しの始まり）・<b>:|</b>（繰り返しの終わり）・<b>1.</b>・<b>2.</b>（1番かっこ・2番かっこ）。もう一度押すと外れる。何小節もあるかっこは、その小節すべてに付ける</td></tr>
 <tr><th scope="row">スクロール・拡大縮小</th><td>マウス：ホイールでスクロール（<kbd>Shift</kbd> で横）、<kbd>Ctrl</kbd>＋ホイールで横方向に拡大・縮小。タッチ操作：空いている所をドラッグでスクロール、ピンチで拡大・縮小。まとめて選ぶときは少し長押ししてからドラッグ</td></tr>
 <tr><th scope="row">元に戻す・やり直す</th><td>矢印のボタン。または <kbd>Ctrl</kbd>+<kbd>Z</kbd></td></tr>
 </tbody>
@@ -143,12 +146,13 @@ ${shot("ja", "app-edit", "4 小節目の音符が 1 つ抜けているため、4
 <tr><th scope="row">音符が足りない・多い</th><td>音の多い和音、紙の汚れを音符と読んだ</td><td>クリックで追加、右クリックで削除</td></tr>
 <tr><th scope="row">長い休みの後で小節が足りない</th><td>複数小節休符（数字の付いた太い横線）を 1 小節として読んだ</td><td>その小節番号をクリックし、足りない数だけ「後ろに追加」</td></tr>
 <tr><th scope="row">1 オクターブずれる</th><td>8va の線や、途中の音部記号の変更の見落とし</td><td>音符を選んで <kbd>Shift</kbd>+<kbd>↑</kbd> か <kbd>↓</kbd></td></tr>
+<tr><th scope="row">繰り返しのあとも 1番かっこを弾く</th><td>1番・2番かっこ（五線の上の細い線）の見落とし</td><td>小節番号をクリックし、<b>1.</b>・<b>2.</b> を付ける</td></tr>
 </tbody>
 </table>
 </div>
 
 <h2 id="limits">編集画面で直せないもの</h2>
-<p>編集画面で直せるのは音符と小節です。調号・拍子記号・音部記号・小節線・繰り返し記号・文字は直せません。これらが違うときは、MusicXML で保存して MuseScore などの楽譜ソフトで直してください（${link("ja", "musicxml", "MusicXML とは")}）。歌詞とコードネームは、もともと読み取りません。</p>
+<p>編集画面で直せるのは音符・小節・繰り返し記号・1番／2番かっこです。調号・拍子記号・音部記号・そのほかの小節線・文字は直せません。これらが違うときは、MusicXML で保存して MuseScore などの楽譜ソフトで直してください（${link("ja", "musicxml", "MusicXML とは")}）。歌詞とコードネームは、もともと読み取りません。</p>
 
 <h2 id="save">直した楽譜を保存する</h2>
 <p>「楽譜」に戻ったとき（または保存したとき）に、直した内容が楽譜と一緒にブラウザに保存されます。ファイルとして残すときは 楽譜の下の<b>MusicXML（楽譜）で保存</b>を選んでください。音符を編集すると、音符から楽譜を作り直すので、スラーやアーティキュレーションなどの記号は保存したファイルに残りません。</p>

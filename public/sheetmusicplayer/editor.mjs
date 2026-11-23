@@ -92,6 +92,20 @@ export function createEditor(host, opts) {
     add.disabled = del.disabled = count.disabled = selMeasure == null;
     const label = Object.assign(el("span", "ed-label"), { textContent: selMeasure == null ? t("ed.measPick") : t("ed.measSel", { n: selMeasure + 1 }) });
     measBox.append(label, count, add, del);
+    // Repeat signs and 1st / 2nd endings of the measure (the reader often misses the endings)
+    const sel = selMeasure == null ? null : model.measures[selMeasure];
+    const marks = [
+      ["|:", "ed.repStart", sel && sel.fwd, (m) => { m.fwd = !m.fwd; }],
+      [":|", "ed.repEnd", sel && sel.back, (m) => { m.back = !m.back; }],
+      ["1.", "ed.ending1", sel && sel.ending === "1", (m) => { m.ending = m.ending === "1" ? "" : "1"; }],
+      ["2.", "ed.ending2", sel && sel.ending === "2", (m) => { m.ending = m.ending === "2" ? "" : "2"; }],
+    ];
+    for (const [text, key, on, flip] of marks) {
+      const c = chip(text, () => change(() => flip(model.measures[selMeasure])), { "aria-pressed": String(!!on), "aria-label": t(key), title: t(key) });
+      c.classList.add("ed-mark");
+      c.disabled = selMeasure == null;
+      measBox.append(c);
+    }
     trBox.textContent = off ? t("ed.transposed", { n: (off > 0 ? "+" : "−") + Math.abs(off) }) : "";
     trBox.hidden = !off;
   }
@@ -192,11 +206,23 @@ export function createEditor(host, opts) {
       if (i === selMeasure) { g.fillStyle = C.cursor; g.fillRect(x, 0, m.len * ppt, RH - 1); }
       else if (m.flagged) { g.fillStyle = "rgba(245, 158, 11, .35)"; g.fillRect(x, 0, m.len * ppt, RH - 1); }
       g.fillStyle = i === selMeasure ? C.paper : C.ink;
-      g.fillText(String(i + 1) + (m.flagged ? " !" : ""), x + 4, RH / 2);
+      const nx = x + (m.fwd ? 12 : 4); // after the start repeat sign
+      g.fillText(String(i + 1) + (m.flagged ? " !" : ""), nx, RH / 2);
       if (i === 0 || ms[i - 1].beats !== m.beats || ms[i - 1].beatType !== m.beatType) {
-        g.fillStyle = i === selMeasure ? C.paper : C.subtle; g.fillText(m.beats + "/" + m.beatType, x + 4 + g.measureText(String(i + 1) + "   ").width, RH / 2);
+        g.fillStyle = i === selMeasure ? C.paper : C.subtle; g.fillText(m.beats + "/" + m.beatType, nx + g.measureText(String(i + 1) + "   ").width, RH / 2);
       }
       g.fillStyle = C.ink; g.fillRect(Math.round(x), 0, 1, RH);
+      // Repeat signs (thick line and two dots) and endings (a line along the top with its number)
+      const ink = i === selMeasure ? C.paper : C.ink, x2 = x + m.len * ppt;
+      g.fillStyle = ink;
+      const dots = (dx) => { g.beginPath(); g.arc(dx, RH / 2 - 4, 1.6, 0, 7); g.arc(dx, RH / 2 + 4, 1.6, 0, 7); g.fill(); };
+      if (m.fwd) { g.fillRect(Math.round(x) + 1, 0, 3, RH - 1); dots(x + 7); }
+      if (m.back) { g.fillRect(Math.round(x2) - 3, 0, 3, RH - 1); dots(x2 - 7); }
+      if (m.ending) {
+        const first = i === 0 || ms[i - 1].ending !== m.ending || ms[i - 1].back;
+        g.fillRect(x, 1, m.len * ppt, 1.5);
+        if (first) { g.fillRect(Math.round(x) + 1, 1, 1.5, 8); g.textBaseline = "top"; g.fillText(m.ending + ".", x2 - g.measureText(m.ending + ". ").width - (m.back ? 10 : 2), 3); g.textBaseline = "middle"; }
+      }
     }
     if (playQ != null) { g.fillStyle = C.cursor; g.fillRect(Math.round(xOf(playQ * PPQ)) - 1, 0, 2, RH); }
     // keyboard
