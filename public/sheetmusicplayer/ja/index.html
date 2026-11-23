@@ -1396,12 +1396,12 @@
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("ocr timeout")), 40000));
         try {
           await Promise.race([timeout, (async function () {
-            const T = await importApp("engine/v3/tesseract/tesseract.esm.min.js");
+            const T = await importApp("engine/v4/tesseract/tesseract.esm.min.js");
             const here = document.baseURI; // ja/index.html has <base href="/sheetmusicplayer/">
             ocr = await (T.default || T).createWorker("eng", 1, {
-              workerPath: new URL("engine/v3/tesseract/worker.min.js", here).href,
-              corePath: new URL("engine/v3/tesseract/tesseract-core-simd-lstm.js", here).href,
-              langPath: new URL("engine/v3/tesseract/lang/", here).href,
+              workerPath: new URL("engine/v4/tesseract/worker.min.js", here).href,
+              corePath: new URL("engine/v4/tesseract/tesseract-core-simd-lstm.js", here).href,
+              langPath: new URL("engine/v4/tesseract/lang/", here).href,
               workerBlobURL: false, logger: function () {},
               // The engine cache (sw.js / omr-worker.mjs) already keeps the data; no second copy in IndexedDB
               cacheMethod: "none",
@@ -2592,7 +2592,7 @@
       renderPlayer();
       if (!supported) { $("firstNote").hidden = true; showError(t("err.unsupported")); }
       // The engine is already downloaded: the first-time note is not needed
-      if (self.caches) caches.has("sheetmusicplayer-engine-v3").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
+      if (self.caches) caches.has("sheetmusicplayer-engine-v4").then((has) => { if (has) $("firstNote").hidden = true; }).catch(() => {});
       function showFileCard() {
         $("fileCard").hidden = !state.xml; $("fileName").textContent = state.name || state.title; $("fileSub").textContent = t("file.saved", { n: state.notes });
         $("thumb").removeAttribute("src"); $("thumb").hidden = true;
