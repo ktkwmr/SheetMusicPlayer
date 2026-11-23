@@ -14,6 +14,7 @@ from concurrent.futures import Future
 
 # ---- Dependencies that do not exist in the browser ----
 sys.modules.setdefault("requests", types.ModuleType("requests"))  # only used to download models
+sys.modules.setdefault("pypdfium2", types.ModuleType("pypdfium2"))  # homr's own PDF input; the page renders PDFs
 _rapidocr = types.ModuleType("rapidocr")
 
 
@@ -25,12 +26,15 @@ class _NoOcr:  # homr reads the title with rapidocr; the title is not needed her
 _rapidocr.RapidOCR = _NoOcr
 sys.modules.setdefault("rapidocr", _rapidocr)
 
+import xml.etree.ElementTree as ET  # noqa: E402
+
 import cv2  # noqa: E402
 import numpy as np  # noqa: E402
 
 from homr import main as homr_main  # noqa: E402
 from homr import staff_parsing, title_detection  # noqa: E402
 from homr.music_xml_generator import XmlGeneratorArguments, generate_xml  # noqa: E402
+from homr.system_repair import repair_systems  # noqa: E402
 from homr.transformer.configs import Config  # noqa: E402
 
 
@@ -157,13 +161,17 @@ def recognize(rgba, width: int, height: int, tempo=None) -> str:
         transformer_use_gpu=False,
         segnet_use_gpu=False,
         coreml_encoder=False,
+        title_detection=False,
     )
     try:
-        multi_staffs, page, debug, _title = homr_main.detect_staffs_in_image(path, config)
+        multi_staffs, page, debug, _title, _count, to_input_image = homr_main.detect_staffs_in_image(path, config)
     except Exception as e:  # homr raises a bare Exception when it finds nothing
-        if "No noteheads found" in str(e) or "No staffs found" in str(e):
+        # "No noteheads or clefs found" (homr 0.7.1; "No noteheads found" before) / "No staffs found"
+        if "No noteheads" in str(e) or "No staffs found" in str(e):
             raise ValueError("no-staff") from e
         raise
+    # As homr's process_image: fix how the staves are grouped into systems
+    multi_staffs = repair_systems(debug, multi_staffs)
 
     _staff_done = 0
     _staff_total = sum(len(m.staffs) for m in multi_staffs)
@@ -171,13 +179,13 @@ def recognize(rgba, width: int, height: int, tempo=None) -> str:
     transformer = Config()
     transformer.use_gpu_inference = False
     transformer.use_coreml_encoder = False
-    staffs = staff_parsing.parse_staffs(debug, multi_staffs, page, selected_staff=-1, config=transformer)
+    staffs = staff_parsing.parse_staffs(
+        debug, multi_staffs, page, selected_staff=-1, config=transformer, page_to_input_image=to_input_image
+    )
 
     _report("xml")
     xml = generate_xml(XmlGeneratorArguments(None, None, int(tempo) if tempo else None), staffs, "")
-    out = "/tmp/page.musicxml"
-    xml.write(out)
-    with open(out, encoding="utf-8") as f:
-        text = f.read()
+    # As homr's process_image writes it (an XML declaration, then the score)
+    text = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(xml, encoding="unicode")
     _report("page-done", round((time.time() - t0) * 1000))
     return text
