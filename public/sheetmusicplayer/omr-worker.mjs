@@ -12,7 +12,7 @@
 // The engine files (engine/<version>/, ~130 MB) never change for a version, so they are
 // kept in their own Cache Storage entry (cache first). sw.js leaves them to this worker.
 
-const ENGINE_VERSION = "v3";
+const ENGINE_VERSION = "v4";
 const BASE = new URL("./", import.meta.url).href;
 const ENGINE = BASE + "engine/" + ENGINE_VERSION + "/";
 const CACHE = "sheetmusicplayer-engine-" + ENGINE_VERSION;
@@ -199,8 +199,7 @@ async function start() {
   ort.env.wasm.numThreads = 1;
   const { loadPyodide } = await import(ENGINE + "pyodide/pyodide.mjs");
   py = await withoutAppleMobileCheck(() => loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} }));
-  await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions",
-    ENGINE + "pyodide/" + wheel("verysimpletree"), ENGINE + "pyodide/" + wheel("musicxml")], { messageCallback: () => {} });
+  await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions"], { messageCallback: () => {} });
   const zip = await (await engineFetch(ENGINE + "homr.zip")).arrayBuffer();
   py.unpackArchive(zip, "zip", { extractDir: "/home/pyodide/app" });
   py.runPython("import sys; sys.path.insert(0, '/home/pyodide/app')");
@@ -237,8 +236,6 @@ async function withoutAppleMobileCheck(fn) {
   try { return await fn(); }
   finally { if (masking) delete self.navigator; }
 }
-
-const wheel = (name) => Object.keys(manifest.files).map((f) => f.split("/").pop()).find((f) => f.startsWith(name + "-") && f.endsWith(".whl"));
 
 let starting = null;
 self.onmessage = async (ev) => {
