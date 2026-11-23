@@ -12,7 +12,7 @@
 // The engine files (engine/<version>/, ~130 MB) never change for a version, so they are
 // kept in their own Cache Storage entry (cache first). sw.js leaves them to this worker.
 
-const ENGINE_VERSION = "v4";
+const ENGINE_VERSION = "v3";
 const BASE = new URL("./", import.meta.url).href;
 const ENGINE = BASE + "engine/" + ENGINE_VERSION + "/";
 const CACHE = "sheetmusicplayer-engine-" + ENGINE_VERSION;
@@ -68,9 +68,25 @@ self.fetch = (input, init) => {
   return nativeFetch(input, init);
 };
 
+// The file list of this engine version. Kept in the engine cache too, so reading also works offline
+// (the Service Worker serves engine files from that cache, and the list was never stored there)
+async function loadManifest() {
+  const url = ENGINE + "manifest.json", c = await openCache();
+  try {
+    const res = await nativeFetch(url, { cache: "no-cache" });
+    if (res.ok) {
+      if (c) { try { await c.put(url, res.clone()); } catch (e) { /* storage full or blocked */ } }
+      return await res.json();
+    }
+  } catch (e) { /* offline: use the stored list */ }
+  const hit = c && (await c.match(url));
+  if (hit) return hit.json();
+  throw Object.assign(new Error("Network error: " + url), { code: "download" });
+}
+
 // Download everything once up front, so progress is shown in one bar
 async function prefetchAll() {
-  manifest = await (await nativeFetch(ENGINE + "manifest.json", { cache: "no-cache" })).json();
+  manifest = await loadManifest();
   const c = await openCache();
   const files = Object.entries(manifest.files);
   const missing = [];
@@ -199,7 +215,8 @@ async function start() {
   ort.env.wasm.numThreads = 1;
   const { loadPyodide } = await import(ENGINE + "pyodide/pyodide.mjs");
   py = await withoutAppleMobileCheck(() => loadPyodide({ indexURL: ENGINE + "pyodide/", stdout: () => {}, stderr: () => {} }));
-  await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions"], { messageCallback: () => {} });
+  await py.loadPackage(["numpy", "opencv-python", "pillow", "typing-extensions",
+    ENGINE + "pyodide/" + wheel("verysimpletree"), ENGINE + "pyodide/" + wheel("musicxml")], { messageCallback: () => {} });
   const zip = await (await engineFetch(ENGINE + "homr.zip")).arrayBuffer();
   py.unpackArchive(zip, "zip", { extractDir: "/home/pyodide/app" });
   py.runPython("import sys; sys.path.insert(0, '/home/pyodide/app')");
@@ -236,6 +253,8 @@ async function withoutAppleMobileCheck(fn) {
   try { return await fn(); }
   finally { if (masking) delete self.navigator; }
 }
+
+const wheel = (name) => Object.keys(manifest.files).map((f) => f.split("/").pop()).find((f) => f.startsWith(name + "-") && f.endsWith(".whl"));
 
 let starting = null;
 self.onmessage = async (ev) => {

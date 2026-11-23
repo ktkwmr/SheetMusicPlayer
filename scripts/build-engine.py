@@ -41,16 +41,18 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-VERSION = "v4"
+VERSION = "v3"
 PYODIDE = "314.0.7"
-HOMR = "0.7.1"
+HOMR = "0.7.0"
 ORT_WEB = "1.30.0"
 TESSERACT_JS = "7.0.0"
 TESSERACT_CORE = "7.0.0"
 TESSERACT_ENG = "1.0.0"
+MUSICXML = "1.6.3"
+VERYSIMPLETREE = "2.1.5"
 HOMR_MODELS = "https://github.com/liebharc/homr/releases/download/onnx_checkpoints/"
 SEGNET = "segnet_308-3296ccd40960f90ca6ab9c035cca945675d30a0f"
-TRANSFORMER = "pytorch_model_509-2293bba14bfea47d9d28411339362af15fce4c31"
+TRANSFORMER = "pytorch_model_396-f6feedb42ff90087d898b0941a55d040fa6b2903"
 PYODIDE_PACKAGES = ["numpy", "opencv-python", "pillow", "typing-extensions"]
 # Libraries used by the page itself (public/sheetmusicplayer/vendor/)
 OSMD = "2.2.1"
@@ -125,7 +127,9 @@ def build_pyodide():
             if name in wanted:
                 with t.extractfile(member) as f, open(OUT / "pyodide" / name, "wb") as o:
                     shutil.copyfileobj(f, o)
-    # homr 0.7.1 writes MusicXML with the standard library: no wheels from PyPI are needed
+    # Pure-Python wheels from PyPI that Pyodide does not ship
+    for name, version in [("musicxml", MUSICXML), ("verysimpletree", VERYSIMPLETREE)]:
+        copy(pip_wheel(name, version), OUT / "pyodide" / pip_wheel(name, version).name)
 
 
 def build_homr_zip():
@@ -224,6 +228,10 @@ def write_licenses():
          wheel_member(whl("pillow"), ".dist-info/licenses/LICENSE")),
         ("typing_extensions", "PSF-2.0", "Copyright (c) Python Software Foundation", "",
          wheel_member(whl("typing_extensions"), ".dist-info/licenses/LICENSE")),
+        ("musicxml", "MIT", "Copyright (c) Alex Gorji", "Writes the MusicXML file",
+         wheel_member(whl("musicxml"), ".dist-info/LICENSE")),
+        ("verysimpletree", "MIT", "Copyright (c) Alex Gorji", "Used by musicxml",
+         "MIT License. The wheel has no license file; the text is the same as for musicxml above, by the same author."),
         ("ONNX Runtime Web (onnxruntime-web)", "MIT", "Copyright (c) Microsoft Corporation", "Runs homr's models",
          raw_github("microsoft/onnxruntime", f"v{ORT_WEB}", "LICENSE")),
         ("Tesseract.js", "Apache-2.0", "Copyright (c) Tesseract.js contributors", "Reads the tempo marking",

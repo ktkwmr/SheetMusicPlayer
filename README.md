@@ -92,7 +92,7 @@ public/
     omr-worker.mjs              # Web Worker: downloads and caches the engine, runs homr in Pyodide
     score-model.mjs             # MusicXML <-> editable notes (ticks, measures, staves), and back to MusicXML
     editor.mjs                  # the piano-roll editor (canvas)
-    engine/v4/                  # the reading engine, built by scripts/build-engine.py (do not edit)
+    engine/v3/                  # the reading engine, built by scripts/build-engine.py (do not edit)
       pyodide/ ort/ models/ tesseract/ homr.zip manifest.json
     vendor/                     # OpenSheetMusicDisplay and PDF.js (copied by scripts/build-engine.py)
     ja/index.html               # Japanese page, generated from index.html (do not edit)
