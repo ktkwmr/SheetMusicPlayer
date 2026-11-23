@@ -1647,8 +1647,9 @@
           SM = SM || await importApp("score-model.mjs");
           // The reader writes ties as slurs: turn them back into ties so held notes are not struck again.
           // It also reads some plain notes as tuplet notes: make them plain where that fills the measure,
-          // and misses some <backup>s, which puts notes past the bar line: move them back.
-          const xml = SM.slursToTies(SM.fixVoiceOverflow(SM.fixStrayTuplets(SM.expandMultiRests(xmls.length > 1 ? mergePages(xmls) : xmls[0]))));
+          // and misses some <backup>s, which puts notes past the bar line: move them back. Its repeat signs
+          // and 1st / 2nd endings are written so that :| goes back to the start: put them right.
+          const xml = SM.slursToTies(SM.fixRepeats(SM.fixVoiceOverflow(SM.fixStrayTuplets(SM.expandMultiRests(xmls.length > 1 ? mergePages(xmls) : xmls[0])))));
           showStatus(t("st.render"), {});
           const prev = state, now = Date.now();
           state = Object.assign({}, EMPTY, {
@@ -1749,9 +1750,10 @@
         });
         return osmdLoading;
       }
-      // steps: one entry per cursor position: { q (quarter notes from the start), x, y, h (position on the page) }
+      // steps: one entry per cursor position: { q (quarter notes from the start), x, y, h (position on the page), m (measure) }
       // events: notes to play: [q, length in quarters, MIDI number, track key ("part:staff")]
-      // measures: [{ q, len, beats, beatType }] · tracks: [{ key, name }], one per staff
+      // measures: [{ q, len, beats, beatType, m }] in the order they are played (a repeated measure comes
+      // again; m is its index in the score) · tracks: [{ key, name }], one per staff
       const EMPTY_TIMELINE = () => ({ steps: [], events: [], endQ: 0, notes: 0, measures: [], tracks: [] });
       let timeline = EMPTY_TIMELINE();
       // The score as it is shown: the saved one, moved by the transposition
@@ -1804,11 +1806,24 @@
         cur.show(); cur.reset();
         const it = cur.Iterator;
         const host = $("score").getBoundingClientRect();
+        const src = sheet.SourceMeasures || [];
+        let ts = { Numerator: 4, Denominator: 4 };
+        const sig = src.map(function (m) { ts = m.ActiveTimeSignature || ts; return { beats: ts.Numerator || 4, beatType: ts.Denominator || 4 }; });
+        const measures = [];
         let guard = 0, notes = 0;
         while (!it.EndReached && guard++ < 50000) {
           const q = it.CurrentEnrolledTimestamp.RealValue * 4;
+          // The measure as it is played: OSMD follows the repeats and endings, so a measure can come again
+          const mi = it.CurrentMeasureIndex, sm = src[mi];
+          if (sm) {
+            const mq = q - (it.CurrentSourceTimestamp.RealValue - sm.AbsoluteTimestamp.RealValue) * 4;
+            const last = measures[measures.length - 1];
+            if (!last || last.m !== mi || Math.abs(last.q - mq) > 1e-6) {
+              measures.push({ q: mq, len: sm.Duration.RealValue * 4, beats: sig[mi].beats, beatType: sig[mi].beatType, m: mi });
+            }
+          }
           const el = cur.cursorElement, r = el.getBoundingClientRect();
-          steps.push({ q: q, x: r.left - host.left + r.width / 2, y: r.top - host.top, h: r.height, bpm: it.CurrentBpm || 0 });
+          steps.push({ q: q, x: r.left - host.left + r.width / 2, y: r.top - host.top, h: r.height, bpm: it.CurrentBpm || 0, m: mi });
           for (const ve of it.CurrentVoiceEntries) {
             if (ve.IsGrace) continue;
             for (const n of ve.Notes) {
@@ -1825,11 +1840,6 @@
         cur.reset(); cur.hide();
         events.sort((a, b) => a[0] - b[0]);
         const endQ = events.reduce((m, e) => Math.max(m, e[0] + e[1]), 0);
-        let ts = { Numerator: 4, Denominator: 4 };
-        const measures = (sheet.SourceMeasures || []).map(function (m) {
-          ts = m.ActiveTimeSignature || ts;
-          return { q: m.AbsoluteTimestamp.RealValue * 4, len: m.Duration.RealValue * 4, beats: ts.Numerator || 4, beatType: ts.Denominator || 4 };
-        });
         const tracks = [];
         insts.forEach(function (inst, p) {
           inst.Staves.forEach(function (st, i) { tracks.push({ key: p + ":" + (i + 1), name: staffName(p, i + 1, insts.length, inst.Staves.length, inst.Name) }); });
@@ -1868,7 +1878,9 @@
         if (!s.length) { head.hidden = true; return; }
         const i = stepAt(q), a = s[i], b = s[i + 1];
         let x = a.x;
-        if (b && Math.abs(b.y - a.y) < 2 && b.x > a.x && b.q > a.q) x = a.x + (b.x - a.x) * clamp((q - a.q) / (b.q - a.q), 0, 1);
+        // (not across a jump of the repeats, e.g. from the end of a repeat over the 1st ending to the 2nd)
+        const jump = a.m != null && b && b.m !== a.m && b.m !== a.m + 1;
+        if (b && !jump && Math.abs(b.y - a.y) < 2 && b.x > a.x && b.q > a.q) x = a.x + (b.x - a.x) * clamp((q - a.q) / (b.q - a.q), 0, 1);
         head.hidden = false;
         head.style.height = a.h + "px";
         head.style.transform = "translate(" + x.toFixed(1) + "px," + a.y.toFixed(1) + "px)";
@@ -1928,7 +1940,7 @@
         });
         if (best < 0 || bestD > 400) return;
         const q = timeline.steps[best].q;
-        if (loopPick) { pickLoopMeasure(measureAt(timeline.measures, q)); return; }
+        if (loopPick) { const ms = timeline.measures; if (ms.length) pickLoopMeasure(ms[measureAt(ms, q)].m); return; }
         // Only move the cursor; while playing, carry on from there
         if (playing) { stop(); setPosition(q); start(); } else setPosition(q);
       });
@@ -1942,19 +1954,26 @@
         while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (ms[mid].q <= q + 1e-6) lo = mid; else hi = mid - 1; }
         return lo;
       }
-      // The loop in quarter notes, for the measures of what is played now
-      function loopRange() {
-        const ms = playSrc.measures || [];
+      // The loop in quarter notes, for the measures of what is played now: from the first time its first
+      // measure is played to the first time its last measure is played after that (with the repeats between)
+      function loopRange(src) {
+        src = src || playSrc;
+        const ms = src.measures || [];
         if (!loop || !ms.length) return null;
-        const a = ms[Math.min(loop.m1, ms.length - 1)], b = ms[Math.min(loop.m2, ms.length - 1)];
-        return { a: a.q, b: Math.min(b.q + b.len, playSrc.endQ || b.q + b.len) };
+        const last = Math.max.apply(null, ms.map((x) => x.m));
+        const m1 = Math.min(loop.m1, last), m2 = Math.min(loop.m2, last);
+        const ai = Math.max(0, ms.findIndex((x) => x.m >= m1));
+        let bi = ms.findIndex((x, i) => i >= ai && x.m >= m2);
+        if (bi < 0) bi = ms.length - 1;
+        const a = ms[ai], b = ms[bi];
+        return { a: a.q, b: Math.min(b.q + b.len, src.endQ || b.q + b.len) };
       }
       function pickLoopMeasure(m) {
         if (loopPick.first < 0) { loopPick.first = m; drawLoop(); renderLoop(); return; }
         loop = { m1: Math.min(loopPick.first, m), m2: Math.max(loopPick.first, m) };
         loopPick = null;
         // Start the loop from its beginning (when playing, the loop takes over at its end)
-        if (!playing) setPosition(loop ? timeline.measures[loop.m1].q : 0);
+        if (!playing) setPosition(loop ? loopRange(timeline).a : 0);
         drawLoop(); renderLoop();
       }
       function clearLoop() {
@@ -2175,7 +2194,7 @@
         return {
           events: SM.modelEvents(model).map((e) => [e[0], e[1], e[2] + tr, keys[e[3]]]),
           endQ: SM.modelEnd(model) / SM.PPQ,
-          measures: model.measures.map((m) => ({ q: m.start / SM.PPQ, len: m.len / SM.PPQ, beats: m.beats, beatType: m.beatType })),
+          measures: model.measures.map((m, i) => ({ q: m.start / SM.PPQ, len: m.len / SM.PPQ, beats: m.beats, beatType: m.beatType, m: i })),
           tracks: model.tracks.map((tr, i) => ({ key: keys[i], name: trackName(i) })),
         };
       }
