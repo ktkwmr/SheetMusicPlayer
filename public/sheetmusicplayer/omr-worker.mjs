@@ -68,9 +68,25 @@ self.fetch = (input, init) => {
   return nativeFetch(input, init);
 };
 
+// The file list of this engine version. Kept in the engine cache too, so reading also works offline
+// (the Service Worker serves engine files from that cache, and the list was never stored there)
+async function loadManifest() {
+  const url = ENGINE + "manifest.json", c = await openCache();
+  try {
+    const res = await nativeFetch(url, { cache: "no-cache" });
+    if (res.ok) {
+      if (c) { try { await c.put(url, res.clone()); } catch (e) { /* storage full or blocked */ } }
+      return await res.json();
+    }
+  } catch (e) { /* offline: use the stored list */ }
+  const hit = c && (await c.match(url));
+  if (hit) return hit.json();
+  throw Object.assign(new Error("Network error: " + url), { code: "download" });
+}
+
 // Download everything once up front, so progress is shown in one bar
 async function prefetchAll() {
-  manifest = await (await nativeFetch(ENGINE + "manifest.json", { cache: "no-cache" })).json();
+  manifest = await loadManifest();
   const c = await openCache();
   const files = Object.entries(manifest.files);
   const missing = [];
