@@ -253,6 +253,110 @@ export function fixVoiceOverflow(xml) {
   return changed ? new XMLSerializer().serializeToString(doc) : xml;
 }
 
+// ---------- Repeat signs and endings (1st / 2nd endings) ----------
+// The reader (homr 0.7.0) writes them in shapes that players follow wrongly:
+// - The start repeat sign |: goes into the right bar line of the measure it starts. A forward repeat
+//   on a right bar line means nothing, so the end repeat :| goes back to the start of the piece.
+// - After an end repeat :|, the end of the 1st ending goes into a measure of its own, with no notes.
+//   (A start repeat at the start of a line, after the clef, also leaves a measure with no notes.)
+//   Such a measure shifts the following measures of that staff against the other staves.
+// - The ending numbers are counted from the measure numbers, so a 2nd ending after a missed end of
+//   the 1st one is numbered 1 again.
+// Moves the start repeats to the left bar line, removes the measures without notes (their bar line
+// marks go to the measure before, everything else to the next one), and writes the endings again:
+// each ending runs from its start to its end repeat (or its end mark, or the next ending), and an
+// ending right after one that went back with :| gets the next number.
+export function fixRepeats(xml) {
+  if (!/<repeat|<ending/.test(xml)) return xml;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const parts = Array.from(doc.querySelectorAll("score-partwise > part"));
+  const hasNotes = (m) => kids(m, "note").length > 0;
+  const loc = (b) => b.getAttribute("location") || "right";
+  const barline = (m, where) => {
+    const old = kids(m, "barline").find((b) => loc(b) === where);
+    if (old) return old;
+    const b = doc.createElement("barline");
+    b.setAttribute("location", where);
+    if (where === "left") m.insertBefore(b, kids(m, "note")[0] || m.querySelector(":scope > backup, :scope > forward") || null);
+    else m.appendChild(b);
+    return b;
+  };
+  // <barline>: bar-style … ending, repeat (in this order)
+  const add = (b, el) => {
+    if (el.localName === "bar-style") { if (!kids(b, "bar-style").length) b.insertBefore(el, b.firstChild); return; }
+    if (el.localName === "repeat" && kids(b, "repeat").length) return;
+    if (el.localName === "ending") b.insertBefore(el, kids(b, "repeat")[0] || null);
+    else b.appendChild(el);
+  };
+  const dropEmpty = (b) => { if (!b.children.length) b.remove(); };
+  let changed = false;
+  // A first measure without notes is a pickup in which this staff has nothing, if another staff has notes
+  const pickup = parts.some((p) => { const m = kids(p, "measure")[0]; return m && hasNotes(m); });
+  for (const part of parts) {
+    // Start repeats on a right bar line
+    for (const m of kids(part, "measure")) {
+      for (const b of kids(m, "barline")) {
+        if (loc(b) !== "right") continue;
+        for (const r of kids(b, "repeat")) {
+          if (r.getAttribute("direction") !== "forward") continue;
+          add(barline(m, "left"), r);
+          changed = true;
+        }
+        dropEmpty(b);
+      }
+    }
+    // Measures without notes
+    let ms = kids(part, "measure");
+    ms.forEach((m, i) => {
+      if (hasNotes(m) || (i === 0 && pickup) || ms.length < 2) return;
+      const prev = ms.slice(0, i).reverse().find((x) => x.parentNode), next = ms[i + 1];
+      for (const b of kids(m, "barline")) {
+        const to = loc(b) === "left" ? (next ? barline(next, "left") : null) : (prev ? barline(prev, "right") : null);
+        if (to) for (const el of Array.from(b.children)) add(to, el);
+      }
+      const rest = Array.from(m.children).filter((c) => c.localName !== "barline");
+      if (next) {
+        const first = next.firstChild;
+        for (const el of rest) next.insertBefore(el, first);
+      }
+      m.remove();
+      changed = true;
+    });
+    ms = kids(part, "measure");
+    if (changed) ms.forEach((m, i) => m.setAttribute("number", String(i + 1)));
+    // Endings
+    const endsOf = (m, side) => kids(m, "barline").filter((b) => loc(b) === side).flatMap((b) => kids(b, "ending"));
+    const back = ms.map((m) => kids(m, "barline").some((b) => loc(b) === "right" && kids(b, "repeat").some((r) => r.getAttribute("direction") === "backward")));
+    const starts = [], stops = [];
+    ms.forEach((m, i) => {
+      const all = kids(m, "barline").flatMap((b) => kids(b, "ending"));
+      if (all.some((e) => e.getAttribute("type") === "start")) starts.push(i);
+      const s = endsOf(m, "right").find((e) => e.getAttribute("type") !== "start");
+      stops[i] = s ? s.getAttribute("type") : null;
+    });
+    if (!starts.length && !stops.some(Boolean)) continue;
+    const endings = [];
+    starts.forEach((i, k) => {
+      const limit = k + 1 < starts.length ? starts[k + 1] : ms.length;
+      let j = i;
+      for (let x = i; x < limit; x++) if (back[x] || stops[x]) { j = x; break; }
+      const prev = endings[endings.length - 1];
+      const number = prev && prev.back && prev.j === i - 1 ? prev.number + 1 : 1;
+      endings.push({ i, j, number, back: back[j], type: back[j] ? "stop" : stops[j] || "discontinue" });
+    });
+    for (const m of ms) for (const b of kids(m, "barline")) { for (const e of kids(b, "ending")) e.remove(); dropEmpty(b); }
+    for (const e of endings) {
+      const a = doc.createElement("ending"), z = doc.createElement("ending");
+      a.setAttribute("number", String(e.number)); a.setAttribute("type", "start");
+      z.setAttribute("number", String(e.number)); z.setAttribute("type", e.type);
+      add(barline(ms[e.i], "left"), a);
+      add(barline(ms[e.j], "right"), z);
+    }
+    changed = true;
+  }
+  return changed ? new XMLSerializer().serializeToString(doc) : xml;
+}
+
 // <tie> (for the sound) goes after <duration>, <tied> (for the drawing) in <notations>
 function addTie(note, type) {
   const doc = note.ownerDocument;

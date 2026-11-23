@@ -324,3 +324,81 @@ test("fixVoiceOverflow leaves measures it cannot fix", () => {
   const odd = tupScore(tupNote("C", "half", 24) + `<forward><duration>6</duration></forward>` + tupNote("D", "half", 24) + tupNote("E", "eighth", 6));
   assert.equal(SM.fixVoiceOverflow(odd), odd);
 });
+
+// ---------- Repeat signs and endings ----------
+// Measures as homr 0.7.0 writes them (from its music_xml_generator): |: in the right bar line, and
+// the end of the 1st ending in a measure of its own after :|
+const repNote = (step) => `<note><pitch><step>${step}</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>whole</type><staff>1</staff></note>`;
+const repPart = (id, measures) => `<part id="${id}">${measures.map((m, i) => `<measure number="${i + 1}">${i === 0 ? "<attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>" : ""}${m}</measure>`).join("")}</part>`;
+const repScore = (...parts) => `<?xml version="1.0"?><score-partwise version="4.0"><part-list>${parts.map((_, i) => `<score-part id="P${i + 1}"><part-name>V</part-name></score-part>`).join("")}</part-list>${parts.map((p, i) => repPart(`P${i + 1}`, p)).join("")}</score-partwise>`;
+const HOMR_REPEAT = [
+  repNote("C"), repNote("D"),
+  `<barline location="right"><repeat direction="forward"/></barline>` + repNote("E"),
+  repNote("F"),
+  `<barline location="left"><ending type="start" number="1"/></barline>` + repNote("G") + `<barline location="right"><repeat direction="backward"/></barline>`,
+  `<barline location="right"><ending type="stop" number="1"/></barline>`,
+  `<barline location="left"><ending type="start" number="2"/></barline>` + repNote("A"),
+  repNote("B"),
+];
+// [measure number, its notes, its repeat signs and endings]
+const repMarks = (xml, part = 0) => {
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  return Array.from(doc.querySelectorAll("part")[part].querySelectorAll(":scope > measure")).map((m) => [
+    m.getAttribute("number"),
+    Array.from(m.querySelectorAll("step")).map((s) => s.textContent).join(""),
+    Array.from(m.querySelectorAll("barline")).flatMap((b) => Array.from(b.children).map((c) =>
+      `${b.getAttribute("location")}:${c.localName}:${c.getAttribute("direction") || c.getAttribute("type") || ""}${c.getAttribute("number") || ""}`)).join(" "),
+  ]);
+};
+
+test("fixRepeats puts homr's start repeat on the left and drops the measure it adds after :|", () => {
+  const out = SM.fixRepeats(repScore(HOMR_REPEAT));
+  assert.deepEqual(repMarks(out), [
+    ["1", "C", ""],
+    ["2", "D", ""],
+    ["3", "E", "left:repeat:forward"],
+    ["4", "F", ""],
+    ["5", "G", "left:ending:start1 right:ending:stop1 right:repeat:backward"],
+    ["6", "A", "left:ending:start2 right:ending:discontinue2"],
+    ["7", "B", ""],
+  ]);
+  assert.equal(SM.fixRepeats(out), out, "running it again changes nothing");
+  assert.equal(SM.parseScore(out).measures.length, 7);
+});
+
+test("fixRepeats numbers a 2nd ending after a 1st one whose end was missed", () => {
+  const m = HOMR_REPEAT.slice();
+  m[5] = repNote("A").replace("<note>", `<barline location="left"><ending type="start" number="1"/></barline><note>`);
+  m.splice(6, 1);
+  const out = SM.fixRepeats(repScore(m));
+  assert.deepEqual(repMarks(out).map((x) => x[2]), [
+    "", "", "left:repeat:forward", "",
+    "left:ending:start1 right:ending:stop1 right:repeat:backward",
+    "left:ending:start2 right:ending:discontinue2",
+    "",
+  ]);
+});
+
+test("fixRepeats keeps the staves of a grand staff in step", () => {
+  // homr writes each staff as a part; only the upper one got the endings
+  const lower = HOMR_REPEAT.filter((_, i) => i !== 5).map((x) => x.replace(/<barline location="\w+"><ending[^>]*\/><\/barline>/g, ""));
+  const out = SM.fixRepeats(repScore(HOMR_REPEAT, lower));
+  assert.equal(repMarks(out, 0).length, 7);
+  assert.equal(repMarks(out, 1).length, 7);
+  assert.deepEqual(repMarks(out, 1)[2], ["3", "E", "left:repeat:forward"]);
+});
+
+test("fixRepeats keeps a start repeat at the start of a line, and a part's empty pickup", () => {
+  // |: after the clef: homr leaves the clef (and the line break) in a measure with no notes
+  const out = SM.fixRepeats(repScore([`<print new-system="yes"/>`, `<barline location="right"><repeat direction="forward"/></barline>` + repNote("C"), repNote("D") + `<barline location="right"><repeat direction="backward"/></barline>`]));
+  assert.deepEqual(repMarks(out), [["1", "C", "left:repeat:forward"], ["2", "D", "right:repeat:backward"]]);
+  assert.match(out, /<measure number="1"><attributes>.*<\/attributes><print new-system="yes"\/><barline location="left"><repeat direction="forward"\/><\/barline><note>/);
+  // Another part has notes in the first measure: this part's empty one is a pickup and stays
+  const two = SM.fixRepeats(repScore(["", repNote("C") + `<barline location="right"><repeat direction="backward"/></barline>`], [repNote("E"), repNote("F")]));
+  assert.equal(repMarks(two, 0).length, 2);
+});
+
+test("fixRepeats leaves scores without repeats as they are", () => {
+  const xml = fixture("piano.musicxml");
+  assert.equal(SM.fixRepeats(xml), xml);
+});
