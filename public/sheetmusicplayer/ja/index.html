@@ -332,6 +332,18 @@
     .site-foot a { color: inherit; text-decoration: none; }
     .site-foot a:hover { text-decoration: underline; }
     .site-foot .meta { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; }
+
+    /* Links to two related apps on ktkwmr.com, right below the app (definitions: related-apps.json in ktkwmr/webapp-baseline, §9-18) */
+    .related { display: grid; grid-template-columns: repeat(2, minmax(0, 340px)); gap: 10px 12px; margin: 4px 0 0; }
+    @media (max-width: 600px) { .related { grid-template-columns: minmax(0, 1fr); } }
+    .related a { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 9px 14px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--paper); color: var(--ink); text-decoration: none; touch-action: manipulation; transition: background-color .12s, border-color .12s, transform .1s ease-out; }
+    .related a > span { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+    .related b { font-size: 14px; font-weight: 700; line-height: 1.4; }
+    .related small { color: var(--subtle); font-size: 12px; line-height: 1.4; }
+    .related svg { flex: none; color: var(--muted); }
+    .related a:active { background: var(--line); transform: scale(.98); }
+    @media (hover: hover) { .related a:hover { border-color: var(--ink); background: var(--hover-fill); } }
+    @media (prefers-reduced-motion: reduce) { .related a { transition: none; } .related a:active { transform: none; } }
 </style>
 <!-- Usage analytics: Cloudflare Zaraz → Google Analytics 4, only after consent in Zaraz's banner
      ("Auto-inject script" is off in the Zaraz settings, so it is loaded here). See usage-events.js -->
@@ -463,6 +475,11 @@
       </section>
     </div>
     <div class="foot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span id="saveState" data-i18n="foot">楽譜はこの端末の中で読み取り、アップロードはしません。最近開いた楽譜はこのブラウザに保存されます。</span></div>
+    <!-- 関連アプリへのリンク（2 つ。同じタブ・同じ言語のページへ。定義の正本は ktkwmr/webapp-baseline の related-apps.json） -->
+    <nav class="related" aria-label="関連アプリ" data-i18n-attr="aria-label:rel.label">
+      <a href="/chordtransposer/ja/" data-i18n-attr="href:rel.1.href"><span><b data-i18n="rel.1.text">楽譜のコードを移調</b><small>Chord Transposer</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
+      <a href="/demotrackmaker/ja/" data-i18n-attr="href:rel.2.href"><span><b data-i18n="rel.2.text">コード進行から伴奏を作成</b><small>Demo Track Maker</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></a>
+    </nav>
   </main>
 
   <!-- サイトのフッター（ベースライン §9-14）。アプリの外へ出るリンクは新しいタブで開く -->
@@ -702,6 +719,11 @@
           "menu.privacy": "Privacy",
           "menu.about": "About",
           "menu.apps": "More apps",
+          "rel.label": "Related apps",
+          "rel.1.text": "Transpose the chords of a score",
+          "rel.1.href": "/chordtransposer/",
+          "rel.2.text": "Make a backing track from chords",
+          "rel.2.href": "/demotrackmaker/",
           "home.url": "https://ktkwmr.com/",
           "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/privacy/\" target=\"_blank\" rel=\"noopener\">Privacy policy</a>\n<a href=\"/sheetmusicplayer/about/\" target=\"_blank\" rel=\"noopener\">About this site</a>\n<a href=\"#\" class=\"cookie-settings\">Cookie settings</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">Source code on GitHub</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">Feedback</a>\n<a href=\"https://ktkwmr.com/\" target=\"_blank\" rel=\"noopener\">More apps by ktkwmr</a>",
           "foot.guidesTitle": "Guides",
@@ -858,6 +880,11 @@
           "menu.privacy": "プライバシー",
           "menu.about": "このアプリについて",
           "menu.apps": "ほかのアプリ",
+          "rel.label": "関連アプリ",
+          "rel.1.text": "楽譜のコードを移調",
+          "rel.1.href": "/chordtransposer/ja/",
+          "rel.2.text": "コード進行から伴奏を作成",
+          "rel.2.href": "/demotrackmaker/ja/",
           "home.url": "https://ktkwmr.com/ja/",
           "foot.meta": "<span>Sheet Music Player · © 2026 ktkwmr</span>\n<a href=\"/sheetmusicplayer/ja/privacy/\" target=\"_blank\" rel=\"noopener\">プライバシーポリシー</a>\n<a href=\"/sheetmusicplayer/ja/about/\" target=\"_blank\" rel=\"noopener\">運営者情報</a>\n<a href=\"#\" class=\"cookie-settings\">Cookie の設定</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer\" target=\"_blank\" rel=\"noopener\">GitHub のソースコード</a>\n<a href=\"https://github.com/ktkwmr/SheetMusicPlayer/issues\" target=\"_blank\" rel=\"noopener\">ご意見・ご質問</a>\n<a href=\"https://ktkwmr.com/ja/\" target=\"_blank\" rel=\"noopener\">ktkwmr のほかのアプリ</a>",
           "foot.guidesTitle": "ガイド",
